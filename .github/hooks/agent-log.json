@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "type": "command",
+        "command": "powershell.exe -ExecutionPolicy Bypass -NoProfile -Command \"[Console]::In.ReadToEnd() | Add-Content -Path 'V:\\Programi\\C#\\football-club\\.github\\hooks\\agent_log.txt'\""
+      }
+    ],
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "powershell.exe -ExecutionPolicy Bypass -NoProfile -Command \"[Console]::In.ReadToEnd() | Add-Content -Path 'V:\\Programi\\C#\\football-club\\.github\\hooks\\agent_log.txt'\""
+      }
+    ]
+  }
+}
