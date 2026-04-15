@@ -1,0 +1,73 @@
+@using FootballClub.Models.Enums 
+@model List<Player>
+
+@{
+    ViewData["Title"] = "Players";
+    ViewData["ActivePage"] = "Player";
+    ViewData["Breadcrumbs"] = new List<(string, string?)>
+    {
+        ("Dashboard", "/"),
+        ("Players", null)
+    };
+}
+
+<div class="page-header">
+    <h2>Players</h2>
+    <p>Browse all players in the league</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Player Roster</h3>
+    </div>
+    <div class="card-body">
+        <table class="fc-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Club</th>
+                    <th>Jersey</th>
+                    <th>Market Value</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var player in Model.OrderBy(p => p.Club?.Name).ThenBy(p => p.Position))
+                {
+                    <tr>
+                        <td><strong>@player.FirstName @player.LastName</strong></td>
+                        <td>
+                            @{
+                                var posClass = player.Position switch
+                                {
+                                    PlayerPosition.Goalkeeper => "badge-gray",
+                                    PlayerPosition.Defender => "badge-blue",
+                                    PlayerPosition.Midfielder => "badge-amber",
+                                    PlayerPosition.Forward => "badge-red",
+                                    _ => "badge-gray"
+                                };
+                            }
+                            <span class="badge @posClass">@player.Position</span>
+                        </td>
+                        <td><a href="/Club/@player.Club?.Id" class="view-link">@player.Club?.Name</a></td>
+                        <td>#@player.JerseyNumber</td>
+                        <td>€@player.MarketValue.ToString("F1")M</td>
+                        <td>
+                            @if (player.IsInjured)
+                            {
+                                <span class="badge badge-red">Injured</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-green">Active</span>
+                            }
+                        </td>
+                        <td><a href="/Player/@player.Id" class="view-link">Details →</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

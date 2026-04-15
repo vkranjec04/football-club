@@ -1,0 +1,168 @@
+@using FootballClub.Models.Enums
+@model Club
+
+@{
+    ViewData["Title"] = $"{Model.Name} - Club Details";
+    ViewData["ActivePage"] = "Club";
+    ViewData["Breadcrumbs"] = new List<(string, string?)>
+    {
+        ("Dashboard", "/"),
+        ("Clubs", "/Club"),
+        (Model.Name, null)
+    };
+}
+
+<a href="/Club" class="btn-back">← Back to Clubs</a>
+
+<div class="page-header">
+    <h2>@Model.Name</h2>
+    <p>League: @Model.LeagueName</p>
+</div>
+
+<div class="detail-grid">
+    <!-- LEFT PANEL: Profile Card -->
+    <div class="profile-card">
+        <div class="profile-avatar">@Model.Name.Substring(0, 1)</div>
+        <div class="profile-name">@Model.Name</div>
+        <div class="profile-sub">@Model.City</div>
+        
+        <div class="profile-stats">
+            <div class="profile-stat-item">
+                <div class="val">@Model.FoundedYear</div>
+                <div class="lbl">Founded</div>
+            </div>
+            <div class="profile-stat-item">
+                <div class="val">@Model.Players.Count</div>
+                <div class="lbl">Players</div>
+            </div>
+            <div class="profile-stat-item">
+                <div class="val">€@Model.Budget.ToString("F1")</div>
+                <div class="lbl">Budget</div>
+            </div>
+            <div class="profile-stat-item">
+                <div class="val">@(Model.HomeMatches.Count + Model.AwayMatches.Count)</div>
+                <div class="lbl">Matches</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: Details -->
+    <div>
+        <!-- Club Info Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Club Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="lbl">Club Name</span>
+                    <span class="val">@Model.Name</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">City</span>
+                    <span class="val">@Model.City</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Founded</span>
+                    <span class="val">@Model.FoundedYear</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">League</span>
+                    <span class="val">@Model.LeagueName</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Budget</span>
+                    <span class="val">€@Model.Budget.ToString("F2") Million</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coach Info -->
+        @if (Model.Coach != null)
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h3>Head Coach</h3>
+                </div>
+                <div class="card-body">
+                    <div class="info-row">
+                        <span class="lbl">Name</span>
+                        <span class="val"><a href="/Coach/@Model.Coach.Id" class="view-link">@Model.Coach.FirstName @Model.Coach.LastName</a></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="lbl">Nationality</span>
+                        <span class="val">@Model.Coach.Nationality</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="lbl">Date of Birth</span>
+                        <span class="val">@Model.Coach.DateOfBirth.ToString("dd.MM.yyyy")</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="lbl">Contract Until</span>
+                        <span class="val">@Model.Coach.ContractUntil.ToString("dd.MM.yyyy")</span>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Players -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Squad (@Model.Players.Count players)</h3>
+            </div>
+            <div class="card-body">
+                @if (Model.Players.Count > 0)
+                {
+                    <table class="fc-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Position</th>
+                                <th>Number</th>
+                                <th>Status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var player in Model.Players.OrderBy(p => p.Position))
+                            {
+                                <tr>
+                                    <td><strong>@player.FirstName @player.LastName</strong></td>
+                                    <td>
+                                        @{
+                                            var posClass = player.Position switch
+                                            {
+                                                PlayerPosition.Goalkeeper => "badge-gray",
+                                                PlayerPosition.Defender => "badge-blue",
+                                                PlayerPosition.Midfielder => "badge-amber",
+                                                PlayerPosition.Forward => "badge-red",
+                                                _ => "badge-gray"
+                                            };
+                                        }
+                                        <span class="badge @posClass">@player.Position</span>
+                                    </td>
+                                    <td>#@player.JerseyNumber</td>
+                                    <td>
+                                        @if (player.IsInjured)
+                                        {
+                                            <span class="badge badge-red">Injured</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge badge-green">Active</span>
+                                        }
+                                    </td>
+                                    <td><a href="/Player/@player.Id" class="view-link">Details →</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p style="color: var(--text-muted);">No players assigned to this club.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,128 @@
+@model Coach
+
+@{
+    ViewData["Title"] = $"{Model.FirstName} {Model.LastName} - Coach Details";
+    ViewData["ActivePage"] = "Coach";
+    ViewData["Breadcrumbs"] = new List<(string, string?)>
+    {
+        ("Dashboard", "/"),
+        ("Coaches", "/Coach"),
+        ($"{Model.FirstName} {Model.LastName}", null)
+    };
+}
+
+<a href="/Coach" class="btn-back">← Back to Coaches</a>
+
+<div class="page-header">
+    <h2>@Model.FirstName @Model.LastName</h2>
+    <p>Head Coach</p>
+</div>
+
+<div class="detail-grid">
+    <!-- LEFT PANEL: Profile Card -->
+    <div class="profile-card">
+        <div class="profile-avatar">@(Model.FirstName.Substring(0, 1))@(Model.LastName.Substring(0, 1))</div>
+        <div class="profile-name">@Model.FirstName @Model.LastName</div>
+        <div class="profile-sub">@Model.Nationality</div>
+        
+        <div class="profile-stats">
+            <div class="profile-stat-item">
+                <div class="val">@Model.DateOfBirth.ToString("yyyy")</div>
+                <div class="lbl">Born</div>
+            </div>
+            <div class="profile-stat-item">
+                <div class="val">@Model.Nationality</div>
+                <div class="lbl">Country</div>
+            </div>
+            <div class="profile-stat-item">
+                <div class="val">@((DateTime.Now.Year - Model.DateOfBirth.Year))</div>
+                <div class="lbl">Age</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: Details -->
+    <div>
+        <!-- Coach Info -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Coach Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="lbl">First Name</span>
+                    <span class="val">@Model.FirstName</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Last Name</span>
+                    <span class="val">@Model.LastName</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Date of Birth</span>
+                    <span class="val">@Model.DateOfBirth.ToString("dd.MM.yyyy")</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Age</span>
+                    <span class="val">@((DateTime.Now.Year - Model.DateOfBirth.Year)) years</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Nationality</span>
+                    <span class="val">@Model.Nationality</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Contract Until</span>
+                    <span class="val">@Model.ContractUntil.ToString("dd.MM.yyyy")</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coaching Statistics (show club and players) -->
+        @{
+            // Find the clubs coached by this coach
+            var clubs = new List<Club>();
+            // Since we can't query from here, we'll need to create a CoachMockRepository method
+            // For now, let's just display the contract info
+        }
+
+        <div class="card">
+            <div class="card-header">
+                <h3>Career Overview</h3>
+            </div>
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="lbl">Current Status</span>
+                    <span class="val">
+                        @if (Model.ContractUntil > DateTime.Now)
+                        {
+                            <span class="badge badge-green">Active</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-red">Contract Expired</span>
+                        }
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Contract Expires In</span>
+                    <span class="val">
+                        @{
+                            var daysLeft = (Model.ContractUntil - DateTime.Now).Days;
+                            if (daysLeft > 0)
+                            {
+                                <text>@daysLeft days</text>
+                            }
+                            else
+                            {
+                                <text>Contract expired @(Math.Abs(daysLeft)) days ago</text>
+                            }
+                        }
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Professional Experience</span>
+                    <span class="val">@((DateTime.Now.Year - Model.DateOfBirth.Year - 20)) years minimum (est.)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

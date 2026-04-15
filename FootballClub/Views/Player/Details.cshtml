@@ -1,0 +1,179 @@
+@using FootballClub.Models.Enums
+@model Player
+
+@{
+    ViewData["Title"] = $"{Model.FirstName} {Model.LastName} - Player Details";
+    ViewData["ActivePage"] = "Player";
+    ViewData["Breadcrumbs"] = new List<(string, string?)>
+    {
+        ("Dashboard", "/"),
+        ("Players", "/Player"),
+        ($"{Model.FirstName} {Model.LastName}", null)
+    };
+    
+    var posClass = Model.Position switch
+    {
+        PlayerPosition.Goalkeeper => "badge-gray",
+        PlayerPosition.Defender => "badge-blue",
+        PlayerPosition.Midfielder => "badge-amber",
+        PlayerPosition.Forward => "badge-red",
+        _ => "badge-gray"
+    };
+}
+
+<a href="/Player" class="btn-back">← Back to Players</a>
+
+<div class="page-header">
+    <h2>@Model.FirstName @Model.LastName</h2>
+    <p>
+        <span class="badge @posClass">@Model.Position</span>
+        <span class="badge badge-blue">@Model.Club?.Name</span>
+    </p>
+</div>
+
+<div class="detail-grid">
+    <!-- LEFT PANEL: Profile Card -->
+    <div class="profile-card">
+        <div class="profile-avatar">@(Model.FirstName.Substring(0, 1))@(Model.LastName.Substring(0, 1))</div>
+        <div class="profile-name">@Model.FirstName @Model.LastName</div>
+        <div class="profile-sub">#@Model.JerseyNumber - @Model.Position</div>
+        
+        <div class="profile-stats">
+            <div class="profile-stat-item">
+                <div class="val">@Model.MarketValue.ToString("F1")M</div>
+                <div class="lbl">Market Value</div>
+            </div>
+            <div class="profile-stat-item">
+                <div class="val">@Model.Stats.Sum(s => s.Goals)</div>
+                <div class="lbl">Goals</div>
+            </div>
+            <div class="profile-stat-item">
+                <div class="val">@Model.Stats.Sum(s => s.Assists)</div>
+                <div class="lbl">Assists</div>
+            </div>
+            <div class="profile-stat-item">
+                <div class="val">@Model.Stats.Count</div>
+                <div class="lbl">Matches</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL: Details -->
+    <div>
+        <!-- Player Info -->
+        <div class="card">
+            <div class="card-header">
+                <h3>Player Information</h3>
+            </div>
+            <div class="card-body">
+                <div class="info-row">
+                    <span class="lbl">First Name</span>
+                    <span class="val">@Model.FirstName</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Last Name</span>
+                    <span class="val">@Model.LastName</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Date of Birth</span>
+                    <span class="val">@Model.DateOfBirth.ToString("dd.MM.yyyy")</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Nationality</span>
+                    <span class="val">@Model.Nationality</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Position</span>
+                    <span class="val">
+                        <span class="badge @posClass">@Model.Position</span>
+                    </span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Jersey Number</span>
+                    <span class="val">#@Model.JerseyNumber</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Market Value</span>
+                    <span class="val">€@Model.MarketValue.ToString("F2")M</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Contract Until</span>
+                    <span class="val">@Model.ContractUntil.ToString("dd.MM.yyyy")</span>
+                </div>
+                <div class="info-row">
+                    <span class="lbl">Status</span>
+                    <span class="val">
+                        @if (Model.IsInjured)
+                        {
+                            <span class="badge badge-red">Injured</span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-green">Active</span>
+                        }
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Club -->
+        @if (Model.Club != null)
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h3>Club</h3>
+                </div>
+                <div class="card-body">
+                    <div class="info-row">
+                        <span class="lbl">Club Name</span>
+                        <span class="val"><a href="/Club/@Model.Club.Id" class="view-link">@Model.Club.Name</a></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="lbl">City</span>
+                        <span class="val">@Model.Club.City</span>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Match Statistics -->
+        @if (Model.Stats.Count > 0)
+        {
+            <div class="card">
+                <div class="card-header">
+                    <h3>Match Statistics (@Model.Stats.Count matches)</h3>
+                </div>
+                <div class="card-body">
+                    <table class="fc-table">
+                        <thead>
+                            <tr>
+                                <th>Match</th>
+                                <th>Goals</th>
+                                <th>Assists</th>
+                                <th>Minutes</th>
+                                <th>Rating</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var stat in Model.Stats.OrderByDescending(s => s.Match.Date))
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@stat.Match.HomeClub.Name</strong> vs 
+                                        <strong>@stat.Match.AwayClub.Name</strong>
+                                    </td>
+                                    <td>@stat.Goals</td>
+                                    <td>@stat.Assists</td>
+                                    <td>@stat.MinutesPlayed'</td>
+                                    <td>@stat.Rating.ToString("F1")</td>
+                                    <td><a href="/Match/@stat.Match.Id" class="view-link">Match →</a></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</div>

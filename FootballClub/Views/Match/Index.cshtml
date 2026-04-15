@@ -1,0 +1,72 @@
+@using FootballClub.Models.Enums 
+@model List<Match>
+
+@{
+    ViewData["Title"] = "Matches";
+    ViewData["ActivePage"] = "Match";
+    ViewData["Breadcrumbs"] = new List<(string, string?)>
+    {
+        ("Dashboard", "/"),
+        ("Matches", null)
+    };
+}
+
+<div class="page-header">
+    <h2>Matches</h2>
+    <p>Browse all league matches</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Match Schedule</h3>
+    </div>
+    <div class="card-body">
+        <table class="fc-table">
+            <thead>
+                <tr>
+                    <th>Round</th>
+                    <th>Date</th>
+                    <th>Home Team</th>
+                    <th>Away Team</th>
+                    <th>Result</th>
+                    <th>Status</th>
+                    <th>Attendance</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var match in Model.OrderByDescending(m => m.Date))
+                {
+                    <tr>
+                        <td><strong>@match.Round</strong></td>
+                        <td>@match.Date.ToString("dd.MM.yyyy HH:mm")</td>
+                        <td>@match.HomeClub.Name</td>
+                        <td>@match.AwayClub.Name</td>
+                        <td>
+                            @if (match.Status == MatchStatus.Finished)
+                            {
+                                <strong>@match.HomeScore - @match.AwayScore</strong>
+                            }
+                            else
+                            {
+                                <span style="color: var(--text-muted);">-:-</span>
+                            }
+                        </td>
+                        <td>
+                            @if (match.Status == MatchStatus.Finished)
+                            {
+                                <span class="badge badge-green">Finished</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-blue">Scheduled</span>
+                            }
+                        </td>
+                        <td>@(match.Status == MatchStatus.Finished ? match.Attendance.ToString() : "-")</td>
+                        <td><a href="/Match/@match.Id" class="view-link">Details →</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
