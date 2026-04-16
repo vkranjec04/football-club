@@ -4,15 +4,22 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Dinamo Zagreb</title>
+    <link rel="icon" href="~/images/dinamo-zagreb-logo.png" type="image/png">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
     <!-- SIDEBAR -->
     <aside class="sidebar">
         <div class="sidebar-brand">
-            <div class="brand-icon">⚽</div>
-            <h1>Dinamo</h1>
-            <p>Zagreb</p>
+            <a href="/" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
+                <div class="brand-logo">
+                    <img src="~/images/dinamo-zagreb-logo.png" alt="Dinamo Zagreb" style="width: 40px; height: 40px; object-fit: contain;">
+                </div>
+                <div>
+                    <h1>Dinamo</h1>
+                    <p>Zagreb</p>
+                </div>
+            </a>
         </div>
         
         <nav class="sidebar-nav">
@@ -23,16 +30,16 @@
             </a>
             
             <div class="nav-section-label">Data</div>
-            <a href="/Club" class="nav-link @(ViewData["ActivePage"]?.ToString() == "Club" ? "active" : "")">
-                <span class="nav-icon">🏢</span>
-                <span>Clubs</span>
+            <a href="/League" class="nav-link @(ViewData["ActivePage"]?.ToString() == "League" ? "active" : "")">
+                <span class="nav-icon">🏆</span>
+                <span>League</span>
             </a>
             <a href="/Player" class="nav-link @(ViewData["ActivePage"]?.ToString() == "Player" ? "active" : "")">
                 <span class="nav-icon">👤</span>
                 <span>Players</span>
             </a>
             <a href="/Match" class="nav-link @(ViewData["ActivePage"]?.ToString() == "Match" ? "active" : "")">
-                <span class="nav-icon">🏆</span>
+                <span class="nav-icon">⚽</span>
                 <span>Matches</span>
             </a>
             <a href="/Coach" class="nav-link @(ViewData["ActivePage"]?.ToString() == "Coach" ? "active" : "")">

@@ -1,0 +1,167 @@
+@using FootballClub.Models.Enums
+@model Club
+
+@{
+    ViewData["Title"] = Model.Name;
+    ViewData["ActivePage"] = "League";
+    ViewData["Breadcrumbs"] = new List<(string, string?)>
+    {
+        ("Dashboard", "/"),
+        ("League", "/League"),
+        (Model.Name, null)
+    };
+}
+
+<div class="page-header">
+    <h2>@Model.Name</h2>
+    <p>@Model.City • Founded @Model.FoundedYear</p>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-value">@Model.Players.Count</div>
+        <div class="stat-label">Players</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">€@Model.Budget.ToString("F1")</div>
+        <div class="stat-label">Budget (€M)</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">@(Model.HomeMatches.Count + Model.AwayMatches.Count)</div>
+        <div class="stat-label">Matches</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">@(Model.Coach?.FirstName ?? "N/A")</div>
+        <div class="stat-label">Coach</div>
+    </div>
+</div>
+
+<div class="two-column">
+    <div class="card">
+        <div class="card-header">
+            <h3>Squad</h3>
+            <span class="badge badge-blue">@Model.Players.Count</span>
+        </div>
+        <div class="card-body">
+            @if (Model.Players.Any())
+            {
+                <table class="fc-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Position</th>
+                            <th>Nationality</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var player in Model.Players.OrderBy(p => p.LastName))
+                        {
+                            <tr>
+                                <td style="font-weight: 700;">@player.JerseyNumber</td>
+                                <td>@player.FirstName @player.LastName</td>
+                                <td><span class="badge badge-gray">@player.Position</span></td>
+                                <td>@player.Nationality</td>
+                                <td><a href="/Player/@player.Id" class="view-link">View →</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <p class="text-muted">No players in squad</p>
+            }
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Current Coach</h3>
+        </div>
+        <div class="card-body">
+            @if (Model.Coach != null)
+            {
+                <div class="profile-card">
+                    <div class="profile-header">
+                        <h4>@Model.Coach.FirstName @Model.Coach.LastName</h4>
+                        <span class="badge badge-green">Active</span>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Nationality</div>
+                        <div class="info-value">@Model.Coach.Nationality</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Date of Birth</div>
+                        <div class="info-value">@Model.Coach.DateOfBirth.ToString("dd/MM/yyyy")</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Contract Until</div>
+                        <div class="info-value">@Model.Coach.ContractUntil.ToString("dd/MM/yyyy")</div>
+                    </div>
+                    <div class="info-row">
+                        <a href="/Coach/@Model.Coach.Id" class="view-link">View Coach Profile →</a>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">No coach assigned</p>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Recent Matches</h3>
+    </div>
+    <div class="card-body">
+        @{
+            var recentMatches = Model.HomeMatches.Union(Model.AwayMatches)
+                .Where(m => m.Status == MatchStatus.Finished)
+                .OrderByDescending(m => m.Date)
+                .Take(5);
+        }
+        @if (recentMatches.Any())
+        {
+            <table class="fc-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Match</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var match in recentMatches)
+                    {
+                        <tr>
+                            <td>@match.Date.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @if (match.HomeClub.Id == Model.Id)
+                                {
+                                    <text><strong>@match.HomeClub.Name</strong> vs @match.AwayClub.Name</text>
+                                }
+                                else
+                                {
+                                    <text>@match.HomeClub.Name vs <strong>@match.AwayClub.Name</strong></text>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge badge-green">
+                                    @match.HomeScore - @match.AwayScore
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="text-muted">No recent matches</p>
+        }
+    </div>
+</div>

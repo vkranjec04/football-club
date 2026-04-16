@@ -2,71 +2,114 @@
 @model List<Match>
 
 @{
-    ViewData["Title"] = "Matches";
+    ViewData["Title"] = "Dinamo Zagreb - Matches";
     ViewData["ActivePage"] = "Match";
     ViewData["Breadcrumbs"] = new List<(string, string?)>
     {
         ("Dashboard", "/"),
         ("Matches", null)
     };
+    var upcomingMatches = Model.Where(m => m.Status == MatchStatus.Scheduled).OrderBy(m => m.Date).ToList();
+    var finishedMatches = Model.Where(m => m.Status == MatchStatus.Finished).OrderByDescending(m => m.Date).ToList();
 }
 
 <div class="page-header">
-    <h2>Matches</h2>
-    <p>Browse all league matches</p>
+    <h2>Dinamo Zagreb - Matches</h2>
+    <p>Upcoming and recent matches</p>
 </div>
 
-<div class="card">
-    <div class="card-header">
-        <h3>Match Schedule</h3>
-    </div>
-    <div class="card-body">
-        <table class="fc-table">
-            <thead>
-                <tr>
-                    <th>Round</th>
-                    <th>Date</th>
-                    <th>Home Team</th>
-                    <th>Away Team</th>
-                    <th>Result</th>
-                    <th>Status</th>
-                    <th>Attendance</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var match in Model.OrderByDescending(m => m.Date))
-                {
+@if (upcomingMatches.Any())
+{
+    <div class="card">
+        <div class="card-header">
+            <h3>Upcoming Matches</h3>
+            <span class="badge badge-blue">@upcomingMatches.Count</span>
+        </div>
+        <div class="card-body">
+            <table class="fc-table">
+                <thead>
                     <tr>
-                        <td><strong>@match.Round</strong></td>
-                        <td>@match.Date.ToString("dd.MM.yyyy HH:mm")</td>
-                        <td>@match.HomeClub.Name</td>
-                        <td>@match.AwayClub.Name</td>
-                        <td>
-                            @if (match.Status == MatchStatus.Finished)
-                            {
-                                <strong>@match.HomeScore - @match.AwayScore</strong>
-                            }
-                            else
-                            {
-                                <span style="color: var(--text-muted);">-:-</span>
-                            }
-                        </td>
-                        <td>
-                            @if (match.Status == MatchStatus.Finished)
-                            {
-                                <span class="badge badge-green">Finished</span>
-                            }
-                            else
-                            {
-                                <span class="badge badge-blue">Scheduled</span>
-                            }
-                        </td>
-                        <td>@(match.Status == MatchStatus.Finished ? match.Attendance.ToString() : "-")</td>
-                        <td><a href="/Match/@match.Id" class="view-link">Details →</a></td>
+                        <th>Round</th>
+                        <th>Date & Time</th>
+                        <th>Opponent</th>
+                        <th>Stadium</th>
+                        <th></th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var match in upcomingMatches)
+                    {
+                        var opponent = match.HomeClub.Id == 1 ? match.AwayClub.Name : match.HomeClub.Name;
+                        var isHome = match.HomeClub.Id == 1;
+                        <tr>
+                            <td><strong>Round @match.Round</strong></td>
+                            <td>@match.Date.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>
+                                <span style="color: var(--text-muted);">@(isHome ? "vs" : "@")</span>
+                                <strong>@opponent</strong>
+                            </td>
+                            <td>@match.Stadium.Name</td>
+                            <td><a href="/Match/@match.Id" class="view-link">Details →</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
+}
+else
+{
+    <div class="card" style="text-align: center; padding: 40px;">
+        <p style="color: var(--text-muted);">No upcoming matches scheduled</p>
+    </div>
+}
+
+@if (finishedMatches.Any())
+{
+    <div class="card">
+        <div class="card-header">
+            <h3>Recent Matches</h3>
+            <span class="badge badge-green">@finishedMatches.Count</span>
+        </div>
+        <div class="card-body">
+            <table class="fc-table">
+                <thead>
+                    <tr>
+                        <th>Round</th>
+                        <th>Date</th>
+                        <th>Match</th>
+                        <th>Result</th>
+                        <th>Attendance</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var match in finishedMatches.Take(10))
+                    {
+                        var isHome = match.HomeClub.Id == 1;
+                        var isDinamoWin = (isHome && match.HomeScore > match.AwayScore) || (!isHome && match.AwayScore > match.HomeScore);
+                        var isDinamoLoss = (isHome && match.HomeScore < match.AwayScore) || (!isHome && match.AwayScore < match.HomeScore);
+                        var resultClass = isDinamoWin ? "badge-green" : (isDinamoLoss ? "badge-red" : "badge-amber");
+                        <tr>
+                            <td><strong>Round @match.Round</strong></td>
+                            <td>@match.Date.ToString("dd.MM.yyyy")</td>
+                            <td>
+                                @if (isHome)
+                                {
+                                    <text><strong>@match.HomeClub.Name</strong> vs @match.AwayClub.Name</text>
+                                }
+                                else
+                                {
+                                    <text>@match.HomeClub.Name vs <strong>@match.AwayClub.Name</strong></text>
+                                }
+                            </td>
+                            <td><span class="badge @resultClass">@match.HomeScore - @match.AwayScore</span></td>
+                            <td>@match.Attendance.ToString("N0")</td>
+                            <td><a href="/Match/@match.Id" class="view-link">Details →</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

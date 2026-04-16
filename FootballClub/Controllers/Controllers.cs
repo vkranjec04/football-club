@@ -17,100 +17,191 @@ public class HomeController : Controller
     public IActionResult Index()
     {
         ViewData["ActivePage"] = "Home";
-        ViewBag.TotalClubs = _clubs.GetAll().Count;
-        ViewBag.TotalPlayers = _players.GetAll().Count;
-        ViewBag.TotalMatches = _matches.GetAll().Count;
-        ViewBag.UpcomingMatch = _matches.GetUpcoming().FirstOrDefault();
-        ViewBag.TopScorer = _players.GetAll()
+        var dinamo = _clubs.GetDinamo();
+        
+        ViewBag.DinamoClub = dinamo;
+        ViewBag.TotalPlayers = _players.GetByClub(dinamo?.Id ?? 1).Count;
+        ViewBag.UpcomingMatches = _matches.GetUpcomingByClub(dinamo?.Id ?? 1).Count;
+        ViewBag.RecentMatches = _matches.GetFinishedByClub(dinamo?.Id ?? 1).Take(3).ToList();
+        ViewBag.TopScorer = _players.GetByClub(dinamo?.Id ?? 1)
             .Where(p => p.Stats.Any())
             .OrderByDescending(p => p.Stats.Sum(s => s.Goals))
             .FirstOrDefault();
-        ViewBag.RecentMatches = _matches.GetFinished().Take(3).ToList();
-        ViewBag.InjuredPlayers = _players.GetAll().Where(p => p.IsInjured).ToList();
+        ViewBag.InjuredPlayers = _players.GetByClub(dinamo?.Id ?? 1).Where(p => p.IsInjured).ToList();
+        
+        var upcomingMatch = _matches.GetUpcomingByClub(dinamo?.Id ?? 1).FirstOrDefault();
+        ViewBag.UpcomingMatch = upcomingMatch;
+        
         return View();
     }
 }
 
-public class ClubController : Controller
+public class LeagueController : Controller
 {
     private readonly ClubMockRepository _repo;
-    public ClubController(ClubMockRepository repo) => _repo = repo;
+    public LeagueController(ClubMockRepository repo) => _repo = repo;
 
     public IActionResult Index()
     {
-        ViewData["ActivePage"] = "Club";
-        var clubs = _repo.GetAll();
-        return View(clubs);
+        ViewData["ActivePage"] = "League";
+        ViewData["Breadcrumbs"] = new List<(string, string?)>
+        {
+            ("Dashboard", "/"),
+            ("League", null)
+        };
+        
+        var standings = _repo.GetLeagueStandings("HNL");
+        return View(standings);
     }
 
     public IActionResult Details(int id)
     {
-        ViewData["ActivePage"] = "Club";
+        ViewData["ActivePage"] = "League";
         var club = _repo.GetById(id);
         if (club == null) return NotFound();
+        
+        ViewData["Breadcrumbs"] = new List<(string, string?)>
+        {
+            ("Dashboard", "/"),
+            ("League", "/League"),
+            (club.Name, null)
+        };
+        
         return View(club);
     }
 }
 
 public class PlayerController : Controller
 {
-    private readonly PlayerMockRepository _repo;
-    public PlayerController(PlayerMockRepository repo) => _repo = repo;
+    private readonly PlayerMockRepository _playerRepo;
+    private readonly ClubMockRepository _clubRepo;
+    
+    public PlayerController(PlayerMockRepository playerRepo, ClubMockRepository clubRepo)
+    {
+        _playerRepo = playerRepo;
+        _clubRepo = clubRepo;
+    }
 
-    public IActionResult Index()
+    public IActionResult Index(int? clubId)
     {
         ViewData["ActivePage"] = "Player";
-        var players = _repo.GetAll();
+        ViewData["Breadcrumbs"] = new List<(string, string?)>
+        {
+            ("Dashboard", "/"),
+            ("Players", null)
+        };
+        
+        // Default to Dinamo
+        if (!clubId.HasValue)
+        {
+            var dinamo = _clubRepo.GetDinamo();
+            clubId = dinamo?.Id ?? 1;
+        }
+        
+        var selectedClub = _clubRepo.GetById(clubId.Value);
+        ViewBag.SelectedClub = selectedClub;
+        ViewBag.AllClubs = _clubRepo.GetAll();
+        
+        var players = _playerRepo.GetByClubOrdered(clubId.Value);
         return View(players);
     }
 
     public IActionResult Details(int id)
     {
         ViewData["ActivePage"] = "Player";
-        var player = _repo.GetById(id);
+        var player = _playerRepo.GetById(id);
         if (player == null) return NotFound();
+        
+        ViewData["Breadcrumbs"] = new List<(string, string?)>
+        {
+            ("Dashboard", "/"),
+            ("Players", "/Player"),
+            ($"{player.FirstName} {player.LastName}", null)
+        };
+        
         return View(player);
     }
 }
 
 public class MatchController : Controller
 {
-    private readonly MatchMockRepository _repo;
-    public MatchController(MatchMockRepository repo) => _repo = repo;
+    private readonly MatchMockRepository _matchRepo;
+    private readonly ClubMockRepository _clubRepo;
+    
+    public MatchController(MatchMockRepository matchRepo, ClubMockRepository clubRepo)
+    {
+        _matchRepo = matchRepo;
+        _clubRepo = clubRepo;
+    }
 
     public IActionResult Index()
     {
         ViewData["ActivePage"] = "Match";
-        var matches = _repo.GetAll();
+        ViewData["Breadcrumbs"] = new List<(string, string?)>
+        {
+            ("Dashboard", "/"),
+            ("Matches", null)
+        };
+        
+        var dinamo = _clubRepo.GetDinamo();
+        var matches = _matchRepo.GetByClub(dinamo?.Id ?? 1).OrderByDescending(m => m.Date).ToList();
         return View(matches);
     }
 
     public IActionResult Details(int id)
     {
         ViewData["ActivePage"] = "Match";
-        var match = _repo.GetById(id);
+        var match = _matchRepo.GetById(id);
         if (match == null) return NotFound();
+        
+        ViewData["Breadcrumbs"] = new List<(string, string?)>
+        {
+            ("Dashboard", "/"),
+            ("Matches", "/Match"),
+            ($"{match.HomeClub.Name} vs {match.AwayClub.Name}", null)
+        };
+        
         return View(match);
     }
 }
 
 public class CoachController : Controller
 {
-    private readonly CoachMockRepository _repo;
-    public CoachController(CoachMockRepository repo) => _repo = repo;
+    private readonly CoachMockRepository _coachRepo;
+    private readonly ClubMockRepository _clubRepo;
+    
+    public CoachController(CoachMockRepository coachRepo, ClubMockRepository clubRepo)
+    {
+        _coachRepo = coachRepo;
+        _clubRepo = clubRepo;
+    }
 
     public IActionResult Index()
     {
         ViewData["ActivePage"] = "Coach";
-        var coaches = _repo.GetAll();
+        ViewData["Breadcrumbs"] = new List<(string, string?)>
+        {
+            ("Dashboard", "/"),
+            ("Coaches", null)
+        };
+        
+        var coaches = _coachRepo.GetCoachesForClub("Dinamo");
         return View(coaches);
     }
 
     public IActionResult Details(int id)
     {
         ViewData["ActivePage"] = "Coach";
-        var coach = _repo.GetById(id);
+        var coach = _coachRepo.GetById(id);
         if (coach == null) return NotFound();
+        
+        ViewData["Breadcrumbs"] = new List<(string, string?)>
+        {
+            ("Dashboard", "/"),
+            ("Coaches", "/Coach"),
+            ($"{coach.FirstName} {coach.LastName}", null)
+        };
+        
         return View(coach);
     }
 }

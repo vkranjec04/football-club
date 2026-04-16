@@ -4,6 +4,8 @@
 @{
     ViewData["Title"] = "Players";
     ViewData["ActivePage"] = "Player";
+    Club selectedClub = ViewBag.SelectedClub;
+    List<Club> allClubs = ViewBag.AllClubs;
     ViewData["Breadcrumbs"] = new List<(string, string?)>
     {
         ("Dashboard", "/"),
@@ -13,14 +15,33 @@
 
 <div class="page-header">
     <h2>Players</h2>
-    <p>Browse all players in the league</p>
+    <p>@(selectedClub != null ? $"Browse {selectedClub.Name} squad" : "Browse all players in the league")</p>
 </div>
 
 <div class="card">
     <div class="card-header">
         <h3>Player Roster</h3>
+        <span class="badge badge-blue">@(selectedClub?.Name ?? "Club")</span>
     </div>
     <div class="card-body">
+        <form id="clubFilterForm" method="get" action="/Player" style="display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;">
+            <label for="clubFilter" style="font-weight: 700; color: var(--text-dark);">Select Club:</label>
+            <select id="clubFilter" name="clubId" onchange="document.getElementById('clubFilterForm').submit();" style="padding: 8px 12px; border-radius: 6px; border: 1px solid #cbd5e1; background: #ffffff; color: var(--text-dark); min-width: 260px; font-size: 14px;">
+                @foreach (var club in allClubs.OrderBy(c => c.Id == 1 ? 0 : 1).ThenBy(c => c.Name))
+                {
+                    if (selectedClub?.Id == club.Id)
+                    {
+                        <option value="@club.Id" selected>@club.Name</option>
+                    }
+                    else
+                    {
+                        <option value="@club.Id">@club.Name</option>
+                    }
+                }
+            </select>
+            <button type="submit" class="btn-back" style="padding: 8px 14px;">Apply</button>
+        </form>
+
         <table class="fc-table">
             <thead>
                 <tr>
@@ -51,7 +72,7 @@
                             }
                             <span class="badge @posClass">@player.Position</span>
                         </td>
-                        <td><a href="/Club/@player.Club?.Id" class="view-link">@player.Club?.Name</a></td>
+                        <td><a href="/League/@player.Club?.Id" class="view-link">@player.Club?.Name</a></td>
                         <td>#@player.JerseyNumber</td>
                         <td>€@player.MarketValue.ToString("F1")M</td>
                         <td>

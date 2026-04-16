@@ -1,0 +1,75 @@
+@model List<FootballClub.Models.LeagueStanding>
+
+@{
+    ViewData["Title"] = "HNL - League Standings";
+    ViewData["ActivePage"] = "League";
+    ViewData["Breadcrumbs"] = new List<(string, string?)>
+    {
+        ("Dashboard", "/"),
+        ("League", null)
+    };
+
+}
+
+<div class="page-header">
+    <h2>HNL - Supersport League</h2>
+    <p>Hrvatska Nogometna Liga</p>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>League Standings</h3>
+    </div>
+    <div class="card-body">
+        <table class="fc-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Club Name</th>
+                    <th>Pts</th>
+                    <th>P</th>
+                    <th>W</th>
+                    <th>D</th>
+                    <th>L</th>
+                    <th>City</th>
+                    <th>Founded</th>
+                    <th>Budget (€M)</th>
+                    <th>Players</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int position = 1;
+                }
+                @foreach (var row in Model)
+                {
+                    <tr>
+                        <td style="font-weight: 700;">@position</td>
+                        <td>
+                            @if (row.Club.Name.Contains("Dinamo"))
+                            {
+                                <strong style="color: var(--blue);">★ @row.Club.Name</strong>
+                            }
+                            else
+                            {
+                                <strong>@row.Club.Name</strong>
+                            }
+                        </td>
+                        <td><strong>@row.Points</strong></td>
+                        <td>@row.Played</td>
+                        <td>@row.Wins</td>
+                        <td>@row.Draws</td>
+                        <td>@row.Losses</td>
+                        <td>@row.Club.City</td>
+                        <td>@row.Club.FoundedYear</td>
+                        <td>€@row.Club.Budget.ToString("F1")</td>
+                        <td><span class="badge badge-blue">@row.Club.Players.Count</span></td>
+                        <td><a href="/League/@row.Club.Id" class="view-link">View →</a></td>
+                    </tr>
+                    position++;
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
