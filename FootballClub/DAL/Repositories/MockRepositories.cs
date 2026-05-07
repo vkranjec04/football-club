@@ -1,4 +1,4 @@
-﻿using FootballClub.Data;
+using FootballClub.Data;
 using FootballClub.Models;
 using Microsoft.EntityFrameworkCore;
 
