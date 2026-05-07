@@ -21,7 +21,6 @@ public class PlayerController : Controller
     }
 
     [Route("team-roster")]
-    [Route("players/list")]
     public IActionResult Index(FootballClub.Models.Enums.PlayerPosition? position)
     {
         ViewData["ActivePage"] = "Player";
@@ -44,7 +43,6 @@ public class PlayerController : Controller
         return View(players);
     }
 
-    [Route("player-profile/{id:int}")]
     public IActionResult Details(int id)
     {
         ViewData["ActivePage"] = "Player";

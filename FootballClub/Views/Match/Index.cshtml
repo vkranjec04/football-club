@@ -39,8 +39,9 @@
                 <tbody>
                     @foreach (var match in upcomingMatches)
                     {
-                        var opponent = match.HomeClub.Id == 1 ? match.AwayClub.Name : match.HomeClub.Name;
-                        var isHome = match.HomeClub.Id == 1;
+                        var homeClubId = match.HomeClub?.Id ?? 0;
+                        var opponent = homeClubId == 1 ? (match.AwayClub?.Name ?? "Opponent") : (match.HomeClub?.Name ?? "Opponent");
+                        var isHome = homeClubId == 1;
                         <tr>
                             <td><strong>Round @match.Round</strong></td>
                             <td>@match.Date.ToString("dd.MM.yyyy HH:mm")</td>
@@ -48,7 +49,7 @@
                                 <span style="color: var(--text-muted);">@(isHome ? "vs" : "@")</span>
                                 <strong>@opponent</strong>
                             </td>
-                            <td>@match.Stadium.Name</td>
+                            <td>@(match.Stadium?.Name ?? "Unknown")</td>
                             <td><a href="/Match/Details/@match.Id" class="view-link">Details →</a></td>
                         </tr>
                     }
@@ -86,7 +87,7 @@ else
                 <tbody>
                     @foreach (var match in finishedMatches.Take(10))
                     {
-                        var isHome = match.HomeClub.Id == 1;
+                        var isHome = (match.HomeClub?.Id ?? 0) == 1;
                         var isDinamoWin = (isHome && match.HomeScore > match.AwayScore) || (!isHome && match.AwayScore > match.HomeScore);
                         var isDinamoLoss = (isHome && match.HomeScore < match.AwayScore) || (!isHome && match.AwayScore < match.HomeScore);
                         var resultClass = isDinamoWin ? "badge-green" : (isDinamoLoss ? "badge-red" : "badge-amber");
@@ -96,11 +97,11 @@ else
                             <td>
                                 @if (isHome)
                                 {
-                                    <text><strong>@match.HomeClub.Name</strong> vs @match.AwayClub.Name</text>
+                                    <text><strong>@(match.HomeClub?.Name ?? "Home")</strong> vs @(match.AwayClub?.Name ?? "Away")</text>
                                 }
                                 else
                                 {
-                                    <text>@match.HomeClub.Name vs <strong>@match.AwayClub.Name</strong></text>
+                                    <text>@(match.HomeClub?.Name ?? "Home") vs <strong>@(match.AwayClub?.Name ?? "Away")</strong></text>
                                 }
                             </td>
                             <td><span class="badge @resultClass">@match.HomeScore - @match.AwayScore</span></td>

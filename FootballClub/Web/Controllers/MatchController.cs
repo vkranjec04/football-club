@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FootballClub.Web.Controllers;
 
+[Route("[controller]")]
 public class MatchController : Controller
 {
     private readonly MatchMockRepository _matchRepo;
@@ -15,7 +16,7 @@ public class MatchController : Controller
         _clubRepo = clubRepo;
     }
 
-    [Route("fixtures-and-results")]
+    [HttpGet("")]
     public IActionResult Index()
     {
         ViewData["ActivePage"] = "Match";
@@ -30,6 +31,7 @@ public class MatchController : Controller
         return View(matches);
     }
 
+    [HttpGet("Details/{id:int}")]
     public IActionResult Details(int id)
     {
         ViewData["ActivePage"] = "Match";
