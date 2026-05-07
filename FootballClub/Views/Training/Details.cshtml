@@ -1,15 +1,15 @@
-@model FootballClub.Models.TrainingSession
+﻿@model FootballClub.Models.TrainingSession
 
 @{
     ViewData["Title"] = Model.Title;
     ViewData["ActivePage"] = "Training";
 }
 
-<a href="/Training" class="btn-back">← Back to Training</a>
+<a href="/Training" class="btn-back">â† Back to Training</a>
 
 <div class="page-header">
     <h2>@Model.Title</h2>
-    <p>@Model.StartTime.ToString("dddd, dd.MM.yyyy HH:mm") • @Model.Location</p>
+    <p>@Model.StartTime.ToString("dddd, dd.MM.yyyy HH:mm") â€¢ @Model.Location</p>
 </div>
 
 <div class="detail-grid" style="grid-template-columns: 1fr;">
@@ -98,7 +98,7 @@
                                         <span class="badge badge-green">Available</span>
                                     }
                                 </td>
-                                <td><a href="/Player/Details/@player.Id" class="view-link">Profile →</a></td>
+                                <td><a href="/player-profile/@player.Id" class="view-link">Profile â†’</a></td>
                             </tr>
                         }
                     </tbody>
@@ -107,3 +107,4 @@
         </div>
     </div>
 </div>
+

@@ -1,4 +1,4 @@
-@using FootballClub.Models
+﻿@using FootballClub.Models
 @using FootballClub.Models.Enums
 @model List<TrainingSession>
 
@@ -74,7 +74,7 @@
                             <td>@((session.EndTime - session.StartTime).TotalMinutes) min</td>
                             <td><span class="badge badge-gray">@session.Intensity</span></td>
                             <td>@session.Participants.Count</td>
-                            <td><a href="/Training/Details/@session.Id" class="view-link">Session Plan →</a></td>
+                            <td><a href="/Training/Details/@session.Id" class="view-link">Session Plan â†’</a></td>
                         </tr>
                     }
                 </tbody>
@@ -119,7 +119,7 @@
                             <td>@trainingCount</td>
                             <td>@recoveryCount</td>
                             <td>@mediaCount</td>
-                            <td><a href="/Player/Details/@player.Id" class="view-link">Player Plan →</a></td>
+                            <td><a href="/player-profile/@player.Id" class="view-link">Player Plan â†’</a></td>
                         </tr>
                     }
                 </tbody>
@@ -127,4 +127,5 @@
         }
     </div>
 </div>
+
 
