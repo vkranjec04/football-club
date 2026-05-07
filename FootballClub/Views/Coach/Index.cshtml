@@ -1,70 +1,72 @@
 @model List<Coach>
 
 @{
-    ViewData["Title"] = "Dinamo Zagreb - Coaches";
+    ViewData["Title"] = "Dinamo Zagreb - Staff";
     ViewData["ActivePage"] = "Coach";
     ViewData["Breadcrumbs"] = new List<(string, string?)>
     {
         ("Dashboard", "/"),
-        ("Coaches", null)
+        ("Staff", null)
     };
     var currentDate = DateTime.Now;
-    var currentCoach = Model.FirstOrDefault(c => c.ContractUntil > currentDate);
+    var currentStaff = Model.Where(c => c.ContractUntil > currentDate).ToList();
     var pastCoaches = Model.Where(c => c.ContractUntil <= currentDate).OrderByDescending(c => c.ContractUntil).ToList();
 }
 
 <div class="page-header">
-    <h2>Dinamo Zagreb - Coaches</h2>
-    <p>Current and past coaching staff</p>
+    <h2>Dinamo Zagreb - Staff</h2>
+    <p>Current staff and management</p>
 </div>
 
-@if (currentCoach != null)
+@if (currentStaff.Any())
 {
     <div class="card">
         <div class="card-header">
-            <h3>Current Head Coach</h3>
+            <h3>Current Staff</h3>
             <span class="badge badge-green">Active</span>
         </div>
         <div class="card-body">
-            <div class="profile-card">
-                <div class="profile-header">
-                    <h2 style="margin: 0 0 10px 0;">@currentCoach.FirstName @currentCoach.LastName</h2>
-                    <span class="badge badge-green" style="font-size: 12px;">Current</span>
-                </div>
-                <div class="info-row">
-                    <div class="info-label">Nationality</div>
-                    <div class="info-value">@currentCoach.Nationality</div>
-                </div>
-                <div class="info-row">
-                    <div class="info-label">Date of Birth</div>
-                    <div class="info-value">@currentCoach.DateOfBirth.ToString("dd.MM.yyyy")</div>
-                </div>
-                <div class="info-row">
-                    <div class="info-label">Contract Until</div>
-                    <div class="info-value">@currentCoach.ContractUntil.ToString("dd.MM.yyyy")</div>
-                </div>
-                <div class="info-row" style="margin-top: 15px;">
-                    <a href="/Coach/@currentCoach.Id" class="view-link">View Full Profile →</a>
-                </div>
-            </div>
+            <table class="fc-table">
+                <thead>
+                    <tr>
+                        <th>Role</th>
+                        <th>Name</th>
+                        <th>Nationality</th>
+                        <th>Contract Until</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var staff in currentStaff)
+                    {
+                        <tr>
+                            <td><span class="badge badge-gray">@staff.Role</span></td>
+                            <td><strong>@staff.FirstName @staff.LastName</strong></td>
+                            <td>@staff.Nationality</td>
+                            <td>@staff.ContractUntil.ToString("dd.MM.yyyy")</td>
+                            <td><a href="/Coach/Details/@staff.Id" class="view-link">View &rarr;</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     </div>
 }
 
 @if (pastCoaches.Any())
 {
-    <div class="card">
+    <div class="card" style="margin-top: 20px;">
         <div class="card-header">
-            <h3>Past Coaches</h3>
+            <h3>Past Staff</h3>
             <span class="badge badge-gray">@pastCoaches.Count</span>
         </div>
         <div class="card-body">
             <table class="fc-table">
                 <thead>
                     <tr>
+                        <th>Role</th>
                         <th>Name</th>
                         <th>Nationality</th>
-                        <th>Date of Birth</th>
                         <th>Contract Ended</th>
                         <th></th>
                     </tr>
@@ -73,11 +75,11 @@
                     @foreach (var coach in pastCoaches)
                     {
                         <tr>
+                            <td><span class="badge badge-gray">@coach.Role</span></td>
                             <td><strong>@coach.FirstName @coach.LastName</strong></td>
                             <td>@coach.Nationality</td>
-                            <td>@coach.DateOfBirth.ToString("dd.MM.yyyy")</td>
                             <td>@coach.ContractUntil.ToString("dd.MM.yyyy")</td>
-                            <td><a href="/Coach/@coach.Id" class="view-link">View →</a></td>
+                            <td><a href="/Coach/Details/@coach.Id" class="view-link">View &rarr;</a></td>
                         </tr>
                     }
                 </tbody>
@@ -89,6 +91,6 @@
 @if (!Model.Any())
 {
     <div class="card" style="text-align: center; padding: 40px;">
-        <p style="color: var(--text-muted);">No coaches found</p>
+        <p style="color: var(--text-muted);">No staff found</p>
     </div>
 }

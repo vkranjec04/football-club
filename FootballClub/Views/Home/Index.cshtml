@@ -1,107 +1,128 @@
-﻿@{
+@using FootballClub.Models
+@{
     ViewData["Title"] = "Dashboard";
     ViewData["ActivePage"] = "Home";
     ViewData["Breadcrumbs"] = new List<(string, string?)>
     {
         ("Dashboard", null)
     };
+
+    var managedClub = ViewBag.ManagedClub as Club;
+    var upcomingTraining = ViewBag.UpcomingTraining as List<TrainingSession> ?? new List<TrainingSession>();
+    var injuredPlayers = ViewBag.InjuredPlayers as List<Player> ?? new List<Player>();
+    var recentMatches = ViewBag.RecentMatches as List<Match> ?? new List<Match>();
+    var nextTraining = ViewBag.NextTraining as TrainingSession;
 }
 
 <div class="page-header">
-    <h2>Dinamo Zagreb</h2>
-    <p>Official Management Dashboard</p>
+    <h2>@(managedClub?.Name ?? "Club Dashboard")</h2>
+    <p>Operations command center: training plans, responsibilities and match readiness.</p>
 </div>
 
-<!-- Stat Cards -->
 <div class="stat-grid">
     <div class="stat-card">
         <div class="stat-label">Squad Size</div>
         <div class="stat-value">@ViewBag.TotalPlayers</div>
-        <div class="stat-sub">players in squad</div>
+        <div class="stat-sub">registered players</div>
     </div>
-    
+
     <div class="stat-card accent-blue">
         <div class="stat-label">Upcoming Matches</div>
         <div class="stat-value">@ViewBag.UpcomingMatches</div>
-        <div class="stat-sub">scheduled</div>
+        <div class="stat-sub">fixtures ahead</div>
     </div>
-    
-    <div class="stat-card accent-amber">
-        <div class="stat-label">Injured Players</div>
-        <div class="stat-value">@ViewBag.InjuredPlayers.Count</div>
-        <div class="stat-sub">currently out</div>
-    </div>
-    
+
     <div class="stat-card accent-green">
-        <div class="stat-label">Club Name</div>
-        <div class="stat-value" style="font-size: 16px; padding-top: 4px;">@ViewBag.DinamoClub?.Name</div>
-        <div class="stat-sub">@ViewBag.DinamoClub?.City</div>
+        <div class="stat-label">Training Today</div>
+        <div class="stat-value">@ViewBag.TodayTrainingCount</div>
+        <div class="stat-sub">scheduled sessions</div>
+    </div>
+
+    <div class="stat-card accent-amber" onclick="window.location.href='/Medical'" style="cursor: pointer;">
+        <div class="stat-label">Medical Center</div>
+        <div class="stat-value" style="color: #ef4444;">@injuredPlayers.Count</div>
+        <div class="stat-sub">players injured</div>
     </div>
 </div>
 
-<!-- Top Scorer -->
-@if (ViewBag.TopScorer != null)
+@if (nextTraining != null)
 {
-    Player topScorer = ViewBag.TopScorer;
-    <div class="card">
-        <div class="card-header">
-            <h3>🏆 Top Scorer</h3>
-        </div>
-        <div class="card-body">
-            <div style="display: flex; align-items: center; gap: 1.5rem;">
-                <div style="width: 64px; height: 64px; background: var(--blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: var(--text-main);">
-                    @topScorer.FirstName.Substring(0, 1)@topScorer.LastName.Substring(0, 1)
-                </div>
-                <div>
-                    <div style="font-size: 16px; font-weight: 700; color: var(--text-dark);">
-                        <a href="/Player/@topScorer.Id" style="color: var(--text-dark); text-decoration: none;">@topScorer.FirstName @topScorer.LastName</a>
-                    </div>
-                    <div style="font-size: 13px; color: var(--text-muted);">@topScorer.Club?.Name</div>
-                    <div style="margin-top: 8px;">
-                        <span style="font-size: 18px; font-weight: 800; color: var(--blue);">@topScorer.Stats.Sum(s => s.Goals)</span>
-                        <span style="color: var(--text-muted); margin-left: 8px;">goals</span>
-                    </div>
-                </div>
+    <div class="upcoming-card" style="margin-bottom: 1.5rem;">
+        <div class="upcoming-label">Next Training Session</div>
+        <div class="match-teams" style="align-items: start;">
+            <div class="team" style="text-align: left;">
+                <div style="font-size: 18px; font-weight: 800; color: var(--text-main);">@nextTraining.Title</div>
+                <div style="margin-top: 6px; color: var(--text-muted);">@nextTraining.FocusArea</div>
             </div>
-        </div>
-    </div>
-}
-
-<!-- Upcoming Match -->
-@if (ViewBag.UpcomingMatch != null)
-{
-    <div class="upcoming-card">
-        <div class="upcoming-label">► Upcoming Match</div>
-        <div class="match-teams">
-            <div class="team">
-                <div style="font-size: 14px; color: var(--text-muted);">HOME</div>
-                <div style="font-size: 16px; font-weight: 700;">@ViewBag.UpcomingMatch.HomeClub.Name</div>
-            </div>
-            <div class="vs">VS</div>
-            <div class="team">
-                <div style="font-size: 14px; color: var(--text-muted);">AWAY</div>
-                <div style="font-size: 16px; font-weight: 700;">@ViewBag.UpcomingMatch.AwayClub.Name</div>
+            <div style="text-align: right; min-width: 170px;">
+                <div style="font-size: 13px; color: var(--text-muted);">Starts</div>
+                <div style="font-size: 16px; font-weight: 700;">@nextTraining.StartTime.ToString("dd.MM.yyyy HH:mm")</div>
             </div>
         </div>
         <div class="match-meta">
-            <span>📅 @ViewBag.UpcomingMatch.Date.ToString("dd.MM.yyyy HH:mm")</span>
-            <span>📍 @ViewBag.UpcomingMatch.Stadium?.Name</span>
-            <span>🎯 @ViewBag.UpcomingMatch.Round</span>
+            <span>📍 @nextTraining.Location</span>
+            <span>👥 @nextTraining.Participants.Count participants</span>
+            <span>🧠 @nextTraining.Intensity intensity</span>
         </div>
-        <div style="margin-top: 1rem;">
-            <a href="/Match/@ViewBag.UpcomingMatch.Id" style="color: var(--blue-light); text-decoration: none; font-weight: 700;">View Match Details →</a>
+        <div style="margin-top: 12px;">
+            <a href="/Training/Details/@nextTraining.Id" style="color: var(--blue-light); text-decoration: none; font-weight: 700;">Open session plan →</a>
         </div>
     </div>
 }
 
-<!-- Recent Matches -->
-@if (ViewBag.RecentMatches != null && ViewBag.RecentMatches.Count > 0)
-{
-    <div class="card">
-        <div class="card-header">
-            <h3>Recent Matches</h3>
-        </div>
-        <div class="card-body">
+<div class="card">
+    <div class="card-header">
+        <h3>Upcoming Training Pipeline</h3>
+        <span class="badge badge-blue">@upcomingTraining.Count</span>
+    </div>
+    <div class="card-body">
+        @if (upcomingTraining.Count == 0)
+        {
+            <p style="color: var(--text-muted);">No upcoming training sessions prepared yet.</p>
+        }
+        else
+        {
+            <table class="fc-table">
+                <thead>
+                    <tr>
+                        <th>Session</th>
+                        <th>Date</th>
+                        <th>Duration</th>
+                        <th>Intensity</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var session in upcomingTraining)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@session.Title</strong>
+                                <div style="color: var(--text-muted); font-size: 12px;">@session.FocusArea</div>
+                            </td>
+                            <td>@session.StartTime.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td>@((session.EndTime - session.StartTime).TotalMinutes) min</td>
+                            <td><span class="badge badge-gray">@session.Intensity</span></td>
+                            <td><a href="/Training/Details/@session.Id" class="view-link">Details →</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Recent Match Snapshot</h3>
+    </div>
+    <div class="card-body">
+        @if (recentMatches.Count == 0)
+        {
+            <p style="color: var(--text-muted);">No match history available.</p>
+        }
+        else
+        {
             <table class="fc-table">
                 <thead>
                     <tr>
@@ -112,52 +133,54 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var match in ViewBag.RecentMatches)
+                    @foreach (var match in recentMatches)
                     {
                         <tr>
-                            <td>
-                                <strong>@match.HomeClub.Name</strong> vs <strong>@match.AwayClub.Name</strong>
-                            </td>
-                            <td style="font-weight: 700;">@match.HomeScore - @match.AwayScore</td>
+                            <td><strong>@match.HomeClub.Name</strong> vs <strong>@match.AwayClub.Name</strong></td>
+                            <td>@match.HomeScore - @match.AwayScore</td>
                             <td>@match.Date.ToString("dd.MM.yyyy")</td>
-                            <td><a href="/Match/@match.Id" class="view-link">Details →</a></td>
+                            <td><a href="/Match/Details/@match.Id" class="view-link">Match →</a></td>
                         </tr>
                     }
                 </tbody>
             </table>
-        </div>
+        }
     </div>
-}
+</div>
 
-<!-- Injured Players -->
-@if (ViewBag.InjuredPlayers != null && ViewBag.InjuredPlayers.Count > 0)
-{
-    <div class="card">
-        <div class="card-header">
-            <h3>⚠️ Injured Players</h3>
-        </div>
-        <div class="card-body">
+<div class="card">
+    <div class="card-header">
+        <h3>Medical Watchlist</h3>
+        <span class="badge badge-red">@injuredPlayers.Count</span>
+    </div>
+    <div class="card-body">
+        @if (injuredPlayers.Count == 0)
+        {
+            <p style="color: var(--text-muted);">All players are fully available.</p>
+        }
+        else
+        {
             <table class="fc-table">
                 <thead>
                     <tr>
                         <th>Player</th>
                         <th>Position</th>
-                        <th>Club</th>
+                        <th>Status</th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var player in ViewBag.InjuredPlayers)
+                    @foreach (var player in injuredPlayers)
                     {
                         <tr>
-                            <td><strong>@player.FirstName @player.LastName</strong></td>
-                            <td><span class="badge badge-red">@player.Position</span></td>
-                            <td>@player.Club?.Name</td>
-                            <td><a href="/Player/@player.Id" class="view-link">Profile →</a></td>
+                            <td><strong>@player.FullName</strong></td>
+                            <td>@player.Position</td>
+                            <td><span class="badge badge-red">Injured</span></td>
+                            <td><a href="/Player/Details/@player.Id" class="view-link">Profile →</a></td>
                         </tr>
                     }
                 </tbody>
             </table>
-        </div>
+        }
     </div>
-}
+</div>

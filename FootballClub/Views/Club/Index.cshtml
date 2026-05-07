@@ -42,7 +42,7 @@
                         <td>€@club.Budget.ToString("F1")</td>
                         <td><span class="badge badge-blue">@club.Players.Count</span></td>
                         <td>@club.Coach?.FirstName @club.Coach?.LastName</td>
-                        <td><a href="/Club/@club.Id" class="view-link">Details →</a></td>
+                        <td><a href="/Club/Details/@club.Id" class="view-link">Details →</a></td>
                     </tr>
                 }
             </tbody>

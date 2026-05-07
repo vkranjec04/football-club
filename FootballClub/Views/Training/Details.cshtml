@@ -1,0 +1,109 @@
+@model FootballClub.Models.TrainingSession
+
+@{
+    ViewData["Title"] = Model.Title;
+    ViewData["ActivePage"] = "Training";
+}
+
+<a href="/Training" class="btn-back">← Back to Training</a>
+
+<div class="page-header">
+    <h2>@Model.Title</h2>
+    <p>@Model.StartTime.ToString("dddd, dd.MM.yyyy HH:mm") • @Model.Location</p>
+</div>
+
+<div class="detail-grid" style="grid-template-columns: 1fr;">
+    <div class="card">
+        <div class="card-header">
+            <h3>Session Overview</h3>
+            <span class="badge badge-blue">@Model.Intensity</span>
+        </div>
+        <div class="card-body">
+            <div class="info-row">
+                <span class="lbl">Club</span>
+                <span class="val">@Model.Club.Name</span>
+            </div>
+            <div class="info-row">
+                <span class="lbl">Focus Area</span>
+                <span class="val">@Model.FocusArea</span>
+            </div>
+            <div class="info-row">
+                <span class="lbl">Start</span>
+                <span class="val">@Model.StartTime.ToString("dd.MM.yyyy HH:mm")</span>
+            </div>
+            <div class="info-row">
+                <span class="lbl">End</span>
+                <span class="val">@Model.EndTime.ToString("dd.MM.yyyy HH:mm")</span>
+            </div>
+            <div class="info-row">
+                <span class="lbl">Duration</span>
+                <span class="val">@((Model.EndTime - Model.StartTime).TotalMinutes) minutes</span>
+            </div>
+            <div class="info-row">
+                <span class="lbl">Lead Coach</span>
+                <span class="val">
+                    @if (Model.LeadCoach != null)
+                    {
+                        <a href="/Coach/Details/@Model.LeadCoach.Id" class="view-link">@Model.LeadCoach.FirstName @Model.LeadCoach.LastName</a>
+                    }
+                    else
+                    {
+                        <text>Coaching Staff</text>
+                    }
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="lbl">Plan Notes</span>
+                <span class="val">@Model.Notes</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Participant List</h3>
+            <span class="badge badge-green">@Model.Participants.Count players</span>
+        </div>
+        <div class="card-body">
+            @if (Model.Participants.Count == 0)
+            {
+                <p style="color: var(--text-muted);">No players assigned.</p>
+            }
+            else
+            {
+                <table class="fc-table">
+                    <thead>
+                        <tr>
+                            <th>Player</th>
+                            <th>Position</th>
+                            <th>Jersey</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var player in Model.Participants.OrderBy(p => p.Position).ThenBy(p => p.LastName))
+                        {
+                            <tr>
+                                <td><strong>@player.FullName</strong></td>
+                                <td>@player.Position</td>
+                                <td>#@player.JerseyNumber</td>
+                                <td>
+                                    @if (player.IsInjured)
+                                    {
+                                        <span class="badge badge-red">Limited</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-green">Available</span>
+                                    }
+                                </td>
+                                <td><a href="/Player/Details/@player.Id" class="view-link">Profile →</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,106 @@
+@using FootballClub.Models
+@using FootballClub.Models.Enums
+@model Dictionary<Player, List<PlayerScheduleItem>>
+
+@{
+    ViewData["Title"] = "Player Schedules";
+    ViewData["ActivePage"] = "Schedules";
+
+    var selectedPosition = ViewBag.SelectedPosition as PlayerPosition?;
+}
+
+<div class="page-header">
+    <h2>Player Schedules</h2>
+    <p>Individual weekly responsibilities for players.</p>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form id="posScheduleFilter" method="get" action="/Player/Schedule" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <label for="position" style="font-weight: 700; color: var(--text-dark);">Position:</label>
+            <select id="position" name="position" onchange="document.getElementById('posScheduleFilter').submit();" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--dark-border); background: var(--dark-card); color: var(--text-main); min-width: 260px;">
+                <option value="">All Positions</option>
+                @foreach (PlayerPosition pos in Enum.GetValues(typeof(PlayerPosition)))
+                {
+                    if (selectedPosition == pos)
+                    {
+                        <option value="@pos" selected>@pos.ToString()</option>
+                    }
+                    else
+                    {
+                        <option value="@pos">@pos.ToString()</option>
+                    }
+                }
+            </select>
+            <a href="/Training" class="view-link">Training Calendar ?</a>
+        </form>
+    </div>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="card" style="text-align: center; padding: 40px;">
+        <p style="color: var(--text-muted);">No schedule data for this club yet.</p>
+    </div>
+}
+else
+{
+    @foreach (var entry in Model.OrderBy(x => x.Key.LastName))
+    {
+        var player = entry.Key;
+        var items = entry.Value.OrderBy(x => x.StartTime).ToList();
+
+        <div class="card">
+            <div class="card-header">
+                <h3>@player.FullName</h3>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <span class="badge badge-gray">@player.Position</span>
+                    <span class="badge badge-blue">@items.Count duties</span>
+                    <a href="/Player/Details/@player.Id" class="view-link">Profile →</a>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="fc-table">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Task</th>
+                            <th>Type</th>
+                            <th>Location</th>
+                            <th>Assigned By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var task in items)
+                        {
+                            <tr>
+                                <td>@task.StartTime.ToString("ddd, dd.MM HH:mm") - @task.EndTime.ToString("HH:mm")</td>
+                                <td>
+                                    <strong>@task.Title</strong>
+                                    <div style="color: var(--text-muted); font-size: 12px;">@task.Notes</div>
+                                </td>
+                                <td>
+                                    @{
+                                        var typeClass = task.ResponsibilityType switch
+                                        {
+                                            ScheduleResponsibilityType.RegularTraining => "badge-blue",
+                                            ScheduleResponsibilityType.Gym => "badge-amber",
+                                            ScheduleResponsibilityType.PhysicalTherapy => "badge-green",
+                                            ScheduleResponsibilityType.Massage => "badge-green",
+                                            ScheduleResponsibilityType.MediaTraining => "badge-red",
+                                            _ => "badge-gray"
+                                        };
+                                    }
+                                    <span class="badge @typeClass">@task.ResponsibilityType</span>
+                                </td>
+                                <td>@task.Location</td>
+                                <td>@task.AssignedBy</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
+

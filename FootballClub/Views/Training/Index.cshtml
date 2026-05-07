@@ -1,0 +1,130 @@
+@using FootballClub.Models
+@using FootballClub.Models.Enums
+@model List<TrainingSession>
+
+@{
+    ViewData["Title"] = "Training";
+    ViewData["ActivePage"] = "Training";
+
+    var selectedPosition = ViewBag.SelectedPosition as PlayerPosition?;
+    var scheduleByPlayer = ViewBag.ScheduleByPlayer as Dictionary<Player, List<PlayerScheduleItem>>
+        ?? new Dictionary<Player, List<PlayerScheduleItem>>();
+}
+
+<div class="page-header">
+    <h2>Training Operations</h2>
+    <p>Organize practice sessions, intensity, and squad workload.</p>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form id="posTrainingFilter" method="get" action="/Training" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <label for="position" style="font-weight: 700; color: var(--text-dark);">Position:</label>
+            <select id="position" name="position" onchange="document.getElementById('posTrainingFilter').submit();" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--dark-border); background: var(--dark-card); color: var(--text-main); min-width: 260px;">
+                <option value="">All Positions</option>
+                @foreach (PlayerPosition pos in Enum.GetValues(typeof(PlayerPosition)))
+                {
+                    if (selectedPosition == pos)
+                    {
+                        <option value="@pos" selected>@pos.ToString()</option>
+                    }
+                    else
+                    {
+                        <option value="@pos">@pos.ToString()</option>
+                    }
+                }
+            </select>
+            <a href="/Player/Schedule" class="view-link">Open Player Schedules ?</a>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Practice Calendar</h3>
+        <span class="badge badge-blue">@Model.Count sessions</span>
+    </div>
+    <div class="card-body">
+        @if (Model.Count == 0)
+        {
+            <p style="color: var(--text-muted);">No sessions planned yet.</p>
+        }
+        else
+        {
+            <table class="fc-table">
+                <thead>
+                    <tr>
+                        <th>Session</th>
+                        <th>Date</th>
+                        <th>Duration</th>
+                        <th>Intensity</th>
+                        <th>Participants</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var session in Model.OrderBy(s => s.StartTime))
+                    {
+                        <tr>
+                            <td>
+                                <strong>@session.Title</strong>
+                                <div style="color: var(--text-muted); font-size: 12px;">@session.FocusArea</div>
+                            </td>
+                            <td>@session.StartTime.ToString("ddd, dd.MM.yyyy HH:mm")</td>
+                            <td>@((session.EndTime - session.StartTime).TotalMinutes) min</td>
+                            <td><span class="badge badge-gray">@session.Intensity</span></td>
+                            <td>@session.Participants.Count</td>
+                            <td><a href="/Training/Details/@session.Id" class="view-link">Session Plan →</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>Responsibility Load (This Week)</h3>
+    </div>
+    <div class="card-body">
+        @if (scheduleByPlayer.Count == 0)
+        {
+            <p style="color: var(--text-muted);">No player responsibilities available.</p>
+        }
+        else
+        {
+            <table class="fc-table">
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Total Items</th>
+                        <th>Training</th>
+                        <th>Recovery</th>
+                        <th>Media</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in scheduleByPlayer.OrderBy(x => x.Key.LastName))
+                    {
+                        var player = item.Key;
+                        var duties = item.Value;
+                        var trainingCount = duties.Count(d => d.ResponsibilityType == FootballClub.Models.Enums.ScheduleResponsibilityType.RegularTraining);
+                        var recoveryCount = duties.Count(d => d.ResponsibilityType == FootballClub.Models.Enums.ScheduleResponsibilityType.Recovery || d.ResponsibilityType == FootballClub.Models.Enums.ScheduleResponsibilityType.PhysicalTherapy || d.ResponsibilityType == FootballClub.Models.Enums.ScheduleResponsibilityType.Massage);
+                        var mediaCount = duties.Count(d => d.ResponsibilityType == FootballClub.Models.Enums.ScheduleResponsibilityType.MediaTraining);
+                        <tr>
+                            <td><strong>@player.FullName</strong></td>
+                            <td>@duties.Count</td>
+                            <td>@trainingCount</td>
+                            <td>@recoveryCount</td>
+                            <td>@mediaCount</td>
+                            <td><a href="/Player/Details/@player.Id" class="view-link">Player Plan →</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+

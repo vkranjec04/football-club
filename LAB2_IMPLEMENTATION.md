@@ -1,7 +1,7 @@
-# Lab 2 - HTML Binding Implementation (Dinamo Zagreb Theme)
+# Lab 2 - Club Management Implementation (Dinamo Zagreb Theme)
 
 ## Overview
-This document describes the changes made to implement Lab 2 requirements with a custom Dinamo Zagreb blue and white theme.
+This document describes the changes made to implement Lab 2 requirements with a custom Dinamo Zagreb blue and white theme, now focused on club management workflows.
 
 ## Changes Made
 
@@ -19,16 +19,38 @@ This document describes the changes made to implement Lab 2 requirements with a 
 - Removed Bootstrap dependencies
 - Added dynamic breadcrumb generation from ViewData
 
-### 3. **Dashboard Page (Home)**
+### 3. **Management Dashboard (Home)**
 - **File**: `FootballClub/Views/Home/Index.cshtml`
-- Created custom dashboard with stat cards (using ViewBag data)
-- Added top scorer card with player stats
-- Added upcoming match preview card
+- Created management KPI dashboard (squad, matches, training, responsibilities)
+- Added next training focus card
+- Added upcoming training pipeline table
 - Added recent matches table
-- Added injured players alert section
+- Added injured players medical watchlist
 - Fully styled with custom components
 
-### 4. **Club Pages**
+### 4. **Training Feature (New)**
+- **Files**:
+  - `FootballClub/Models/TrainingSession.cs`
+  - `FootballClub/Models/Enums/TrainingIntensity.cs`
+  - `FootballClub/Repositories/ClubManagementRepositories.cs`
+  - `FootballClub/Views/Training/Index.cshtml`
+  - `FootballClub/Views/Training/Details.cshtml`
+- Added complete training planning workflow
+- Supports session intensity, focus area, coach assignment, and participant lists
+- Includes training details page for each planned practice
+
+### 5. **Player Schedules Feature (New)**
+- **Files**:
+  - `FootballClub/Models/PlayerScheduleItem.cs`
+  - `FootballClub/Models/Enums/ScheduleResponsibilityType.cs`
+  - `FootballClub/Repositories/ClubManagementRepositories.cs`
+  - `FootballClub/Views/Player/Schedule.cshtml`
+  - `FootballClub/Views/Player/Details.cshtml` (weekly responsibilities section)
+- Added individual player weekly responsibilities
+- Includes media training, regular training, gym, physical therapy, massages, and more
+- Added club-wide schedule overview page
+
+### 6. **Club Pages**
 - **Files**: 
   - `FootballClub/Views/Club/Index.cshtml`
   - `FootballClub/Views/Club/Details.cshtml`
@@ -37,16 +59,16 @@ This document describes the changes made to implement Lab 2 requirements with a 
 - Integrated squad display with player links
 - Coach information linked to coach details page
 
-### 5. **Player Pages**
+### 7. **Player Pages**
 - **Files**:
   - `FootballClub/Views/Player/Index.cshtml`
   - `FootballClub/Views/Player/Details.cshtml`
 - Index: Filterable player list with position badges
-- Details: Comprehensive player profile with stats and match history
+- Details: Comprehensive player profile with stats, match history, and weekly schedule
 - Status indicators (Active/Injured)
 - Links to club and match details
 
-### 6. **Match Pages**
+### 8. **Match Pages**
 - **Files**:
   - `FootballClub/Views/Match/Index.cshtml`
   - `FootballClub/Views/Match/Details.cshtml`
@@ -55,20 +77,28 @@ This document describes the changes made to implement Lab 2 requirements with a 
 - Player statistics table for finished matches
 - Links to clubs and player profiles
 
-### 7. **Coach Pages**
+### 9. **Coach Pages**
 - **Files**:
   - `FootballClub/Views/Coach/Index.cshtml`
   - `FootballClub/Views/Coach/Details.cshtml`
 - Index: List of all coaches with contract info
 - Details: Coach profile with career overview and contract status
 
-### 8. **Controller Updates**
+### 10. **Controller & Routing Updates**
 - **File**: `FootballClub/Controllers/Controllers.cs`
 - Added `ViewData["ActivePage"]` to all controller actions
 - Ensures proper sidebar navigation highlighting
-- All controllers follow the same pattern
+- Added new `TrainingController`
+- Added new `ClubController` for `/Club` routes
+- Added `PlayerController.Schedule` action for weekly schedule management
+- Removed league standings controller/actions
 
-### 9. **UX Agent Instructions (Lab 2)**
+### 11. **Dependency Injection Updates**
+- **File**: `FootballClub/Program.cs`
+- Registered `TrainingMockRepository`
+- Registered `PlayerScheduleMockRepository`
+
+### 12. **UX Agent Instructions (Lab 2)**
 - **File**: `FootballClub/ux-agent-instructions.md`
 - Updated with Dinamo Zagreb theme specifications
 - Added detailed component guidelines
@@ -99,6 +129,7 @@ This document describes the changes made to implement Lab 2 requirements with a 
 - **Breadcrumbs**: Shows page hierarchy
 - **Links**: All entity lists link to details pages
 - **Related Data**: Details pages link to related entities
+- **Management Focus**: Replaced league standings navigation with training and schedule operations
 
 ## File Structure Created
 
@@ -132,6 +163,8 @@ FootballClub/
 - ✅ **Custom UX Sub-agent**: `ux-agent-instructions.md` defines styling rules
 - ✅ **All Index Pages**: Club, Player, Match, Coach with tables
 - ✅ **All Details Pages**: Comprehensive entity details with related data
+- ✅ **Training Feature**: Complete training planning with details
+- ✅ **Player Schedules**: Individual weekly responsibilities per player
 - ✅ **Navigation**: Complete breadcrumbs and sidebar navigation
 - ✅ **Unique Non-standard UX**: Custom CSS, no Bootstrap, Dinamo branding
 - ✅ **Blue & White Theme**: Dinamo Zagreb colors throughout

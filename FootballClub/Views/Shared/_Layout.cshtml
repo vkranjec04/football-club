@@ -29,14 +29,18 @@
                 <span>Dashboard</span>
             </a>
             
-            <div class="nav-section-label">Data</div>
-            <a href="/League" class="nav-link @(ViewData["ActivePage"]?.ToString() == "League" ? "active" : "")">
-                <span class="nav-icon">🏆</span>
-                <span>League</span>
-            </a>
+            <div class="nav-section-label">Management</div>
             <a href="/Player" class="nav-link @(ViewData["ActivePage"]?.ToString() == "Player" ? "active" : "")">
                 <span class="nav-icon">👤</span>
                 <span>Players</span>
+            </a>
+            <a href="/Player/Schedule" class="nav-link @(ViewData["ActivePage"]?.ToString() == "Schedules" ? "active" : "")">
+                <span class="nav-icon">📋</span>
+                <span>Schedules</span>
+            </a>
+            <a href="/Training" class="nav-link @(ViewData["ActivePage"]?.ToString() == "Training" ? "active" : "")">
+                <span class="nav-icon">🧪</span>
+                <span>Training</span>
             </a>
             <a href="/Match" class="nav-link @(ViewData["ActivePage"]?.ToString() == "Match" ? "active" : "")">
                 <span class="nav-icon">⚽</span>
@@ -44,12 +48,20 @@
             </a>
             <a href="/Coach" class="nav-link @(ViewData["ActivePage"]?.ToString() == "Coach" ? "active" : "")">
                 <span class="nav-icon">👨‍🏫</span>
-                <span>Coaches</span>
+                <span>Staff</span>
+            </a>
+            <a href="/Medical" class="nav-link @(ViewData["ActivePage"]?.ToString() == "Medical" ? "active" : "")">
+                <span class="nav-icon">🏥</span>
+                <span>Medical Center</span>
+            </a>
+            <a href="/Tactics" class="nav-link @(ViewData["ActivePage"]?.ToString() == "Tactics" ? "active" : "")">
+                <span class="nav-icon">📋</span>
+                <span>Tactics Board</span>
             </a>
         </nav>
 
         <div class="sidebar-footer">
-            <p>© 2026 Football Club HNL</p>
+            <p>© 2026 Club Management Suite</p>
         </div>
     </aside>
 
@@ -82,7 +94,7 @@
                 }
             </div>
             <div class="topbar-right">
-                Lab 2 - HNL Football
+                Lab 2 - Club Management
             </div>
         </header>
 

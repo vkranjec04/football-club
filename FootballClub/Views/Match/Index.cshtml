@@ -49,7 +49,7 @@
                                 <strong>@opponent</strong>
                             </td>
                             <td>@match.Stadium.Name</td>
-                            <td><a href="/Match/@match.Id" class="view-link">Details →</a></td>
+                            <td><a href="/Match/Details/@match.Id" class="view-link">Details →</a></td>
                         </tr>
                     }
                 </tbody>
@@ -105,7 +105,7 @@ else
                             </td>
                             <td><span class="badge @resultClass">@match.HomeScore - @match.AwayScore</span></td>
                             <td>@match.Attendance.ToString("N0")</td>
-                            <td><a href="/Match/@match.Id" class="view-link">Details →</a></td>
+                            <td><a href="/Match/Details/@match.Id" class="view-link">Details →</a></td>
                         </tr>
                     }
                 </tbody>

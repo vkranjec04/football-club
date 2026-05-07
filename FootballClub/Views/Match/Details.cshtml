@@ -98,7 +98,7 @@
         <div class="card-body">
             <div class="info-row">
                 <span class="lbl">Club</span>
-                <span class="val"><a href="/Club/@Model.HomeClub.Id" class="view-link">@Model.HomeClub.Name</a></span>
+                <span class="val">@Model.HomeClub.Name</span>
             </div>
             <div class="info-row">
                 <span class="lbl">City</span>
@@ -126,7 +126,7 @@
         <div class="card-body">
             <div class="info-row">
                 <span class="lbl">Club</span>
-                <span class="val"><a href="/Club/@Model.AwayClub.Id" class="view-link">@Model.AwayClub.Name</a></span>
+                <span class="val">@Model.AwayClub.Name</span>
             </div>
             <div class="info-row">
                 <span class="lbl">City</span>
@@ -176,7 +176,7 @@
                                 <td>@stat.Assists</td>
                                 <td>@stat.MinutesPlayed'</td>
                                 <td style="font-weight: 700;">@stat.Rating.ToString("F1")</td>
-                                <td><a href="/Player/@stat.Player.Id" class="view-link">Player →</a></td>
+                                <td><a href="/Player/Details/@stat.Player.Id" class="view-link">Player →</a></td>
                             </tr>
                         }
                     </tbody>

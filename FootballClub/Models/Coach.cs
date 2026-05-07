@@ -8,9 +8,10 @@
         public string Nationality { get; set; }
         public DateTime DateOfBirth { get; set; }
         public DateTime ContractUntil { get; set; }
+        public string Role { get; set; } = "Head Coach";
 
-        // N strana od Club 1-1 Coach
-        public Club Club { get; set; }
+        public int ClubId { get; set; }  // Foreign key property
+        public virtual Club Club { get; set; }
 
         public string FullName => $"{FirstName} {LastName}";
     }

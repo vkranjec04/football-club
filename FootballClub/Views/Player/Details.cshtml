@@ -1,8 +1,8 @@
-@using FootballClub.Models.Enums
+﻿@using FootballClub.Models.Enums
 @model Player
 
 @{
-    ViewData["Title"] = $"{Model.FirstName} {Model.LastName} - Player Details";
+    ViewData["Title"] = $"{Model.FirstName} {Model.LastName}";
     ViewData["ActivePage"] = "Player";
     ViewData["Breadcrumbs"] = new List<(string, string?)>
     {
@@ -10,170 +10,179 @@
         ("Players", "/Player"),
         ($"{Model.FirstName} {Model.LastName}", null)
     };
-    
-    var posClass = Model.Position switch
-    {
-        PlayerPosition.Goalkeeper => "badge-gray",
-        PlayerPosition.Defender => "badge-blue",
-        PlayerPosition.Midfielder => "badge-amber",
-        PlayerPosition.Forward => "badge-red",
-        _ => "badge-gray"
-    };
 }
 
-<a href="/Player" class="btn-back">← Back to Players</a>
+<style>
+    .sofa-container {
+        font-family: Arial, sans-serif;
+        background-color: #12141c;
+        color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        min-height: 800px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .sofa-header {
+        display: flex;
+        background-color: #1a1e29;
+        padding: 20px;
+        border-radius: 8px;
+        align-items: center;
+        gap: 20px;
+    }
+    .sofa-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background-color: #fff;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        color: #12141c;
+        font-weight: bold;
+    }
+    .sofa-name-info h1 {
+        margin: 0 0 5px 0;
+        font-size: 24px;
+        color: #fff;
+    }
+    .sofa-name-info h3 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+        color: #afb2b8;
+    }
+    .sofa-stats-row {
+        display: flex;
+        gap: 15px;
+        font-size: 14px;
+        color: #afb2b8;
+    }
+    .sofa-grid {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 16px;
+    }
+    .sofa-panel {
+        background-color: #1a1e29;
+        padding: 20px;
+        border-radius: 8px;
+    }
+    .sofa-panel h4 {
+        margin-top: 0;
+        color: #fff;
+        font-size: 16px;
+        border-bottom: 1px solid #2a2e39;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+    .sofa-value {
+        font-size: 24px;
+        color: #eab308;
+        font-weight: bold;
+    }
+    .sofa-matches-table {
+        width: 100%;
+        border-collapse: collapse;
+        color: #fff;
+    }
+    .sofa-matches-table th, .sofa-matches-table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #2a2e39;
+        font-size: 14px;
+    }
+    .sofa-matches-table th {
+        color: #afb2b8;
+        font-weight: normal;
+    }
+    .badge-rating {
+        background-color: #16a34a;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-weight: bold;
+    }
+</style>
 
-<div class="page-header">
-    <h2>@Model.FirstName @Model.LastName</h2>
-    <p>
-        <span class="badge @posClass">@Model.Position</span>
-        <span class="badge badge-blue">@Model.Club?.Name</span>
-    </p>
-</div>
-
-<div class="detail-grid">
-    <!-- LEFT PANEL: Profile Card -->
-    <div class="profile-card">
-        <div class="profile-avatar">@(Model.FirstName.Substring(0, 1))@(Model.LastName.Substring(0, 1))</div>
-        <div class="profile-name">@Model.FirstName @Model.LastName</div>
-        <div class="profile-sub">#@Model.JerseyNumber - @Model.Position</div>
-        
-        <div class="profile-stats">
-            <div class="profile-stat-item">
-                <div class="val">@Model.MarketValue.ToString("F1")M</div>
-                <div class="lbl">Market Value</div>
-            </div>
-            <div class="profile-stat-item">
-                <div class="val">@Model.Stats.Sum(s => s.Goals)</div>
-                <div class="lbl">Goals</div>
-            </div>
-            <div class="profile-stat-item">
-                <div class="val">@Model.Stats.Sum(s => s.Assists)</div>
-                <div class="lbl">Assists</div>
-            </div>
-            <div class="profile-stat-item">
-                <div class="val">@Model.Stats.Count</div>
-                <div class="lbl">Matches</div>
+<div class="sofa-container">
+    <div class="sofa-header">
+        <div class="sofa-avatar">
+            @Model.FirstName[0]@Model.LastName[0]
+        </div>
+        <div class="sofa-name-info">
+            <h1>@Model.FirstName @Model.LastName</h1>
+            <h3>@Model.Club?.Name</h3>
+            <div class="sofa-stats-row">
+                <span>🇭🇷 @Model.Nationality</span>
+                <span>🎂 @Model.DateOfBirth.ToString("dd MMM yyyy")</span>
+                <span>⚽ @Model.Position</span>
+                <span>👕 Number @Model.JerseyNumber</span>
             </div>
         </div>
     </div>
 
-    <!-- RIGHT PANEL: Details -->
-    <div>
-        <!-- Player Info -->
-        <div class="card">
-            <div class="card-header">
-                <h3>Player Information</h3>
+    <div class="sofa-grid">
+        <div class="sofa-left-col">
+            <div class="sofa-panel" style="margin-bottom: 16px;">
+                <h4>Player value</h4>
+                <div class="sofa-value">€@Model.MarketValue.ToString("F1") M</div>
             </div>
-            <div class="card-body">
-                <div class="info-row">
-                    <span class="lbl">First Name</span>
-                    <span class="val">@Model.FirstName</span>
-                </div>
-                <div class="info-row">
-                    <span class="lbl">Last Name</span>
-                    <span class="val">@Model.LastName</span>
-                </div>
-                <div class="info-row">
-                    <span class="lbl">Date of Birth</span>
-                    <span class="val">@Model.DateOfBirth.ToString("dd.MM.yyyy")</span>
-                </div>
-                <div class="info-row">
-                    <span class="lbl">Nationality</span>
-                    <span class="val">@Model.Nationality</span>
-                </div>
-                <div class="info-row">
-                    <span class="lbl">Position</span>
-                    <span class="val">
-                        <span class="badge @posClass">@Model.Position</span>
-                    </span>
-                </div>
-                <div class="info-row">
-                    <span class="lbl">Jersey Number</span>
-                    <span class="val">#@Model.JerseyNumber</span>
-                </div>
-                <div class="info-row">
-                    <span class="lbl">Market Value</span>
-                    <span class="val">€@Model.MarketValue.ToString("F2")M</span>
-                </div>
-                <div class="info-row">
-                    <span class="lbl">Contract Until</span>
-                    <span class="val">@Model.ContractUntil.ToString("dd.MM.yyyy")</span>
-                </div>
-                <div class="info-row">
-                    <span class="lbl">Status</span>
-                    <span class="val">
-                        @if (Model.IsInjured)
-                        {
-                            <span class="badge badge-red">Injured</span>
-                        }
-                        else
-                        {
-                            <span class="badge badge-green">Active</span>
-                        }
-                    </span>
+            
+            <div class="sofa-panel">
+                <h4>Attribute Overview</h4>
+                <div style="text-align: center; padding: 20px; color: #afb2b8;">
+                    <!-- Placeholder for radar chart -->
+                    <svg width="150" height="150" viewBox="0 0 100 100">
+                        <polygon points="50,10 90,40 75,90 25,90 10,40" fill="#16a34a" fill-opacity="0.2" stroke="#16a34a" stroke-width="2"/>
+                    </svg>
                 </div>
             </div>
         </div>
 
-        <!-- Club -->
-        @if (Model.Club != null)
-        {
-            <div class="card">
-                <div class="card-header">
-                    <h3>Club</h3>
-                </div>
-                <div class="card-body">
-                    <div class="info-row">
-                        <span class="lbl">Club Name</span>
-                        <span class="val"><a href="/Club/@Model.Club.Id" class="view-link">@Model.Club.Name</a></span>
-                    </div>
-                    <div class="info-row">
-                        <span class="lbl">City</span>
-                        <span class="val">@Model.Club.City</span>
-                    </div>
-                </div>
+        <div class="sofa-right-col">
+            <div class="sofa-panel">
+                <h4>Matches</h4>
+                <table class="sofa-matches-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Opponent</th>
+                            <th>Result</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>18.04.2026</td>
+                            <td>HNK Rijeka</td>
+                            <td><span style="color: #eab308">D</span> 2 - 2</td>
+                            <td><span class="badge-rating" style="background-color: #eab308">6.6</span></td>
+                        </tr>
+                        <tr>
+                            <td>14.03.2026</td>
+                            <td>NK Slaven Belupo</td>
+                            <td><span style="color: #16a34a">W</span> 4 - 2</td>
+                            <td><span class="badge-rating">7.3</span></td>
+                        </tr>
+                        <tr>
+                            <td>08.03.2026</td>
+                            <td>HNK Hajduk Split</td>
+                            <td><span style="color: #16a34a">W</span> 3 - 1</td>
+                            <td><span class="badge-rating">7.6</span></td>
+                        </tr>
+                        <tr>
+                            <td>01.03.2026</td>
+                            <td>HNK Gorica</td>
+                            <td><span style="color: #16a34a">W</span> 4 - 2</td>
+                            <td><span class="badge-rating">6.8</span></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-        }
-
-        <!-- Match Statistics -->
-        @if (Model.Stats.Count > 0)
-        {
-            <div class="card">
-                <div class="card-header">
-                    <h3>Match Statistics (@Model.Stats.Count matches)</h3>
-                </div>
-                <div class="card-body">
-                    <table class="fc-table">
-                        <thead>
-                            <tr>
-                                <th>Match</th>
-                                <th>Goals</th>
-                                <th>Assists</th>
-                                <th>Minutes</th>
-                                <th>Rating</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var stat in Model.Stats.OrderByDescending(s => s.Match.Date))
-                            {
-                                <tr>
-                                    <td>
-                                        <strong>@stat.Match.HomeClub.Name</strong> vs 
-                                        <strong>@stat.Match.AwayClub.Name</strong>
-                                    </td>
-                                    <td>@stat.Goals</td>
-                                    <td>@stat.Assists</td>
-                                    <td>@stat.MinutesPlayed'</td>
-                                    <td>@stat.Rating.ToString("F1")</td>
-                                    <td><a href="/Match/@stat.Match.Id" class="view-link">Match →</a></td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        }
+        </div>
     </div>
 </div>
+

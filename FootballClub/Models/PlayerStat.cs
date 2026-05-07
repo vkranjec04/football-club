@@ -6,6 +6,9 @@
     {
         public int Id { get; set; }
 
+            public int PlayerId { get; set; }
+            public int MatchId { get; set; }
+
         // N strana od Player 1-N Stats
         public Player Player { get; set; }
 

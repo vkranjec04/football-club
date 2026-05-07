@@ -63,7 +63,7 @@
                                 <td>@player.FirstName @player.LastName</td>
                                 <td><span class="badge badge-gray">@player.Position</span></td>
                                 <td>@player.Nationality</td>
-                                <td><a href="/Player/@player.Id" class="view-link">View →</a></td>
+                                <td><a href="/Player/Details/@player.Id" class="view-link">View →</a></td>
                             </tr>
                         }
                     </tbody>
@@ -101,7 +101,7 @@
                         <div class="info-value">@Model.Coach.ContractUntil.ToString("dd/MM/yyyy")</div>
                     </div>
                     <div class="info-row">
-                        <a href="/Coach/@Model.Coach.Id" class="view-link">View Coach Profile →</a>
+                        <a href="/Coach/Details/@Model.Coach.Id" class="view-link">View Coach Profile →</a>
                     </div>
                 </div>
             }

@@ -1,0 +1,136 @@
+@using FootballClub.Models
+@model List<Player>
+
+@{
+    ViewData["Title"] = "Medical Center";
+    ViewData["ActivePage"] = "Medical";
+}
+
+<style>
+    .medical-container {
+        display: grid;
+        grid-template-columns: 1fr 2fr;
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .medical-card {
+        background: #1a1e29;
+        border-radius: 8px;
+        padding: 20px;
+        color: #fff;
+        border: 1px solid #2a2e39;
+    }
+
+    .stats-header {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #f87171;
+    }
+
+    .injury-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .injury-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #2a2e39;
+        padding: 15px;
+        border-radius: 6px;
+        border-left: 4px solid #ef4444;    
+    }
+
+    .doctor-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #fca5a5;
+        color: #7f1d1d;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        font-weight: bold;
+        flex-shrink: 0;
+    }
+
+    .doc-info {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .doc-name {
+        font-size: 18px;
+        font-weight: bold;
+    }
+</style>
+
+<div class="page-header">
+    <h2 style="color: var(--text-dark);">Medical Center & Rehab</h2>
+    <p style="color: var(--text-muted);">Manage player injuries, recovery schedules, and fitness status.</p>
+</div>
+
+<div class="medical-container">
+    <div class="medical-card">
+        <div class="stats-header">Chief Medical Officer</div>
+        <div class="doc-info">
+            <div class="doctor-avatar">Dr</div>
+            <div>
+                <div class="doc-name">Matej Raguž</div>
+                <div style="color: #9ca3af; font-size: 14px;">Head of Medical Staff</div>
+            </div>
+        </div>
+        
+        <hr style="border-color: #374151; margin: 20px 0;" />
+        
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span>Total Injuries:</span>
+            <strong style="color: #ef4444; font-size: 18px;">@Model.Count</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+            <span>Available Squad:</span>
+            <strong style="color: #4ade80; font-size: 18px;">92%</strong> <!-- Mock percentage -->
+        </div>
+    </div>
+
+    <div class="medical-card">
+        <div class="stats-header" style="color: #facc15;">Injury Report</div>
+        
+        @if (!Model.Any())
+        {
+            <div style="text-align: center; padding: 40px; color: #9ca3af;">
+                <h3>All players are fully fit.</h3>
+                <p>No injuries currently reported at the club.</p>
+            </div>
+        }
+        else
+        {
+            <div class="injury-list">
+                @foreach (var player in Model)
+                {
+                    <div class="injury-item">
+                        <div>
+                            <div style="font-weight: bold; font-size: 16px; margin-bottom: 4px;">@player.FirstName @player.LastName</div>
+                            <div style="color: #9ca3af; font-size: 13px;">#@player.JerseyNumber &middot; @player.Position</div>
+                            <div style="color: #f87171; font-size: 14px; margin-top: 8px;">
+                                &#10060; Unavailable
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: 12px; color: #9ca3af; margin-bottom: 4px;">Expected Return</div>
+                            <div style="font-weight: bold; color: #fbbf24;">2-3 Weeks</div> <!-- Mocked expected return -->
+                            <a href="/Player/Details/@player.Id" style="display: inline-block; margin-top: 10px; color: #60a5fa; text-decoration: none; font-size: 13px;">View Profile &rarr;</a>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

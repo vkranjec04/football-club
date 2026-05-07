@@ -1,21 +1,21 @@
-@model Coach
+﻿@model Coach
 
 @{
-    ViewData["Title"] = $"{Model.FirstName} {Model.LastName} - Coach Details";
+    ViewData["Title"] = $"{Model.FirstName} {Model.LastName} - Staff Details";
     ViewData["ActivePage"] = "Coach";
     ViewData["Breadcrumbs"] = new List<(string, string?)>
     {
         ("Dashboard", "/"),
-        ("Coaches", "/Coach"),
+        ("Staff", "/Coach"),
         ($"{Model.FirstName} {Model.LastName}", null)
     };
 }
 
-<a href="/Coach" class="btn-back">← Back to Coaches</a>
+<a href="/Coach" class="btn-back">â† Back to Staff</a>
 
 <div class="page-header">
     <h2>@Model.FirstName @Model.LastName</h2>
-    <p>Head Coach</p>
+    <p>@Model.Role</p>
 </div>
 
 <div class="detail-grid">
@@ -46,7 +46,7 @@
         <!-- Coach Info -->
         <div class="card">
             <div class="card-header">
-                <h3>Coach Information</h3>
+                <h3>Staff Information</h3>
             </div>
             <div class="card-body">
                 <div class="info-row">
@@ -76,7 +76,7 @@
             </div>
         </div>
 
-        <!-- Coaching Statistics (show club and players) -->
+        <!-- Statistics (show club and players) -->
         @{
             // Find the clubs coached by this coach
             var clubs = new List<Club>();
@@ -126,3 +126,4 @@
         </div>
     </div>
 </div>
+

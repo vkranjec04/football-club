@@ -56,11 +56,14 @@ public static class MockData
         
         Clubs = new List<Club> { dinamo, hajduk, rijeka, osijek, lok, slaven_belupo, vukovar, varazdin_club, istra_1961, gorica };
 
-        // --- TRENERI (Past and Current) ---
-        // Dinamo coaches
-        var trDinamo = new Coach { Id = 1, FirstName = "Sergej", LastName = "Jakirović", Nationality = "Hrvatska", DateOfBirth = new DateTime(1978, 3, 15), ContractUntil = new DateTime(2026, 6, 30) };
-        var trDinamoPrev1 = new Coach { Id = 11, FirstName = "Igor", LastName = "Jovičević", Nationality = "Hrvatska", DateOfBirth = new DateTime(1970, 5, 22), ContractUntil = new DateTime(2023, 12, 31) };
-        var trDinamoPrev2 = new Coach { Id = 21, FirstName = "Damir", LastName = "Burić", Nationality = "Hrvatska", DateOfBirth = new DateTime(1962, 8, 12), ContractUntil = new DateTime(2022, 6, 30) };
+        // --- STAFF (Past and Current) ---
+        // Dinamo staff
+        var trDinamo = new Coach { Id = 1, FirstName = "Nenad", LastName = "Bjelica", Nationality = "Hrvatska", DateOfBirth = new DateTime(1971, 8, 20), ContractUntil = new DateTime(2026, 6, 30), Role = "Manager", Club = dinamo };
+        var trAst = new Coach { Id = 11, FirstName = "Danijel", LastName = "Jumić", Nationality = "Hrvatska", DateOfBirth = new DateTime(1986, 6, 27), ContractUntil = new DateTime(2026, 6, 30), Role = "Assistant Coach", Club = dinamo };
+        var trAst2 = new Coach { Id = 21, FirstName = "Nino", LastName = "Bule", Nationality = "Hrvatska", DateOfBirth = new DateTime(1976, 3, 19), ContractUntil = new DateTime(2026, 6, 30), Role = "Assistant Coach", Club = dinamo };
+        var trMed = new Coach { Id = 31, FirstName = "Hrvoje", LastName = "Šebečić", Nationality = "Hrvatska", DateOfBirth = new DateTime(1975, 4, 18), ContractUntil = new DateTime(2026, 6, 30), Role = "Medical Staff", Club = dinamo };
+        var trAnal = new Coach { Id = 41, FirstName = "Hrvoje", LastName = "Jozak", Nationality = "Hrvatska", DateOfBirth = new DateTime(1989, 2, 21), ContractUntil = new DateTime(2026, 6, 30), Role = "Football Analyst", Club = dinamo };
+        var trGk = new Coach { Id = 51, FirstName = "Sandro", LastName = "Žufić", Nationality = "Hrvatska", DateOfBirth = new DateTime(1979, 12, 10), ContractUntil = new DateTime(2026, 6, 30), Role = "Goalkeeping Coach", Club = dinamo };
         
         var trHajduk = new Coach { Id = 2, FirstName = "Gennaro", LastName = "Gattuso", Nationality = "Italija", DateOfBirth = new DateTime(1978, 1, 9), ContractUntil = new DateTime(2026, 6, 30) };
         var trRijeka = new Coach { Id = 3, FirstName = "Željko", LastName = "Sopić", Nationality = "Hrvatska", DateOfBirth = new DateTime(1972, 7, 20), ContractUntil = new DateTime(2025, 12, 31) };
@@ -68,7 +71,7 @@ public static class MockData
         var trLok = new Coach { Id = 5, FirstName = "Mario", LastName = "Cvitković", Nationality = "Hrvatska", DateOfBirth = new DateTime(1975, 2, 28), ContractUntil = new DateTime(2025, 12, 31) };
         var trSlaven = new Coach { Id = 6, FirstName = "Petar", LastName = "Krpan", Nationality = "Hrvatska", DateOfBirth = new DateTime(1968, 6, 3), ContractUntil = new DateTime(2025, 6, 30) };
         var trVukovar = new Coach { Id = 7, FirstName = "Silvijo", LastName = "Čabraja", Nationality = "Hrvatska", DateOfBirth = new DateTime(1970, 8, 11), ContractUntil = new DateTime(2026, 6, 30) };
-        var trVarazdin = new Coach { Id = 8, FirstName = "Nenad", LastName = "Bjelica", Nationality = "Hrvatska", DateOfBirth = new DateTime(1973, 4, 19), ContractUntil = new DateTime(2026, 6, 30) };
+        var trVarazdin = new Coach { Id = 8, FirstName = "Igor", LastName = "Stimac", Nationality = "Hrvatska", DateOfBirth = new DateTime(1973, 4, 19), ContractUntil = new DateTime(2026, 6, 30) };
         var trIstra = new Coach { Id = 9, FirstName = "Safet", LastName = "Hadžić", Nationality = "Bosna i Hercegovina", DateOfBirth = new DateTime(1971, 12, 5), ContractUntil = new DateTime(2025, 6, 30) };
         var trGorica = new Coach { Id = 10, FirstName = "Mario", LastName = "Carević", Nationality = "Hrvatska", DateOfBirth = new DateTime(1975, 11, 12), ContractUntil = new DateTime(2026, 6, 30) };
         
@@ -76,7 +79,7 @@ public static class MockData
         lok.Coach = trLok; slaven_belupo.Coach = trSlaven; vukovar.Coach = trVukovar;
         varazdin_club.Coach = trVarazdin; istra_1961.Coach = trIstra; gorica.Coach = trGorica;
         
-        Coaches = new List<Coach> { trDinamo, trDinamoPrev1, trDinamoPrev2, trHajduk, trRijeka, trOsijek, trLok, trSlaven, trVukovar, trVarazdin, trIstra, trGorica };
+        Coaches = new List<Coach> { trDinamo, trAst, trAst2, trMed, trAnal, trGk, trHajduk, trRijeka, trOsijek, trLok, trSlaven, trVukovar, trVarazdin, trIstra, trGorica };
 
         // --- IGRAČI ---
         // Dinamo players
@@ -86,6 +89,25 @@ public static class MockData
         var petkovic = new Player { Id = 4, FirstName = "Bruno", LastName = "Petković", DateOfBirth = new DateTime(1994, 9, 16), Nationality = "Hrvatska", Position = PlayerPosition.Forward, JerseyNumber = 9, MarketValue = 10.0m, ContractUntil = new DateTime(2026, 6, 30), IsInjured = true, Club = dinamo };
         var moro = new Player { Id = 41, FirstName = "Mislav", LastName = "Oršić", DateOfBirth = new DateTime(1992, 4, 24), Nationality = "Hrvatska", Position = PlayerPosition.Midfielder, JerseyNumber = 11, MarketValue = 15.0m, ContractUntil = new DateTime(2027, 12, 31), IsInjured = false, Club = dinamo };
         var bradaric = new Player { Id = 42, FirstName = "Borna", LastName = "Barišić", DateOfBirth = new DateTime(1996, 11, 10), Nationality = "Hrvatska", Position = PlayerPosition.Defender, JerseyNumber = 3, MarketValue = 16.0m, ContractUntil = new DateTime(2027, 6, 30), IsInjured = false, Club = dinamo };
+        var nevistic_gk = new Player { Id = 101, FirstName = "Ivan", LastName = "Nevistić", DateOfBirth = new DateTime(1998, 7, 31), Nationality = "Hrvatska", Position = PlayerPosition.Goalkeeper, JerseyNumber = 33, MarketValue = 3.0m, ContractUntil = new DateTime(2026, 6, 30), IsInjured = false, Club = dinamo };
+        var zagorac = new Player { Id = 102, FirstName = "Danijel", LastName = "Zagorac", DateOfBirth = new DateTime(1987, 2, 7), Nationality = "Hrvatska", Position = PlayerPosition.Goalkeeper, JerseyNumber = 1, MarketValue = 0.5m, ContractUntil = new DateTime(2025, 6, 30), IsInjured = false, Club = dinamo };
+        var ristovski = new Player { Id = 103, FirstName = "Stefan", LastName = "Ristovski", DateOfBirth = new DateTime(1992, 2, 12), Nationality = "Sjeverna Makedonija", Position = PlayerPosition.Defender, JerseyNumber = 13, MarketValue = 2.0m, ContractUntil = new DateTime(2025, 6, 30), IsInjured = false, Club = dinamo };
+        var peric = new Player { Id = 104, FirstName = "Dino", LastName = "Perić", DateOfBirth = new DateTime(1994, 7, 12), Nationality = "Hrvatska", Position = PlayerPosition.Defender, JerseyNumber = 55, MarketValue = 3.5m, ContractUntil = new DateTime(2026, 6, 30), IsInjured = false, Club = dinamo };
+        var theophile = new Player { Id = 105, FirstName = "Kevin", LastName = "Theophile-Catherine", DateOfBirth = new DateTime(1989, 10, 28), Nationality = "Francuska", Position = PlayerPosition.Defender, JerseyNumber = 28, MarketValue = 1.0m, ContractUntil = new DateTime(2025, 6, 30), IsInjured = false, Club = dinamo };
+        var bernauer = new Player { Id = 106, FirstName = "Maxime", LastName = "Bernauer", DateOfBirth = new DateTime(1998, 7, 1), Nationality = "Francuska", Position = PlayerPosition.Defender, JerseyNumber = 6, MarketValue = 1.5m, ContractUntil = new DateTime(2027, 6, 30), IsInjured = false, Club = dinamo };
+        var ogiwara = new Player { Id = 107, FirstName = "Takuya", LastName = "Ogiwara", DateOfBirth = new DateTime(1999, 11, 23), Nationality = "Japan", Position = PlayerPosition.Defender, JerseyNumber = 3, MarketValue = 1.2m, ContractUntil = new DateTime(2025, 1, 31), IsInjured = false, Club = dinamo };
+        var perkovic = new Player { Id = 108, FirstName = "Mauro", LastName = "Perković", DateOfBirth = new DateTime(2003, 3, 22), Nationality = "Hrvatska", Position = PlayerPosition.Defender, JerseyNumber = 39, MarketValue = 3.5m, ContractUntil = new DateTime(2028, 6, 30), IsInjured = false, Club = dinamo };
+        var misic = new Player { Id = 109, FirstName = "Josip", LastName = "Mišić", DateOfBirth = new DateTime(1994, 6, 28), Nationality = "Hrvatska", Position = PlayerPosition.Midfielder, JerseyNumber = 27, MarketValue = 4.0m, ContractUntil = new DateTime(2026, 6, 30), IsInjured = false, Club = dinamo };
+        var ademi = new Player { Id = 110, FirstName = "Arijan", LastName = "Ademi", DateOfBirth = new DateTime(1991, 5, 29), Nationality = "Sjeverna Makedonija", Position = PlayerPosition.Midfielder, JerseyNumber = 5, MarketValue = 1.5m, ContractUntil = new DateTime(2026, 6, 30), IsInjured = false, Club = dinamo };
+        var baturina = new Player { Id = 111, FirstName = "Martin", LastName = "Baturina", DateOfBirth = new DateTime(2003, 2, 16), Nationality = "Hrvatska", Position = PlayerPosition.Midfielder, JerseyNumber = 10, MarketValue = 20.0m, ContractUntil = new DateTime(2028, 6, 30), IsInjured = false, Club = dinamo };
+        var sucic = new Player { Id = 112, FirstName = "Petar", LastName = "Sučić", DateOfBirth = new DateTime(2003, 10, 25), Nationality = "Bosna i Hercegovina", Position = PlayerPosition.Midfielder, JerseyNumber = 25, MarketValue = 2.5m, ContractUntil = new DateTime(2028, 6, 30), IsInjured = false, Club = dinamo };
+        var rog = new Player { Id = 113, FirstName = "Marko", LastName = "Rog", DateOfBirth = new DateTime(1995, 7, 19), Nationality = "Hrvatska", Position = PlayerPosition.Midfielder, JerseyNumber = 18, MarketValue = 2.0m, ContractUntil = new DateTime(2025, 1, 31), IsInjured = true, Club = dinamo };
+        var hoxha = new Player { Id = 114, FirstName = "Arbër", LastName = "Hoxha", DateOfBirth = new DateTime(1998, 10, 6), Nationality = "Albanija", Position = PlayerPosition.Midfielder, JerseyNumber = 20, MarketValue = 2.0m, ContractUntil = new DateTime(2027, 6, 30), IsInjured = false, Club = dinamo };
+        var kacavenda = new Player { Id = 115, FirstName = "Lukas", LastName = "Kačavenda", DateOfBirth = new DateTime(2003, 3, 2), Nationality = "Hrvatska", Position = PlayerPosition.Midfielder, JerseyNumber = 8, MarketValue = 1.5m, ContractUntil = new DateTime(2028, 6, 30), IsInjured = true, Club = dinamo };
+        var vidovic = new Player { Id = 116, FirstName = "Gabrijel", LastName = "Vidović", DateOfBirth = new DateTime(2003, 12, 1), Nationality = "Hrvatska", Position = PlayerPosition.Midfielder, JerseyNumber = 72, MarketValue = 3.5m, ContractUntil = new DateTime(2024, 6, 30), IsInjured = false, Club = dinamo };
+        var kulenovic = new Player { Id = 117, FirstName = "Sandro", LastName = "Kulenović", DateOfBirth = new DateTime(1999, 12, 4), Nationality = "Hrvatska", Position = PlayerPosition.Forward, JerseyNumber = 17, MarketValue = 2.0m, ContractUntil = new DateTime(2025, 6, 30), IsInjured = false, Club = dinamo };
+        var kaneko = new Player { Id = 118, FirstName = "Takuro", LastName = "Kaneko", DateOfBirth = new DateTime(1997, 7, 30), Nationality = "Japan", Position = PlayerPosition.Midfielder, JerseyNumber = 30, MarketValue = 2.5m, ContractUntil = new DateTime(2024, 6, 30), IsInjured = false, Club = dinamo };
+        var brodic = new Player { Id = 119, FirstName = "Fran", LastName = "Brodić", DateOfBirth = new DateTime(1997, 1, 8), Nationality = "Hrvatska", Position = PlayerPosition.Forward, JerseyNumber = 19, MarketValue = 1.2m, ContractUntil = new DateTime(2027, 6, 30), IsInjured = false, Club = dinamo };
         
         // Hajduk players
         var posavec = new Player { Id = 5, FirstName = "Lovre", LastName = "Posavec", DateOfBirth = new DateTime(1994, 4, 4), Nationality = "Hrvatska", Position = PlayerPosition.Goalkeeper, JerseyNumber = 1, MarketValue = 3.5m, ContractUntil = new DateTime(2026, 6, 30), IsInjured = false, Club = hajduk };
@@ -120,9 +142,9 @@ public static class MockData
         // Gorica players
         var goricaPlayer = new Player { Id = 18, FirstName = "Ante", LastName = "Čuić", DateOfBirth = new DateTime(2001, 7, 8), Nationality = "Hrvatska", Position = PlayerPosition.Forward, JerseyNumber = 9, MarketValue = 1.5m, ContractUntil = new DateTime(2027, 6, 30), IsInjured = false, Club = gorica };
 
-        dinamo.Players.AddRange(new[] { livakovic, sutalo, ivanusec, petkovic, moro, bradaric });
-        hajduk.Players.AddRange(new[] { posavec, kalik, durdov, mlakar });
-        rijeka.Players.AddRange(new[] { nevistic, tomecak, muric, cvetkovic });
+        foreach (var p in new[] { livakovic, sutalo, ivanusec, petkovic, moro, bradaric, nevistic_gk, zagorac, ristovski, peric, theophile, bernauer, ogiwara, perkovic, misic, ademi, baturina, sucic, rog, hoxha, kacavenda, vidovic, kulenovic, kaneko, brodic }) dinamo.Players.Add(p);
+        foreach (var p in new[] { posavec, kalik, durdov, mlakar }) hajduk.Players.Add(p);
+        foreach (var p in new[] { nevistic, tomecak, muric, cvetkovic }) rijeka.Players.Add(p);
         osijek.Players.Add(gelezniak);
         lok.Players.Add(stojanovic);
         slaven_belupo.Players.Add(soric);
@@ -131,7 +153,10 @@ public static class MockData
         istra_1961.Players.Add(mikulic);
         gorica.Players.Add(goricaPlayer);
         
-        Players = new List<Player> { livakovic, sutalo, ivanusec, petkovic, moro, bradaric, posavec, kalik, durdov, mlakar, nevistic, tomecak, muric, cvetkovic, gelezniak, stojanovic, vukovarPlayer, svidercic, mikulic, goricaPlayer };
+        Players = new List<Player> { 
+            livakovic, sutalo, ivanusec, petkovic, moro, bradaric, nevistic_gk, zagorac, ristovski, peric, theophile, bernauer, ogiwara, perkovic, misic, ademi, baturina, sucic, rog, hoxha, kacavenda, vidovic, kulenovic, kaneko, brodic, 
+            posavec, kalik, durdov, mlakar, nevistic, tomecak, muric, cvetkovic, gelezniak, stojanovic, vukovarPlayer, svidercic, mikulic, goricaPlayer 
+        };
 
         // --- UTAKMICE (HNL 2025/26: actual season clubs) ---
         var roundRobinTeams = new List<Club> { dinamo, hajduk, rijeka, osijek, lok, slaven_belupo, vukovar, varazdin_club, istra_1961, gorica };

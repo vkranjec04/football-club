@@ -1,11 +1,12 @@
 # football-club
 
-Football Club is an ASP.NET Core MVC project for managing core football club data in one place.
+Football Club is an ASP.NET Core MVC project focused on football club management operations.
 
-The project models common entities such as:
-- Players and their statistics
-- Coaches and clubs
-- Matches and match status
-- Transfers and stadiums
+The project models and visualizes:
+- Club management dashboard KPIs
+- Training session organization (focus area, intensity, participants, coach)
+- Individual player weekly responsibilities (media, gym, therapy, massage, tactical video, and more)
+- Players, coaches, clubs, and matches
+- Transfers and stadium context
 
-It is structured as a standard MVC app with controllers, models, and Razor views, and can be used as a learning project for C# and ASP.NET Core fundamentals.
+The app is structured as a standard MVC project with controllers, models, repositories, and Razor views, and is useful for learning C# and ASP.NET Core through a realistic club-management use case.

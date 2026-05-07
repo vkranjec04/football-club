@@ -11,24 +11,24 @@
 }
 
 :root {
-    --blue: #0047AB;
-    --blue-light: #1E7BC1;
-    --blue-dim: #001F3F;
-    --dark: #001F3F;
-    --dark-card: #0D3B66;
-    --dark-border: #1A5F9F;
-    --text-main: #F0F4F8;
-    --text-muted: #A0AEC0;
-    --text-dark: #1A202C;
+    --blue: #1e3a8a;
+    --blue-light: #3b82f6;
+    --blue-dim: #1e293b;
+    --dark: #0f172a;
+    --dark-card: #1e293b;
+    --dark-border: #334155;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --text-dark: #f1f5f9;      /* Swapped for dark mode */
     --white: #ffffff;
-    --red: #EF4444;
-    --amber: #F59E0B;
+    --red: #ef4444;
+    --amber: #f59e0b;
     --sidebar-w: 240px;
 }
 
 body {
     font-family: 'Segoe UI', system-ui, sans-serif;
-    background: #CFE5FF;
+    background: #0f172a;
     color: var(--text-dark);
     display: flex;
     min-height: 100vh;
@@ -134,8 +134,8 @@ body {
 }
 
 .topbar {
-    background: var(--white);
-    border-bottom: 1px solid #e2e8f0;
+    background: var(--dark-card);
+    border-bottom: 1px solid var(--dark-border);
     padding: 0.875rem 2rem;
     display: flex;
     align-items: center;
@@ -154,7 +154,7 @@ body {
 }
 
     .breadcrumbs a {
-        color: var(--blue);
+        color: var(--blue-light);
         text-decoration: none;
         font-weight: 500;
     }
@@ -164,11 +164,11 @@ body {
         }
 
     .breadcrumbs .sep {
-        color: #cbd5e1;
+        color: var(--dark-border);
     }
 
     .breadcrumbs .current {
-        color: var(--text-dark);
+        color: var(--text-main);
         font-weight: 600;
     }
 
@@ -207,8 +207,8 @@ body {
 }
 
 .stat-card {
-    background: var(--white);
-    border: 1px solid #e2e8f0;
+    background: var(--dark-card);
+    border: 1px solid var(--dark-border);
     border-radius: 12px;
     padding: 1.25rem;
     position: relative;
@@ -234,7 +234,7 @@ body {
     }
 
     .stat-card.accent-blue::before {
-        background: #3b82f6;
+        background: var(--blue-light);
     }
 
     .stat-card.accent-green::before {
@@ -252,7 +252,7 @@ body {
 .stat-value {
     font-size: 28px;
     font-weight: 800;
-    color: var(--text-dark);
+    color: var(--text-main);
     line-height: 1.2;
     margin-top: 4px;
 }
@@ -265,8 +265,8 @@ body {
 
 /* ---- CARDS ---- */
 .card {
-    background: var(--white);
-    border: 1px solid #e2e8f0;
+    background: var(--dark-card);
+    border: 1px solid var(--dark-border);
     border-radius: 12px;
     overflow: hidden;
     margin-bottom: 1.5rem;
@@ -274,7 +274,7 @@ body {
 
 .card-header {
     padding: 1rem 1.25rem;
-    border-bottom: 1px solid #e2e8f0;
+    border-bottom: 1px solid var(--dark-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -283,6 +283,7 @@ body {
     .card-header h3 {
         font-size: 15px;
         font-weight: 700;
+        color: var(--text-main);
     }
 
 .card-body {
@@ -297,7 +298,7 @@ body {
 }
 
     .fc-table th {
-        background: #f8fafc;
+        background: #0f172a;
         color: var(--text-muted);
         font-size: 11px;
         font-weight: 700;
@@ -305,13 +306,14 @@ body {
         letter-spacing: 0.05em;
         padding: 0.75rem 1rem;
         text-align: left;
-        border-bottom: 1px solid #e2e8f0;
+        border-bottom: 1px solid var(--dark-border);
     }
 
     .fc-table td {
         padding: 0.875rem 1rem;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid var(--dark-border);
         vertical-align: middle;
+        color: var(--text-main);
     }
 
     .fc-table tr:last-child td {
@@ -319,11 +321,11 @@ body {
     }
 
     .fc-table tr:hover td {
-        background: #f8fafc;
+        background: #1e293b;
     }
 
     .fc-table a {
-        color: var(--blue);
+        color: var(--blue-light);
         text-decoration: none;
         font-weight: 600;
     }
@@ -577,27 +579,28 @@ body {
     align-items: center;
     gap: 6px;
     font-size: 13px;
-    color: var(--text-muted);
+    color: var(--text-main);
     text-decoration: none;
     padding: 6px 12px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--dark-border);
     border-radius: 8px;
-    background: var(--white);
+    background: var(--dark-card);
     font-weight: 500;
     transition: all 0.15s;
+    cursor: pointer;
 }
 
     .btn-back:hover {
-        border-color: var(--blue);
-        color: var(--blue);
+        border-color: var(--blue-light);
+        color: var(--blue-light);
     }
 
 .view-link {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 12px;
-    color: var(--blue);
+    font-size: 13px;
+    color: var(--blue-light);
     text-decoration: none;
     font-weight: 700;
 }
