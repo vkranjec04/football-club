@@ -13,6 +13,7 @@ public class CoachController : Controller
         _coachRepo = coachRepo;
     }
 
+    [Route("staff-members")]
     public IActionResult Index()
     {
         ViewData["ActivePage"] = "Coach";

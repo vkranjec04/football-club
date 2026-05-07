@@ -43,6 +43,7 @@ public class PlayerController : Controller
         return View(players);
     }
 
+    [Route("player-profile/{id:int}")]
     public IActionResult Details(int id)
     {
         ViewData["ActivePage"] = "Player";
