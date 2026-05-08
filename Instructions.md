@@ -7,30 +7,70 @@
 
 ## Steps to Run
 
-1. **Navigate to the core project directory**  
-   Open your terminal and ensure you are in the folder containing `FootballClub.csproj`:
-   ```bash
-   cd FootballClub
-   ```
+### Step 1: Start SQL Server
+Choose one of the following options:
 
-2. **Restore dependencies**  
-   Download all required NuGet packages:
-   ```bash
-   dotnet restore
-   ```
+**Option A: Using Docker (Recommended)**  
+If you have Docker installed, start a SQL Server instance:
+```bash
+docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong@Passw0rd" -p 1433:1433 --name ClubDB -d mcr.microsoft.com/mssql/server:2022-latest
+```
+*(Wait 10-15 seconds for SQL Server to fully initialize after the container starts)*
 
-3. **Update the Database**  
-   Apply the existing Entity Framework migrations to generate your SQL schema:
-   ```bash
-   dotnet ef database update
-   ```
-   *Note: Ensure your database server is running and the connection string in `appsettings.json` or `appsettings.Development.json` is correct.*
+**Option B: Using Local SQL Server Express**  
+If you have SQL Server Express installed locally:
+- Open SQL Server Management Studio (SSMS)
+- Connect to your local SQL Server instance
+- Ensure TCP/IP is enabled in SQL Server Configuration Manager
 
-4. **Build and Run the project**  
-   Start the application:
-   ```bash
-   dotnet run
-   ```
+**Option C: Using LocalDB**  
+Modify `appsettings.json` to use LocalDB:
+```json
+"DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=ClubDB;Integrated Security=true;"
+```
 
-5. **Open in Browser**  
-   Check the terminal output for the local URL (typically `http://localhost:5000` or `https://localhost:5001` upwards) and open it in your web browser.
+### Step 2: Navigate to the project directory
+Open your terminal and ensure you are in the folder containing `FootballClub.csproj`:
+```bash
+cd FootballClub
+```
+
+### Step 3: Restore dependencies
+Download all required NuGet packages:
+```bash
+dotnet restore
+```
+
+### Step 4: Update the Database
+Apply the existing Entity Framework migrations to generate your SQL schema:
+```bash
+dotnet ef database update
+```
+
+### Step 5: Build and Run the project
+Start the application:
+```bash
+dotnet run
+```
+
+### Step 6: Open in Browser
+Check the terminal output for the local URL (typically `http://localhost:5000` or `https://localhost:5001`) and open it in your web browser.
+
+---
+
+## Troubleshooting
+
+**Error: "An existing connection was forcibly closed by the remote host"**
+- Ensure SQL Server is running (check Docker container or SQL Server service)
+- Wait 15+ seconds after starting the Docker container before running the app
+- Try running `dotnet run` again to trigger automatic retry logic
+
+**Error: "A network-related or instance-specific error occurred"**
+- Verify your SQL Server instance is accessible at `localhost:1433`
+- Check the connection string in `appsettings.json` matches your SQL Server setup
+- If using LocalDB, update the connection string as shown above
+
+**Database already exists but is empty**
+- Delete the database: `dotnet ef database drop --force`
+- Recreate it: `dotnet ef database update`
+- The app will automatically seed sample data on startup
