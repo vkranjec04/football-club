@@ -122,6 +122,14 @@
                 <span>👕 Number @Model.JerseyNumber</span>
             </div>
         </div>
+        <div style="margin-left:auto; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <a href="/Player/Edit/@Model.Id" class="btn-back" style="text-decoration:none;">Edit Player</a>
+            <form method="post" action="/Player/Delete/@Model.Id" style="display:inline;" onsubmit="return confirm('Soft delete this player?');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-back" style="text-decoration:none; border-color:#7f1d1d; color:#fecaca;">Delete Player</button>
+            </form>
+            <a href="/Player" class="btn-back" style="text-decoration:none;">Back to Players</a>
+        </div>
     </div>
 
     <div class="sofa-grid">

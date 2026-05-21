@@ -590,6 +590,67 @@ body {
     cursor: pointer;
 }
 
+/* ---- FORMS ---- */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+    align-items: start;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-field > .form-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: none;
+}
+
+.form-control {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--dark-border);
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    color: var(--text-main);
+    outline: none;
+    transition: box-shadow 0.12s, border-color 0.12s, transform 0.06s;
+    font-size: 14px;
+}
+
+.form-control:focus {
+    border-color: var(--blue-light);
+    box-shadow: 0 6px 20px rgba(30,124,202,0.08);
+    transform: translateY(-1px);
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-main);
+}
+
+.form-actions {
+    margin-top: 12px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* smaller inputs */
+.form-control[type="number"] {
+    max-width: 160px;
+}
+
+@media (max-width: 700px) {
+    .form-grid { grid-template-columns: 1fr; }
+}
+
     .btn-back:hover {
         border-color: var(--blue-light);
         color: var(--blue-light);
@@ -630,4 +691,59 @@ body {
     .score-result {
         font-size: 32px;
     }
+}
+
+/* ---- ANIMATIONS ---- */
+@keyframes fadeInDeleted {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 0.5;
+    }
+}
+
+@keyframes ripple {
+    0% {
+        width: 20px;
+        height: 20px;
+        opacity: 1;
+    }
+    100% {
+        width: 300px;
+        height: 300px;
+        opacity: 0;
+    }
+}
+
+@keyframes slideDownError {
+    from {
+        max-height: 0;
+        opacity: 0;
+    }
+    to {
+        max-height: 100px;
+        opacity: 1;
+    }
+}
+
+/* Smooth transitions for form fields */
+.form-field {
+    animation: slideInUp 0.4s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Enhanced focus and hover states */
+.form-control:hover {
+    border-color: rgba(59, 130, 246, 0.5);
 }

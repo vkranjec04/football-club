@@ -1,4 +1,5 @@
 ﻿@using FootballClub.Models.Enums
+@using System.Linq
 @model Club
 
 @{
@@ -10,6 +11,12 @@
         ("League", "/League"),
         (Model.Name, null)
     };
+}
+
+@{
+    var headStaff = Model.StaffMembers != null && Model.StaffMembers.Any()
+        ? Model.StaffMembers.FirstOrDefault(s => s.Role != null && s.Role.ToLower().Contains("head")) ?? Model.StaffMembers.First()
+        : null;
 }
 
 <div class="page-header">
@@ -31,8 +38,8 @@
         <div class="stat-label">Matches</div>
     </div>
     <div class="stat-card">
-        <div class="stat-value">@(Model.Coach?.FirstName ?? "N/A")</div>
-        <div class="stat-label">Coach</div>
+        <div class="stat-value">@(Model.StaffMembers != null && Model.StaffMembers.Any() ? Model.StaffMembers.First().FirstName : "N/A")</div>
+        <div class="stat-label">Staff Lead</div>
     </div>
 </div>
 
@@ -78,36 +85,36 @@
 
     <div class="card">
         <div class="card-header">
-            <h3>Current Coach</h3>
+            <h3>Current Staff Lead</h3>
         </div>
         <div class="card-body">
-            @if (Model.Coach != null)
-            {
-                <div class="profile-card">
-                    <div class="profile-header">
-                        <h4>@Model.Coach.FirstName @Model.Coach.LastName</h4>
-                        <span class="badge badge-green">Active</span>
+                @if (headStaff != null)
+                {
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <h4>@headStaff.FirstName @headStaff.LastName</h4>
+                            <span class="badge badge-green">Active</span>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Nationality</div>
+                            <div class="info-value">@headStaff.Nationality</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Date of Birth</div>
+                            <div class="info-value">@headStaff.DateOfBirth.ToString("dd/MM/yyyy")</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">Contract Until</div>
+                            <div class="info-value">@headStaff.ContractUntil.ToString("dd/MM/yyyy")</div>
+                        </div>
+                        <div class="info-row">
+                            <a href="/staff-members/@headStaff.Id" class="view-link">View Staff Profile â†’</a>
+                        </div>
                     </div>
-                    <div class="info-row">
-                        <div class="info-label">Nationality</div>
-                        <div class="info-value">@Model.Coach.Nationality</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Date of Birth</div>
-                        <div class="info-value">@Model.Coach.DateOfBirth.ToString("dd/MM/yyyy")</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">Contract Until</div>
-                        <div class="info-value">@Model.Coach.ContractUntil.ToString("dd/MM/yyyy")</div>
-                    </div>
-                    <div class="info-row">
-                        <a href="/Coach/Details/@Model.Coach.Id" class="view-link">View Coach Profile â†’</a>
-                    </div>
-                </div>
-            }
+                }
             else
             {
-                <p class="text-muted">No coach assigned</p>
+                <p class="text-muted">No staff assigned</p>
             }
         </div>
     </div>

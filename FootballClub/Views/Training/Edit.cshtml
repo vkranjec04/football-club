@@ -1,0 +1,98 @@
+@using FootballClub.Web.ViewModels
+@using FootballClub.Models.Enums
+@model TrainingSessionEditModel
+
+@{
+    ViewData["Title"] = "Edit Training Session";
+    var staffMembers = ViewBag.Staff as IEnumerable<FootballClub.Models.Staff> ?? System.Linq.Enumerable.Empty<FootballClub.Models.Staff>();
+}
+
+<div class="card">
+    <div class="card-header"><h3>Edit Training Session</h3></div>
+    <div class="card-body">
+        <form method="post" action="/Training/Edit/@Model.Id">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="Id" value="@Model.Id" />
+
+            <div class="form-grid">
+                <label class="form-field"><span class="form-label">Session title</span>
+                    <input type="text" name="Title" value="@Model.Title" class="form-control" required maxlength="200" />
+                </label>
+                <label class="form-field"><span class="form-label">Focus area</span>
+                    <input type="text" name="FocusArea" value="@Model.FocusArea" class="form-control" maxlength="500" />
+                </label>
+
+                <div>
+                    @await Html.PartialAsync("_DateTimePicker", null, new ViewDataDictionary(ViewData)
+                    {
+                        ["FieldName"] = "StartTime",
+                        ["Label"] = "Start time",
+                        ["Value"] = Model.StartTime
+                    })
+                </div>
+
+                <div>
+                    @await Html.PartialAsync("_DateTimePicker", null, new ViewDataDictionary(ViewData)
+                    {
+                        ["FieldName"] = "EndTime",
+                        ["Label"] = "End time",
+                        ["Value"] = Model.EndTime
+                    })
+                </div>
+
+                <label class="form-field"><span class="form-label">Location</span>
+                    <input type="text" name="Location" value="@Model.Location" class="form-control" maxlength="200" />
+                </label>
+
+                <label class="form-field"><span class="form-label">Intensity</span>
+                    <select name="Intensity" class="form-control" required>
+                        @foreach (TrainingIntensity intensity in Enum.GetValues(typeof(TrainingIntensity)))
+                        {
+                            if (Model.Intensity == intensity)
+                            {
+                                <option value="@intensity" selected="selected">@intensity</option>
+                            }
+                            else
+                            {
+                                <option value="@intensity">@intensity</option>
+                            }
+                        }
+                    </select>
+                </label>
+
+                <label class="form-field"><span class="form-label">Lead Coach (optional)</span>
+                    <select name="LeadStaffId" class="form-control">
+                        <option value="">-- No Coach --</option>
+                        @foreach (var coach in staffMembers)
+                        {
+                            if (Model.LeadStaffId == coach.Id)
+                            {
+                                <option value="@coach.Id" selected="selected">@coach.FirstName @coach.LastName</option>
+                            }
+                            else
+                            {
+                                <option value="@coach.Id">@coach.FirstName @coach.LastName</option>
+                            }
+                        }
+                    </select>
+                </label>
+
+                <label class="form-field"><span class="form-label">Notes</span>
+                    <textarea name="Notes" class="form-control" rows="3" maxlength="1000">@Model.Notes</textarea>
+                </label>
+
+                <input type="hidden" name="ClubId" value="@Model.ClubId" />
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Save</button>
+                <a class="btn btn-outline-light" href="/Training">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

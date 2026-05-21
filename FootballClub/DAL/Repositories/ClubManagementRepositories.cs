@@ -7,16 +7,16 @@ public class TrainingMockRepository
 {
     private readonly ClubMockRepository _clubs;
     private readonly PlayerMockRepository _players;
-    private readonly CoachMockRepository _coaches;
+    private readonly StaffMockRepository _staff;
 
     public TrainingMockRepository(
         ClubMockRepository clubs,
         PlayerMockRepository players,
-        CoachMockRepository coaches)
+        StaffMockRepository staff)
     {
         _clubs = clubs;
         _players = players;
-        _coaches = coaches;
+        _staff = staff;
     }
 
     public List<TrainingSession> GetByClub(int clubId)
@@ -27,7 +27,7 @@ public class TrainingMockRepository
             return new List<TrainingSession>();
         }
 
-        var leadCoach = _coaches.GetCurrentCoachByClub(clubId);
+        var leadStaff = _staff.GetCurrentStaffByClub(clubId);
         var squad = _players.GetByClub(clubId).OrderBy(p => p.JerseyNumber).ToList();
         var coreSquad = squad.Take(Math.Min(14, squad.Count)).ToList();
 
@@ -44,7 +44,7 @@ public class TrainingMockRepository
                 EndTime = today.AddDays(1).AddHours(10).AddMinutes(30),
                 Location = "Indoor Training Hall",
                 Intensity = TrainingIntensity.Light,
-                LeadCoach = leadCoach,
+                LeadStaff = leadStaff,
                 Participants = coreSquad,
                 Notes = "Dynamic stretching, prehab circuits and low-load technical drills."
             },
@@ -99,9 +99,9 @@ public class PlayerScheduleMockRepository
                 ResponsibilityType = ScheduleResponsibilityType.RegularTraining,
                 Title = session.Title,
                 Location = session.Location,
-                AssignedBy = session.LeadCoach is null
+                AssignedBy = session.LeadStaff is null
                     ? "Coaching Staff"
-                    : $"{session.LeadCoach.FirstName} {session.LeadCoach.LastName}",
+                    : $"{session.LeadStaff.FirstName} {session.LeadStaff.LastName}",
                 Notes = session.FocusArea
             });
         }

@@ -5,7 +5,8 @@ namespace FootballClub.Models;
 public class PlayerScheduleItem
 {
     public int Id { get; set; }
-    public Player Player { get; set; } = new();
+    public int PlayerId { get; set; }
+    public virtual Player Player { get; set; } = new();
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
     public ScheduleResponsibilityType ResponsibilityType { get; set; }

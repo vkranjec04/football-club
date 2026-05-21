@@ -16,6 +16,12 @@
     <p>Organize practice sessions, intensity, and squad workload.</p>
 </div>
 
+<div class="card" style="margin-bottom: 16px;">
+    <div class="card-body" style="display: flex; justify-content: flex-end; align-items: center;">
+        <a href="/Training/Create" class="btn btn-primary">+ Create Session</a>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-body">
         <form id="posTrainingFilter" method="get" action="/Training" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
@@ -119,7 +125,7 @@
                             <td>@trainingCount</td>
                             <td>@recoveryCount</td>
                             <td>@mediaCount</td>
-                            <td><a href="/player-profile/@player.Id" class="view-link">Player Plan â†’</a></td>
+                            <td><a href="/player-profile/@player.Id" class="view-link">Player Plan →</a></td>
                         </tr>
                     }
                 </tbody>
@@ -128,4 +134,36 @@
     </div>
 </div>
 
+<script>
+    (function(){
+        var input = document.getElementById('trainingQuickSearch');
+        var clearBtn = document.getElementById('clearTrainingSearch');
+        var timeout = null;
+        var tbody = document.getElementById('trainingTableBody');
+
+        if (!input || !clearBtn || !tbody) {
+            return;
+        }
+
+        function fetchAndRender(q) {
+            fetch('/Training/Filter?term=' + encodeURIComponent(q), { headers: { 'Accept': 'text/html' } })
+                .then(function(r){ return r.text(); })
+                .then(function(html){ 
+                    tbody.innerHTML = html; 
+                    // Reinitialize row hover animations after AJAX update
+                    if (window.reinitializeAnimations) {
+                        window.reinitializeAnimations();
+                    }
+                })
+                .catch(function(){});
+        }
+
+        input.addEventListener('input', function(){
+            clearTimeout(timeout);
+            timeout = setTimeout(function(){ fetchAndRender(input.value.trim()); }, 250);
+        });
+
+        clearBtn.addEventListener('click', function(){ input.value = ''; fetchAndRender(''); input.focus(); });
+    })();
+</script>
 

@@ -5,11 +5,32 @@
     ViewData["ActivePage"] = "Training";
 }
 
-<a href="/Training" class="btn-back">â† Back to Training</a>
+<a href="/Training" class="btn-back">&larr; Back to Training</a>
 
 <div class="page-header">
     <h2>@Model.Title</h2>
-    <p>@Model.StartTime.ToString("dddd, dd.MM.yyyy HH:mm") â€¢ @Model.Location</p>
+    <p>@Model.StartTime.ToString("dddd, dd.MM.yyyy HH:mm") &bull; @Model.Location</p>
+</div>
+
+<div class="card" style="margin-bottom: 16px;">
+    <div class="card-body" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        @if (Model.IsDeleted)
+        {
+            <span class="badge" style="background-color: #dc2626;">Deleted</span>
+            <form method="post" action="/Training/Restore/@Model.Id" style="display: inline; margin: 0;">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="view-link" style="background: none; border: none; cursor: pointer; padding: 0;">Restore →</button>
+            </form>
+        }
+        else
+        {
+            <a href="/Training/Edit/@Model.Id" class="view-link">Edit →</a>
+            <form method="post" action="/Training/Delete/@Model.Id" style="display: inline; margin: 0;" onsubmit="return confirm('Soft delete this training session?');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="view-link" style="background: none; border: none; cursor: pointer; padding: 0; color: #fca5a5;">Delete →</button>
+            </form>
+        }
+    </div>
 </div>
 
 <div class="detail-grid" style="grid-template-columns: 1fr;">
@@ -40,11 +61,11 @@
                 <span class="val">@((Model.EndTime - Model.StartTime).TotalMinutes) minutes</span>
             </div>
             <div class="info-row">
-                <span class="lbl">Lead Coach</span>
+                <span class="lbl">Lead Staff</span>
                 <span class="val">
-                    @if (Model.LeadCoach != null)
+                    @if (Model.LeadStaff != null)
                     {
-                        <a href="/Coach/Details/@Model.LeadCoach.Id" class="view-link">@Model.LeadCoach.FirstName @Model.LeadCoach.LastName</a>
+                        <a href="/staff-members/@Model.LeadStaff.Id" class="view-link">@Model.LeadStaff.FirstName @Model.LeadStaff.LastName</a>
                     }
                     else
                     {

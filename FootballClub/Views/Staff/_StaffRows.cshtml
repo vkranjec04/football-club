@@ -1,0 +1,43 @@
+@using FootballClub.Models
+@model IEnumerable<Staff>
+
+@{
+    var isAdmin = ViewBag.IsAdmin ?? false;
+}
+
+@foreach (var staff in Model.OrderBy(s => s.IsDeleted ? 1 : 0).ThenByDescending(s => s.ContractUntil))
+{
+    if (!staff.IsDeleted || isAdmin)
+    {
+        var statusClass = staff.IsDeleted ? "style='opacity: 0.5;'" : "";
+        <tr @Html.Raw(statusClass)>
+            <td><span class="badge badge-gray">@staff.Role</span></td>
+            <td><strong>@staff.FirstName @staff.LastName</strong></td>
+            <td>@staff.Nationality</td>
+            <td>@staff.ContractUntil.ToString("dd.MM.yyyy")</td>
+            <td>
+                @if (staff.IsDeleted)
+                {
+                    <span class="badge" style="background-color: #dc2626;">Deleted</span>
+                }
+                else
+                {
+                    <span class="badge badge-blue">@(staff.ContractUntil > DateTime.Now ? "Active" : "Past")</span>
+                }
+            </td>
+            <td style="display: flex; gap: 8px;">
+                @if (staff.IsDeleted && isAdmin)
+                {
+                    <form method="post" action="/Staff/Restore/@staff.Id" style="display: inline; margin: 0;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="view-link" style="background: none; border: none; cursor: pointer; padding: 0;">Restore →</button>
+                    </form>
+                }
+                else
+                {
+                    <a href="/staff-members/@staff.Id" class="view-link">Details →</a>
+                }
+            </td>
+        </tr>
+    }
+}

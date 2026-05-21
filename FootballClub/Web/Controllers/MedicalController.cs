@@ -1,19 +1,20 @@
+using FootballClub.Data;
 using FootballClub.Models;
-using FootballClub.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FootballClub.Web.Controllers;
 
 public class MedicalController : Controller
 {
-    private readonly PlayerMockRepository _playerRepo;
+    private readonly ApplicationDbContext _context;
 
-    public MedicalController(PlayerMockRepository playerRepo)
+    public MedicalController(ApplicationDbContext context)
     {
-        _playerRepo = playerRepo;
+        _context = context;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
         ViewData["ActivePage"] = "Medical";
         ViewData["Breadcrumbs"] = new List<(string, string?)>
@@ -22,7 +23,11 @@ public class MedicalController : Controller
             ("Medical Center", null)
         };
 
-        var injuredPlayers = _playerRepo.GetAll().Where(p => p.IsInjured && p.Club?.Id == 1).ToList();
+        // Get Dinamo Zagreb (ID = 1) injured players
+        var injuredPlayers = await _context.Players
+            .Where(p => p.IsInjured && p.ClubId == 1)
+            .ToListAsync();
+        
         return View(injuredPlayers);
     }
 }

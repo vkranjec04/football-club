@@ -1,12 +1,19 @@
 using FootballClub.Data;
 using FootballClub.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Localization;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add DbContext
+// Add DbContext with retry logic for transient failures
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 3,
+            maxRetryDelay: TimeSpan.FromSeconds(5),
+            errorNumbersToAdd: null)));
 
 // Configure for Razor Pages + MVC Controllers (if you use both)
 builder.Services.AddRazorPages();
@@ -16,9 +23,22 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<ClubMockRepository>();
 builder.Services.AddScoped<PlayerMockRepository>();
 builder.Services.AddScoped<MatchMockRepository>();
-builder.Services.AddScoped<CoachMockRepository>();
+builder.Services.AddScoped<StaffMockRepository>();
 builder.Services.AddScoped<TrainingMockRepository>();
 builder.Services.AddScoped<PlayerScheduleMockRepository>();
+
+var supportedCultures = new[]
+{
+    new CultureInfo("hr"),
+    new CultureInfo("en-US")
+};
+
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.DefaultRequestCulture = new RequestCulture("hr");
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+});
 
 var app = builder.Build();
 
@@ -26,11 +46,14 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    context.Database.EnsureCreated();
+    context.Database.Migrate();
     DataSeeder.SeedDatabase(context);
 }
 
 app.UseStaticFiles();
+
+app.UseRequestLocalization(app.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<RequestLocalizationOptions>>().Value);
+
 app.UseRouting();
 
 // Map Razor Pages first (they have priority)

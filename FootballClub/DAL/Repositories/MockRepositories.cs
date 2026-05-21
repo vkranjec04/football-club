@@ -73,11 +73,12 @@ public class PlayerMockRepository
         _context = context;
     }
 
-    public List<Player> GetAll() => _context.Players.ToList();
-    public Player? GetById(int id) => _context.Players.FirstOrDefault(p => p.Id == id);
-    public List<Player> GetByClub(int clubId) => _context.Players.Where(p => p.Club != null && p.Club.Id == clubId).ToList();
+    public List<Player> GetAll() => _context.Players.Where(p => !p.IsDeleted).ToList();
+    public List<Player> GetAllIncludingDeleted() => _context.Players.ToList();
+    public Player? GetById(int id) => _context.Players.FirstOrDefault(p => p.Id == id && !p.IsDeleted);
+    public List<Player> GetByClub(int clubId) => _context.Players.Where(p => p.ClubId == clubId && !p.IsDeleted).ToList();
     public List<Player> GetByClubOrdered(int clubId) => _context.Players
-        .Where(p => p.Club != null && p.Club.Id == clubId)
+        .Where(p => p.ClubId == clubId && !p.IsDeleted)
         .OrderBy(p => p.Position)
         .ThenBy(p => p.LastName)
         .ToList();
@@ -127,26 +128,31 @@ public class MatchMockRepository
         .ToList();
 }
 
-public class CoachMockRepository
+public class StaffMockRepository
 {
     private readonly ApplicationDbContext _context;
 
-    public CoachMockRepository(ApplicationDbContext context)
+    public StaffMockRepository(ApplicationDbContext context)
     {
         _context = context;
     }
 
-    public List<Coach> GetAll() => _context.Coaches.ToList();
-    public Coach? GetById(int id) => _context.Coaches.FirstOrDefault(c => c.Id == id);
+    public List<Staff> GetAll() => _context.StaffMembers.ToList();
+    public Staff? GetById(int id) => _context.StaffMembers.FirstOrDefault(c => c.Id == id);
     
-    public Coach? GetCurrentCoachByClub(int clubId)
+    public Staff? GetCurrentStaffByClub(int clubId)
     {
-        var club = _context.Clubs.Include(c => c.Coach).FirstOrDefault(c => c.Id == clubId);
-        return club?.Coach;
+        var club = _context.Clubs.Include(c => c.StaffMembers).FirstOrDefault(c => c.Id == clubId);
+        if (club == null || club.StaffMembers == null || !club.StaffMembers.Any()) return null;
+        var head = club.StaffMembers.FirstOrDefault(c => c.Role != null && c.Role.ToLower().Contains("head"));
+        return head ?? club.StaffMembers.OrderByDescending(c => c.ContractUntil).FirstOrDefault();
     }
     
-    public List<Coach> GetCoachesForClub(string clubName)
+    public List<Staff> GetStaffForClub(string clubName)
     {
-        return _context.Coaches.Where(c => c.Club != null && c.Club.Name.Contains(clubName)).OrderByDescending(c => c.ContractUntil).ToList();
+        // Resolve club first, then query by ClubId to avoid pitfalls with navigation properties
+        var club = _context.Clubs.FirstOrDefault(c => c.Name.Contains(clubName));
+        if (club == null) return new List<Staff>();
+        return _context.StaffMembers.Where(c => c.ClubId == club.Id).OrderByDescending(c => c.ContractUntil).ToList();
     }
 }

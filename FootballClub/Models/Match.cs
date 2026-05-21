@@ -16,21 +16,23 @@ namespace FootballClub.Models
         // Foreign keys to Club
         public int HomeClubId { get; set; }
         [ForeignKey(nameof(HomeClubId))]
-        public Club HomeClub { get; set; }
+        public Club HomeClub { get; set; } = null!;
 
         public int AwayClubId { get; set; }
         [ForeignKey(nameof(AwayClubId))]
-        public Club AwayClub { get; set; }
+        public Club AwayClub { get; set; } = null!;
 
         // Scores
         public int HomeScore { get; set; }
         public int AwayScore { get; set; }
 
-        public Stadium Stadium { get; set; }
+        public int StadiumId { get; set; }
+        [ForeignKey(nameof(StadiumId))]
+        public Stadium Stadium { get; set; } = null!;
         public MatchStatus Status { get; set; }
         public int Attendance { get; set; }
-        public string Referee { get; set; }
-        public string Round { get; set; }           // npr. "Kolo 5"
+        public string Referee { get; set; } = string.Empty;
+        public string Round { get; set; } = string.Empty;           // npr. "Kolo 5"
 
         // N-N veza između Player i Match ostvarena kroz PlayerStat
         public List<PlayerStat> PlayerStats { get; set; }

@@ -1,4 +1,5 @@
 @model List<Club>
+@using System.Linq
 
 @{
     ViewData["Title"] = "Clubs";
@@ -28,7 +29,7 @@
                     <th>Founded</th>
                     <th>Budget (€M)</th>
                     <th>Players</th>
-                    <th>Coach</th>
+                    <th>Staff</th>
                     <th></th>
                 </tr>
             </thead>
@@ -41,8 +42,8 @@
                         <td>@club.FoundedYear</td>
                         <td>€@club.Budget.ToString("F1")</td>
                         <td><span class="badge badge-blue">@club.Players.Count</span></td>
-                        <td>@club.Coach?.FirstName @club.Coach?.LastName</td>
-                        <td><a href="/Club/Details/@club.Id" class="view-link">Details →</a></td>
+                        <td>@(club.StaffMembers != null && club.StaffMembers.Any() ? string.Join(", ", club.StaffMembers.Select(s => s.FullName)) : "-")</td>
+                        <td><a href="/Club/Details/@club.Id" class="view-link">Details &rarr;</a></td>
                     </tr>
                 }
             </tbody>

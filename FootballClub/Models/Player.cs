@@ -12,16 +12,16 @@ namespace FootballClub.Models
 
         [Required]
         [MaxLength(100)]
-        public string FirstName { get; set; }
+        public string FirstName { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(100)]
-        public string LastName { get; set; }
+        public string LastName { get; set; } = string.Empty;
 
         public DateTime DateOfBirth { get; set; }
 
         [MaxLength(100)]
-        public string Nationality { get; set; }
+        public string Nationality { get; set; } = string.Empty;
 
         public PlayerPosition Position { get; set; }
         
@@ -34,8 +34,14 @@ namespace FootballClub.Models
         
         public bool IsInjured { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         // N strana od Club 1-N Players
-        public virtual Club Club { get; set; }
+        public int ClubId { get; set; }
+        public virtual Club Club { get; set; } = null!;
+
+        public int? TrainingSessionId { get; set; }
+        public virtual TrainingSession? TrainingSession { get; set; }
 
         // 1-N: jedan igrač ima više statistika (po utakmici)
         public virtual ICollection<PlayerStat> Stats { get; set; }

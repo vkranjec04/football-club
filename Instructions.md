@@ -15,6 +15,10 @@ If you have Docker installed, start a SQL Server instance:
 ```bash
 docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong@Passw0rd" -p 1433:1433 --name ClubDB -d mcr.microsoft.com/mssql/server:2022-latest
 ```
+If the container already exists, start it instead:
+```bash
+docker start ClubDB
+```
 *(Wait 10-15 seconds for SQL Server to fully initialize after the container starts)*
 
 **Option B: Using Local SQL Server Express**  
@@ -74,3 +78,13 @@ Check the terminal output for the local URL (typically `http://localhost:5000` o
 - Delete the database: `dotnet ef database drop --force`
 - Recreate it: `dotnet ef database update`
 - The app will automatically seed sample data on startup
+
+**Error: "The process cannot access the file because it is being used by another process"**
+- Stop any running FootballClub instance before rebuilding
+- Press Ctrl+C in the terminal running `dotnet run`, or use `Stop-Process -Name FootballClub -Force`
+- Rebuild only after the executable is no longer running
+
+**Error: Docker says the container name `ClubDB` is already in use**
+- The container already exists
+- Start it with `docker start ClubDB` instead of `docker run`
+- If you want a fresh container, remove the old one first with `docker rm -f ClubDB`

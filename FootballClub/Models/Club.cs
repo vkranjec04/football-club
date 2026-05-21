@@ -11,11 +11,11 @@ namespace FootballClub.Models
 
         [Required]
         [MaxLength(100)]
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
 
         [Required]
         [MaxLength(100)]
-        public string City { get; set; }
+        public string City { get; set; } = string.Empty;
 
         public int FoundedYear { get; set; }
 
@@ -24,11 +24,13 @@ namespace FootballClub.Models
 
         [Required]
         [MaxLength(50)]
-        public string LeagueName { get; set; }
+        public string LeagueName { get; set; } = string.Empty;
 
-        public virtual Stadium HomeStadium { get; set; }
+        public int HomeStadiumId { get; set; }
+        public virtual Stadium HomeStadium { get; set; } = null!;
         
-        public virtual Coach? Coach { get; set; }
+        // Allow multiple staff members (coaches, physios, assistants)
+        public virtual ICollection<Staff> StaffMembers { get; set; }
 
         // 1-N: jedan klub ima više igrača
         public virtual ICollection<Player> Players { get; set; }
@@ -43,6 +45,7 @@ namespace FootballClub.Models
             Players = new HashSet<Player>();
             HomeMatches = new HashSet<Match>();
             AwayMatches = new HashSet<Match>();
+            StaffMembers = new HashSet<Staff>();
         }
     }
 }

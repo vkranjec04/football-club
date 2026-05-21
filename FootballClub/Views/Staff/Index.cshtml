@@ -1,0 +1,79 @@
+@using FootballClub.Models
+@model List<Staff>
+
+@{
+    ViewData["Title"] = "Dinamo Zagreb - Staff";
+    ViewData["ActivePage"] = "Staff";
+    ViewData["Breadcrumbs"] = new List<(string, string?)>
+    {
+        ("Dashboard", "/"),
+        ("Staff", null)
+    };
+}
+
+<div class="page-header">
+    <h2>Dinamo Zagreb - Staff</h2>
+    <p>Current staff and management</p>
+</div>
+
+<div class="card">
+    <div class="card-body" style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+        <input type="text" id="staffQuickSearch" class="form-control" placeholder="Find a staff member..." style="flex: 1; min-width: 200px;" />
+        <button id="clearStaffSearch" class="btn btn-outline-light" type="button">Clear</button>
+        <a href="/Staff/Create" class="btn btn-primary">+ Add staff member</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>All Staff</h3>
+        <span class="badge badge-blue">@Model.Count(s => !s.IsDeleted) active</span>
+    </div>
+    <div class="card-body">
+        <table class="fc-table">
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th>Name</th>
+                    <th>Nationality</th>
+                    <th>Contract Until</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="staffTableBody">
+                @await Html.PartialAsync("_StaffRows", Model)
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    (function(){
+        var input = document.getElementById('staffQuickSearch');
+        var clearBtn = document.getElementById('clearStaffSearch');
+        var timeout = null;
+        var tbody = document.getElementById('staffTableBody');
+
+        function fetchAndRender(q) {
+            fetch('/Staff/Filter?term=' + encodeURIComponent(q), { headers: { 'Accept': 'text/html' } })
+                .then(function(r){ return r.text(); })
+                .then(function(html){ 
+                    tbody.innerHTML = html; 
+                    // Reinitialize row hover animations after AJAX update
+                    if (window.reinitializeAnimations) {
+                        window.reinitializeAnimations();
+                    }
+                })
+                .catch(function(){});
+        }
+
+        input.addEventListener('input', function(){
+            clearTimeout(timeout);
+            timeout = setTimeout(function(){ fetchAndRender(input.value.trim()); }, 250);
+        });
+
+        clearBtn.addEventListener('click', function(){ input.value = ''; fetchAndRender(''); input.focus(); });
+    })();
+</script>
+

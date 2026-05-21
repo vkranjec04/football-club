@@ -1,0 +1,104 @@
+@using FootballClub.Web.ViewModels
+@using FootballClub.Models.Enums
+@model PlayerCreateModel
+
+@{
+    ViewData["Title"] = "Create Player";
+}
+
+<div class="card">
+    <div class="card-header"><h3>Create Player</h3></div>
+    <div class="card-body">
+        <form method="post" action="/Player/Create">
+            @Html.AntiForgeryToken()
+
+            <div class="form-grid">
+                <label class="form-field"><span class="form-label">First name</span>
+                    <input type="text" name="FirstName" value="@Model.FirstName" class="form-control" required maxlength="100" />
+                </label>
+                <label class="form-field"><span class="form-label">Last name</span>
+                    <input type="text" name="LastName" value="@Model.LastName" class="form-control" required maxlength="100" />
+                </label>
+
+                <div>
+                    @await Html.PartialAsync("_DateTimePicker", null, new ViewDataDictionary(ViewData)
+                    {
+                        ["FieldName"] = "DateOfBirth",
+                        ["Label"] = "Date of birth",
+                        ["Value"] = Model.DateOfBirth
+                    })
+                </div>
+
+                <label class="form-field"><span class="form-label">Nationality</span>
+                    <input type="text" name="Nationality" value="@Model.Nationality" class="form-control" maxlength="100" />
+                </label>
+
+                <label class="form-field"><span class="form-label">Position</span>
+                    <select name="Position" class="form-control">
+                        @foreach (PlayerPosition pos in Enum.GetValues(typeof(PlayerPosition)))
+                        {
+                            if (Model.Position == pos)
+                            {
+                                <option value="@pos" selected="selected">@pos</option>
+                            }
+                            else
+                            {
+                                <option value="@pos">@pos</option>
+                            }
+                        }
+                    </select>
+                </label>
+
+                <label class="form-field"><span class="form-label">Jersey number</span>
+                    <input type="number" name="JerseyNumber" value="@Model.JerseyNumber" class="form-control" />
+                </label>
+
+                <label class="form-field"><span class="form-label">Market value (M EUR)</span>
+                    <input type="number" step="0.1" name="MarketValue" value="@Model.MarketValue" class="form-control" />
+                </label>
+
+                <div>
+                    @await Html.PartialAsync("_DateTimePicker", null, new ViewDataDictionary(ViewData)
+                    {
+                        ["FieldName"] = "ContractUntil",
+                        ["Label"] = "Contract until",
+                        ["Value"] = Model.ContractUntil
+                    })
+                </div>
+
+                <label class="form-check form-field"><span class="form-label">Is injured</span>
+                    @if (Model.IsInjured)
+                    {
+                        <input type="checkbox" name="IsInjured" value="true" checked />
+                    }
+                    else
+                    {
+                        <input type="checkbox" name="IsInjured" value="true" />
+                    }
+                </label>
+
+                <label class="form-field"><span class="form-label">Club</span>
+                    <select name="ClubId" class="form-control">
+                        @foreach (var c in (IEnumerable<FootballClub.Models.Club>)ViewBag.Clubs)
+                        {
+                            <option value="@c.Id">@c.Name</option>
+                        }
+                    </select>
+                </label>
+
+                <label class="form-field"><span class="form-label">Training session id (optional)</span>
+                    <input type="number" name="TrainingSessionId" value="@(Model.TrainingSessionId.HasValue ? Model.TrainingSessionId.Value.ToString() : string.Empty)" class="form-control" min="1" placeholder="Leave blank if none" />
+                </label>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Create</button>
+                <a class="btn btn-outline-light" href="/Player">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

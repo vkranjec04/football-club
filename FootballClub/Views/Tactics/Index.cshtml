@@ -7,186 +7,605 @@
 }
 
 <style>
-    .pitch-container {
-        width: 100%;
-        max-width: 800px;
-        aspect-ratio: 1.6;
-        background: #2e7d32;
-        border: 4px solid #fff;
-        border-radius: 8px;
-        position: relative;
+    .tactics-container {
+        max-width: 1200px;
         margin: 20px auto;
-        overflow: hidden;
-        background-image: 
-            /* Center circle */
-            radial-gradient(circle, transparent 48%, rgba(255,255,255,0.7) 48%, rgba(255,255,255,0.7) 52%, transparent 52%),
-            /* Halfway line */
-            linear-gradient(to right, transparent 49.5%, rgba(255,255,255,0.7) 49.5%, rgba(255,255,255,0.7) 50.5%, transparent 50.5%);
-    }
-
-    .penalty-box-left {
-        position: absolute;
-        top: 20%;
-        bottom: 20%;
-        left: 0;
-        width: 15%;
-        border: 2px solid rgba(255,255,255,0.7);
-        border-left: none;
-    }
-
-    .penalty-box-right {
-        position: absolute;
-        top: 20%;
-        bottom: 20%;
-        right: 0;
-        width: 15%;
-        border: 2px solid rgba(255,255,255,0.7);
-        border-right: none;
-    }
-
-    .player-spot {
-        position: absolute;
-        width: 40px;
-        height: 40px;
-        background: #ffc107;
-        color: #000;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-weight: bold;
-        transform: translate(-50%, -50%);
-        border: 2px solid #000;
-        cursor: grab;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    }
-    
-    .player-spot span {
-        position: absolute;
-        top: 45px;
-        width: 80px;
-        text-align: center;
-        color: #fff;
-        font-size: 12px;
-        font-weight: bold;
-        text-shadow: 1px 1px 2px #000;
-    }
-
-    .bench-container {
-        display: flex;
-        gap: 10px;
-        padding: 15px;
-        background: #1a1e29;
-        border-radius: 8px;
-        overflow-x: auto;
-        margin-top: 20px;
-        width: 100%;
-        max-width: 800px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    .bench-player {
-        background: #2a2e39;
-        color: #fff;
-        padding: 8px 12px;
-        border-radius: 6px;
-        font-size: 14px;
-        white-space: nowrap;
-        cursor: grab;
-        border: 1px solid #4ade80;
+        padding: 20px;
     }
 
     .tactic-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .formation-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
     }
 
     .formation-select {
         background: #1a1e29;
         color: #fff;
-        padding: 10px;
+        padding: 10px 15px;
         border-radius: 6px;
         border: 1px solid #334155;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    .clear-canvas-btn {
+        background: #ef4444;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+
+    .clear-canvas-btn:hover {
+        background: #dc2626;
+    }
+
+    .pitch-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .pitch-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 900px;
+        aspect-ratio: 1 / 1.5;
+    }
+
+    .pitch-container {
+        width: 100%;
+        height: 100%;
+        background: #2e7d32;
+        border: 4px solid #fff;
+        border-radius: 8px;
+        position: relative;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+        background-image: 
+            /* Center circle */
+            radial-gradient(circle at center, transparent 8%, rgba(255,255,255,0.7) 8%, rgba(255,255,255,0.7) 9%, transparent 9%),
+            /* Halfway line */
+            linear-gradient(to bottom, transparent 49.5%, rgba(255,255,255,0.7) 49.5%, rgba(255,255,255,0.7) 50.5%, transparent 50.5%),
+            /* Goal areas */
+            linear-gradient(to bottom, transparent 15%, rgba(255,255,255,0.5) 15%, rgba(255,255,255,0.5) 85%, transparent 85%);
+        background-size: 100% 100%, 100% 100%, 100% 100%;
+        background-position: center, center, 0 0;
+    }
+
+    .pitch-overlay {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: space-between;
+        padding: 2% 3%;
+        box-sizing: border-box;
+    }
+
+    .penalty-box {
+        width: 12%;
+        height: 100%;
+        border: 2px solid rgba(255, 255, 255, 0.7);
+        position: relative;
+    }
+
+    .pitch-lines {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+    }
+
+    #tacticsCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        cursor: crosshair;
+    }
+
+    .player-node {
+        position: absolute;
+        width: 45px;
+        height: 45px;
+        background: #ffc107;
+        border: 2px solid #000;
+        border-radius: 50%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        color: #000;
+        transform: translate(-50%, -50%);
+        cursor: grab;
+        user-select: none;
+        transition: all 0.3s ease;
+        font-size: 16px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        z-index: 10;
+    }
+
+    .player-node:active {
+        cursor: grabbing;
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    .player-node.dragging {
+        opacity: 0.7;
+        background: #ff9800;
+    }
+
+    .player-label {
+        position: absolute;
+        top: 52px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        white-space: nowrap;
+        pointer-events: none;
+        text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+    }
+
+    .squad-section {
+        margin-top: 40px;
+    }
+
+    .squad-header {
+        font-size: 18px;
+        font-weight: bold;
+        color: var(--text-dark);
+        margin-bottom: 15px;
+    }
+
+    .squad-container {
+        background: #1a1e29;
+        border: 1px solid #2a2e39;
+        border-radius: 8px;
+        padding: 15px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .squad-player {
+        background: #2a2e39;
+        border: 2px solid #334155;
+        color: #fff;
+        padding: 12px;
+        border-radius: 6px;
+        text-align: center;
+        cursor: grab;
+        transition: all 0.2s ease;
+        font-size: 13px;
+    }
+
+    .squad-player:hover {
+        border-color: #4ade80;
+        background: #374151;
+    }
+
+    .squad-player.on-pitch {
+        opacity: 0.5;
+        border-color: #888;
+    }
+
+    .squad-player-number {
+        font-weight: bold;
+        color: #ffc107;
+        font-size: 16px;
+        margin-bottom: 4px;
+    }
+
+    .squad-player-name {
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    .squad-player-pos {
+        font-size: 11px;
+        color: #94a3b8;
+    }
+
+    .drawing-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-top: 15px;
+        flex-wrap: wrap;
+    }
+
+    .drawing-mode-toggle {
+        background: #3b82f6;
+        color: white;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 13px;
+    }
+
+    .drawing-mode-toggle.active {
+        background: #1e40af;
+    }
+
+    .color-picker {
+        display: flex;
+        gap: 5px;
+    }
+
+    .color-option {
+        width: 30px;
+        height: 30px;
+        border-radius: 4px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .color-option:hover,
+    .color-option.active {
+        border-color: #fff;
+        transform: scale(1.1);
+    }
+
+    .info-text {
+        color: #94a3b8;
+        font-size: 12px;
+        margin-top: 10px;
     }
 </style>
 
-<div class="tactic-header">
-    <h2 style="color: var(--text-dark);">Tactics Board (Dinamo Zagreb)</h2>
-    <select class="formation-select" onchange="changeFormation(this.value)">
-        <option value="4231">4-2-3-1</option>
-        <option value="433">4-3-3</option>
-        <option value="352">3-5-2</option>
-    </select>
-</div>
-
-<div class="pitch-container" id="pitch">
-    <div class="penalty-box-left"></div>
-    <div class="penalty-box-right"></div>
-    
-    <!-- Hardcoded initial 4-2-3-1 positions for dynamic drag and drop visualization -->
-    <div class="player-spot" style="left: 10%; top: 50%;" draggable="true" ondragstart="drag(event)" id="pos-gk">1<span>Nevistić</span></div>
-    <div class="player-spot" style="left: 25%; top: 20%;" draggable="true" ondragstart="drag(event)" id="pos-lb">3<span>Ogiwara</span></div>
-    <div class="player-spot" style="left: 22%; top: 40%;" draggable="true" ondragstart="drag(event)" id="pos-lcb">22<span>Ristovski</span></div>
-    <div class="player-spot" style="left: 22%; top: 60%;" draggable="true" ondragstart="drag(event)" id="pos-rcb">28<span>Theophile</span></div>
-    <div class="player-spot" style="left: 25%; top: 80%;" draggable="true" ondragstart="drag(event)" id="pos-rb">18<span>Gabriel</span></div>
-
-    <div class="player-spot" style="left: 45%; top: 35%;" draggable="true" ondragstart="drag(event)" id="pos-ldm">27<span>Mišić</span></div>
-    <div class="player-spot" style="left: 45%; top: 65%;" draggable="true" ondragstart="drag(event)" id="pos-rdm">25<span>Sučić</span></div>
-
-    <div class="player-spot" style="left: 65%; top: 20%;" draggable="true" ondragstart="drag(event)" id="pos-lw">20<span>Pjaca</span></div>
-    <div class="player-spot" style="left: 60%; top: 50%;" draggable="true" ondragstart="drag(event)" id="pos-cam">10<span>Baturina</span></div>
-    <div class="player-spot" style="left: 65%; top: 80%;" draggable="true" ondragstart="drag(event)" id="pos-rw">77<span>Špikić</span></div>
-
-    <div class="player-spot" style="left: 85%; top: 50%;" draggable="true" ondragstart="drag(event)" id="pos-st">9<span>Petković</span></div>
-</div>
-
-<h3 style="margin-top: 20px; color: var(--text-dark);">Available Squad</h3>
-<div class="bench-container" ondrop="drop(event)" ondragover="allowDrop(event)">
-    @foreach(var player in Model)
-    {
-        <div class="bench-player" draggable="true" ondragstart="drag(event)" id="player-@player.Id">
-            @player.JerseyNumber - @player.LastName (@player.Position.ToString().Substring(0, 3))
+<div class="tactics-container">
+    <div class="tactic-header">
+        <h2 style="color: var(--text-dark);">Dinamo Zagreb - Tactics Board</h2>
+        <div class="formation-controls">
+            <label for="formation" style="color: var(--text-dark);">Formation:</label>
+            <select id="formation" class="formation-select" onchange="changeFormation(this.value)">
+                <option value="4231">4-2-3-1</option>
+                <option value="433">4-3-3</option>
+                <option value="352">3-5-2</option>
+                <option value="532">5-3-2</option>
+            </select>
+            <button class="clear-canvas-btn" onclick="clearDrawing()">Clear Drawing</button>
         </div>
-    }
+    </div>
+
+    <div class="pitch-section">
+        <div class="pitch-wrapper">
+            <div class="pitch-container">
+                <canvas id="tacticsCanvas"></canvas>
+                <div id="playersContainer"></div>
+            </div>
+        </div>
+
+        <div class="drawing-controls">
+            <button class="drawing-mode-toggle" id="drawingToggle" onclick="toggleDrawing()">🎨 Enable Drawing</button>
+            <span style="color: var(--text-dark);">Draw Color:</span>
+            <div class="color-picker">
+                <div class="color-option active" style="background: #ff0000;" onclick="setDrawColor('#ff0000', this)" title="Red"></div>
+                <div class="color-option" style="background: #00ff00;" onclick="setDrawColor('#00ff00', this)" title="Green"></div>
+                <div class="color-option" style="background: #ffff00;" onclick="setDrawColor('#ffff00', this)" title="Yellow"></div>
+                <div class="color-option" style="background: #ffffff;" onclick="setDrawColor('#ffffff', this)" title="White" style="border: 1px solid #666;"></div>
+            </div>
+        </div>
+
+        <p class="info-text">💡 Drag players from the squad below onto the pitch. Click + drag on the pitch to draw. Select a formation to auto-position players.</p>
+    </div>
+
+    <div class="squad-section">
+        <h3 class="squad-header">Squad - Available Players</h3>
+        <div class="squad-container" id="squadContainer">
+            <!-- Players populated by JavaScript -->
+        </div>
+    </div>
 </div>
 
 <script>
-    function allowDrop(ev) {
-        ev.preventDefault();
-    }
+    const playersData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Select(p => new { 
+        id = p.Id, 
+        number = p.JerseyNumber, 
+        name = p.LastName, 
+        position = p.Position.ToString()
+    }).ToList()));
 
-    function drag(ev) {
-        ev.dataTransfer.setData("text", ev.target.id);
-    }
+    let canvas = document.getElementById('tacticsCanvas');
+    let ctx = canvas.getContext('2d');
+    let playersContainer = document.getElementById('playersContainer');
+    let squadContainer = document.getElementById('squadContainer');
+    
+    let isDrawing = false;
+    let isDrawingMode = false;
+    let drawColor = '#ff0000';
+    let draggedPlayer = null;
+    let draggedFrom = null; // 'squad' or 'pitch'
+    let playerPositions = {};
+    
+    // Formation presets - positions as % of pitch
+    const formations = {
+        '4231': [
+            { pos: 'GK', x: 10, y: 50 },
+            { pos: 'LB', x: 25, y: 20 },
+            { pos: 'LCB', x: 22, y: 35 },
+            { pos: 'RCB', x: 22, y: 65 },
+            { pos: 'RB', x: 25, y: 80 },
+            { pos: 'LDM', x: 45, y: 35 },
+            { pos: 'RDM', x: 45, y: 65 },
+            { pos: 'LM', x: 65, y: 20 },
+            { pos: 'CM', x: 60, y: 50 },
+            { pos: 'RM', x: 65, y: 80 },
+            { pos: 'ST', x: 85, y: 50 }
+        ],
+        '433': [
+            { pos: 'GK', x: 10, y: 50 },
+            { pos: 'LB', x: 25, y: 15 },
+            { pos: 'LCB', x: 22, y: 35 },
+            { pos: 'RCB', x: 22, y: 65 },
+            { pos: 'RB', x: 25, y: 85 },
+            { pos: 'LM', x: 45, y: 20 },
+            { pos: 'CM', x: 45, y: 50 },
+            { pos: 'RM', x: 45, y: 80 },
+            { pos: 'LW', x: 70, y: 20 },
+            { pos: 'ST', x: 80, y: 50 },
+            { pos: 'RW', x: 70, y: 80 }
+        ],
+        '352': [
+            { pos: 'GK', x: 10, y: 50 },
+            { pos: 'LCB', x: 22, y: 25 },
+            { pos: 'CB', x: 22, y: 50 },
+            { pos: 'RCB', x: 22, y: 75 },
+            { pos: 'LWB', x: 40, y: 15 },
+            { pos: 'CM', x: 45, y: 50 },
+            { pos: 'RWB', x: 40, y: 85 },
+            { pos: 'LW', x: 65, y: 25 },
+            { pos: 'ST1', x: 80, y: 40 },
+            { pos: 'ST2', x: 80, y: 60 },
+            { pos: 'RW', x: 65, y: 75 }
+        ],
+        '532': [
+            { pos: 'GK', x: 10, y: 50 },
+            { pos: 'LCB', x: 20, y: 20 },
+            { pos: 'CB', x: 20, y: 50 },
+            { pos: 'RCB', x: 20, y: 80 },
+            { pos: 'LWB', x: 35, y: 10 },
+            { pos: 'LM', x: 45, y: 30 },
+            { pos: 'CM', x: 45, y: 50 },
+            { pos: 'RM', x: 45, y: 70 },
+            { pos: 'RWB', x: 35, y: 90 },
+            { pos: 'ST1', x: 75, y: 40 },
+            { pos: 'ST2', x: 75, y: 60 }
+        ]
+    };
 
-    function drop(ev) {
-        ev.preventDefault();
-        var data = ev.dataTransfer.getData("text");
-        var draggedEl = document.getElementById(data);
+    function initCanvas() {
+        const rect = canvas.parentElement.getBoundingClientRect();
+        canvas.width = canvas.parentElement.offsetWidth;
+        canvas.height = canvas.parentElement.offsetHeight;
         
-        // Swap or move logic here if needed. 
-        // For simplicity, just append to bench if dropped there, or swap innerHTML if dropped on pitch spot.
-        if(ev.target.classList.contains('player-spot') || ev.target.parentElement.classList.contains('player-spot')) {
-            let targetSpot = ev.target.classList.contains('player-spot') ? ev.target : ev.target.parentElement;
-            
-            // Simple visual swap
-            let tempContent = targetSpot.innerHTML;
-            let pNum = draggedEl.innerText.split('-')[0].trim();
-            let pName = draggedEl.innerText.split('-')[1].split('(')[0].trim();
-            
-            targetSpot.innerHTML = pNum + "<span>" + pName + "</span>";
-            draggedEl.style.opacity = '0.5';
-        }
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
     }
 
-    function changeFormation(form) {
-        // Very basic mock adaptation
-        if(form === '433') {
-            document.getElementById('pos-cam').style.left = '55%';
-            document.getElementById('pos-cam').style.top = '50%';
-        }
+    function populateSquad() {
+        squadContainer.innerHTML = '';
+        playersData.forEach(player => {
+            const playerEl = document.createElement('div');
+            playerEl.className = 'squad-player';
+            playerEl.id = 'squad-' + player.id;
+            playerEl.draggable = true;
+            playerEl.innerHTML = `
+                <div class="squad-player-number">${player.number}</div>
+                <div class="squad-player-name">${player.name}</div>
+                <div class="squad-player-pos">${player.position.substring(0, 3)}</div>
+            `;
+            
+            playerEl.addEventListener('dragstart', (e) => {
+                draggedPlayer = player;
+                draggedFrom = 'squad';
+                playerEl.classList.add('dragging-squad');
+                e.dataTransfer.effectAllowed = 'move';
+            });
+            
+            playerEl.addEventListener('dragend', () => {
+                playerEl.classList.remove('dragging-squad');
+            });
+            
+            squadContainer.appendChild(playerEl);
+        });
     }
+
+    function placePlayersOnPitch(formationKey) {
+        playersContainer.innerHTML = '';
+        playerPositions = {};
+        const formation = formations[formationKey];
+        const pitchRect = canvas.parentElement.getBoundingClientRect();
+
+        // Center formation horizontally for symmetry
+        const xs = formation.map(f => (f.x / 100) * pitchRect.width);
+        const avgX = xs.reduce((a, b) => a + b, 0) / xs.length;
+        const centerShift = (pitchRect.width / 2) - avgX;
+
+        playersData.slice(0, 11).forEach((player, index) => {
+            if (index < formation.length) {
+                const formPos = formation[index];
+                const x = (formPos.x / 100) * pitchRect.width + centerShift;
+                const y = (formPos.y / 100) * pitchRect.height;
+
+                placePlayer(player, x, y, formPos.pos);
+            }
+        });
+    }
+
+    function placePlayer(player, x, y, positionLabel = '') {
+        const playerEl = document.createElement('div');
+        playerEl.className = 'player-node';
+        playerEl.id = 'player-' + player.id;
+        playerEl.style.left = x + 'px';
+        playerEl.style.top = y + 'px';
+        playerEl.innerHTML = player.number + '<div class="player-label">' + player.name.substring(0, 6) + '</div>';
+        
+        playerEl.draggable = true;
+        
+        playerEl.addEventListener('dragstart', (e) => {
+            draggedPlayer = player;
+            draggedFrom = 'pitch';
+            playerEl.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+        
+        playerEl.addEventListener('dragend', () => {
+            playerEl.classList.remove('dragging');
+        });
+        
+        canvas.parentElement.appendChild(playerEl);
+        playerPositions[player.id] = { x, y, label: positionLabel };
+        
+        // Update squad status
+        const squadEl = document.getElementById('squad-' + player.id);
+        if (squadEl) squadEl.classList.add('on-pitch');
+    }
+
+    canvas.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+    });
+
+    canvas.addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (!draggedPlayer) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        const nodesOnPitch = document.querySelectorAll('.player-node');
+
+        if (draggedFrom === 'pitch') {
+            // Move existing node instead of creating a new one
+            const existing = document.getElementById('player-' + draggedPlayer.id);
+            if (existing) {
+                existing.style.left = x + 'px';
+                existing.style.top = y + 'px';
+                playerPositions[draggedPlayer.id] = { x, y };
+            }
+        } else if (draggedFrom === 'squad') {
+            // Adding from squad: if under 11 players, place normally; otherwise swap with nearest
+            if (nodesOnPitch.length < 11) {
+                placePlayer(draggedPlayer, x, y);
+            } else {
+                // find nearest player to drop point
+                let nearest = null;
+                let nearestDist = Infinity;
+                nodesOnPitch.forEach(n => {
+                    const rectN = n.getBoundingClientRect();
+                    const cx = rectN.left + rectN.width/2 - rect.left;
+                    const cy = rectN.top + rectN.height/2 - rect.top;
+                    const dx = cx - x; const dy = cy - y;
+                    const d = Math.sqrt(dx*dx + dy*dy);
+                    if (d < nearestDist) { nearestDist = d; nearest = n; }
+                });
+
+                if (nearest && nearestDist < 120) {
+                    // swap: take id from nearest, put it back to squad, place dragged player into its spot
+                    const nearestId = parseInt(nearest.id.replace('player-', ''));
+                    // remove nearest DOM node
+                    nearest.remove();
+                    // mark old player's squad element as available
+                    const oldSquadEl = document.getElementById('squad-' + nearestId);
+                    if (oldSquadEl) oldSquadEl.classList.remove('on-pitch');
+
+                    // place the new player at that exact spot
+                    placePlayer(draggedPlayer, x, y);
+                } else {
+                    // no nearby player to swap with; do nothing (could notify)
+                    alert('Board already has 11 players — drop onto a player to swap.');
+                }
+            }
+        }
+
+        // clear drag state
+        draggedPlayer = null; draggedFrom = null;
+    });
+
+    function changeFormation(formationKey) {
+        placePlayersOnPitch(formationKey);
+    }
+
+    function startDrawing(e) {
+        if (!isDrawingMode) return;
+        
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        ctx.beginPath();
+        ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    }
+
+    function draw(e) {
+        if (!isDrawing || !isDrawingMode) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        ctx.strokeStyle = drawColor;
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+        ctx.stroke();
+    }
+
+    function stopDrawing() {
+        isDrawing = false;
+    }
+
+    function toggleDrawing() {
+        isDrawingMode = !isDrawingMode;
+        const toggle = document.getElementById('drawingToggle');
+        toggle.classList.toggle('active');
+        canvas.style.cursor = isDrawingMode ? 'crosshair' : 'default';
+    }
+
+    function setDrawColor(color, el) {
+        drawColor = color;
+        document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    function clearDrawing() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    // Initialize
+    window.addEventListener('load', () => {
+        initCanvas();
+        populateSquad();
+        placePlayersOnPitch('4231');
+    });
+
+    // Redraw on window resize
+    window.addEventListener('resize', () => {
+        initCanvas();
+        placePlayersOnPitch('4231');
+    });
 </script>

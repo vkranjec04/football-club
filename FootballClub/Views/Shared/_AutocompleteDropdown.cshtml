@@ -1,0 +1,228 @@
+@{
+    var endpoint = ViewData["Endpoint"]?.ToString();
+    if (string.IsNullOrWhiteSpace(endpoint))
+    {
+        throw new InvalidOperationException("_AutocompleteDropdown requires ViewData[\"Endpoint\"].");
+    }
+
+    var label = ViewData["Label"]?.ToString() ?? "Search";
+    var placeholder = ViewData["Placeholder"]?.ToString() ?? "Type to search...";
+    var minChars = ViewData["MinChars"] as int? ?? 2;
+    var elementKey = ViewData["FieldName"]?.ToString();
+    if (string.IsNullOrWhiteSpace(elementKey))
+    {
+        elementKey = $"autocomplete_{Guid.NewGuid():N}";
+    }
+
+    var inputId = $"{elementKey}_input";
+    var panelId = $"{elementKey}_panel";
+    var statusId = $"{elementKey}_status";
+}
+
+<div class="football-autocomplete" data-football-autocomplete data-endpoint="@endpoint" data-min-chars="@minChars" style="position: relative; max-width: 520px;">
+    <label class="form-label" for="@inputId">@label</label>
+    <div style="display: flex; gap: 0.5rem; align-items: center;">
+        <input id="@inputId"
+               type="text"
+               class="form-control football-autocomplete__input"
+               placeholder="@placeholder"
+               autocomplete="off"
+               aria-autocomplete="list"
+               aria-expanded="false"
+               aria-controls="@panelId"
+               data-football-autocomplete-input />
+        <button type="button" class="btn btn-outline-light" data-football-autocomplete-clear aria-label="Clear search">×</button>
+    </div>
+
+    <div id="@panelId"
+         class="football-autocomplete__panel"
+         data-football-autocomplete-panel
+         hidden
+         role="listbox"
+         style="position: absolute; z-index: 25; left: 0; right: 0; margin-top: 0.4rem; background: #0f172a; border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 0.85rem; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35); overflow: hidden;">
+    </div>
+
+    <div id="@statusId" class="form-text" data-football-autocomplete-status>Search for a player by name.</div>
+</div>
+
+<script>
+(function () {
+    if (!window.FootballClubAutocomplete) {
+        window.FootballClubAutocomplete = {
+            init: function () {
+                document.querySelectorAll("[data-football-autocomplete]").forEach(function (root) {
+                    if (root.dataset.autocompleteInitialized === "true") {
+                        return;
+                    }
+
+                    root.dataset.autocompleteInitialized = "true";
+
+                    var endpoint = root.dataset.endpoint;
+                    var minChars = parseInt(root.dataset.minChars || "2", 10);
+                    var input = root.querySelector("[data-football-autocomplete-input]");
+                    var panel = root.querySelector("[data-football-autocomplete-panel]");
+                    var clearButton = root.querySelector("[data-football-autocomplete-clear]");
+                    var status = root.querySelector("[data-football-autocomplete-status]");
+                    var debounceTimer = null;
+                    var activeRequest = null;
+
+                    function closePanel() {
+                        panel.hidden = true;
+                        input.setAttribute("aria-expanded", "false");
+                    }
+
+                    function renderItems(items) {
+                        panel.innerHTML = "";
+
+                        if (!items || items.length === 0) {
+                            var empty = document.createElement("div");
+                            empty.className = "football-autocomplete__empty";
+                            empty.style.padding = "0.85rem 1rem";
+                            empty.style.color = "#cbd5e1";
+                            empty.textContent = "No players found.";
+                            panel.appendChild(empty);
+                            panel.hidden = false;
+                            input.setAttribute("aria-expanded", "true");
+                            return;
+                        }
+
+                        items.forEach(function (item, index) {
+                            var option = document.createElement("button");
+                            option.type = "button";
+                            option.className = "football-autocomplete__item";
+                            option.setAttribute("role", "option");
+                            option.dataset.url = item.url || "";
+                            option.style.width = "100%";
+                            option.style.border = "0";
+                            option.style.background = "transparent";
+                            option.style.padding = "0.85rem 1rem";
+                            option.style.textAlign = "left";
+                            option.style.color = "#e2e8f0";
+                            option.style.cursor = "pointer";
+                            option.innerHTML = '<div style="display:flex;justify-content:space-between;gap:1rem;align-items:center;"><strong>' +
+                                escapeHtml(item.text || item.label || item.name || "Player") +
+                                '</strong><span style="color:#94a3b8;font-size:0.85rem;">' +
+                                escapeHtml(item.subtitle || item.club || "Details") +
+                                '</span></div>';
+
+                            option.addEventListener("mouseenter", function () {
+                                option.style.background = "rgba(59, 130, 246, 0.16)";
+                            });
+                            option.addEventListener("mouseleave", function () {
+                                option.style.background = "transparent";
+                            });
+                            option.addEventListener("click", function () {
+                                if (item.url) {
+                                    window.location.href = item.url;
+                                }
+                            });
+
+                            panel.appendChild(option);
+                        });
+
+                        panel.hidden = false;
+                        input.setAttribute("aria-expanded", "true");
+                    }
+
+                    function escapeHtml(value) {
+                        return String(value)
+                            .replace(/&/g, "&amp;")
+                            .replace(/</g, "&lt;")
+                            .replace(/>/g, "&gt;")
+                            .replace(/\"/g, "&quot;")
+                            .replace(/'/g, "&#39;");
+                    }
+
+                    function searchPlayers(query) {
+                        if (activeRequest) {
+                            activeRequest.abort();
+                        }
+
+                        var controller = new AbortController();
+                        activeRequest = controller;
+
+                        status.textContent = "Searching...";
+
+                        fetch(endpoint + "?term=" + encodeURIComponent(query), {
+                            headers: { "Accept": "application/json" },
+                            signal: controller.signal
+                        })
+                            .then(function (response) {
+                                if (!response.ok) {
+                                    throw new Error("Search failed");
+                                }
+                                return response.json();
+                            })
+                            .then(function (items) {
+                                if (activeRequest !== controller) {
+                                    return;
+                                }
+                                renderItems(items);
+                                status.textContent = items && items.length ? "Select a player to open the details page." : "No players found.";
+                            })
+                            .catch(function (error) {
+                                if (error.name === "AbortError") {
+                                    return;
+                                }
+                                panel.innerHTML = "";
+                                closePanel();
+                                status.textContent = "Unable to load player search results.";
+                            });
+                    }
+
+                    input.addEventListener("input", function () {
+                        var query = input.value.trim();
+                        clearTimeout(debounceTimer);
+
+                        if (query.length < minChars) {
+                            panel.innerHTML = "";
+                            closePanel();
+                            status.textContent = "Type at least " + minChars + " characters to search players.";
+                            return;
+                        }
+
+                        debounceTimer = window.setTimeout(function () {
+                            searchPlayers(query);
+                        }, 220);
+                    });
+
+                    input.addEventListener("focus", function () {
+                        if (panel.children.length > 0) {
+                            panel.hidden = false;
+                            input.setAttribute("aria-expanded", "true");
+                        }
+                    });
+
+                    input.addEventListener("keydown", function (event) {
+                        if (event.key === "Escape") {
+                            closePanel();
+                        }
+                    });
+
+                    clearButton.addEventListener("click", function () {
+                        input.value = "";
+                        panel.innerHTML = "";
+                        closePanel();
+                        status.textContent = "Search for a player by name.";
+                        input.focus();
+                    });
+
+                    document.addEventListener("click", function (event) {
+                        if (!root.contains(event.target)) {
+                            closePanel();
+                        }
+                    });
+                });
+            }
+        };
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", function () {
+            window.FootballClubAutocomplete.init();
+        });
+    } else {
+        window.FootballClubAutocomplete.init();
+    }
+})();
+</script>

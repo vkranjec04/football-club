@@ -2,7 +2,9 @@ namespace FootballClub.Models;
 
 public class LeagueStanding
 {
-    public Club Club { get; set; }
+    public int Id { get; set; }
+    public int ClubId { get; set; }
+    public virtual Club Club { get; set; } = null!;
     public int Played { get; set; }
     public int Wins { get; set; }
     public int Draws { get; set; }

@@ -1,0 +1,77 @@
+@using FootballClub.Web.ViewModels
+@model StaffEditModel
+
+@{
+    ViewData["Title"] = "Edit Staff";
+}
+
+<div class="card">
+    <div class="card-header"><h3>Edit Staff Member</h3></div>
+    <div class="card-body">
+        <form method="post" action="/Staff/Edit/@Model.Id">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="Id" value="@Model.Id" />
+
+            <div class="form-grid">
+                <label class="form-field"><span class="form-label">First name</span>
+                    <input type="text" name="FirstName" value="@Model.FirstName" class="form-control" required maxlength="100" />
+                </label>
+                <label class="form-field"><span class="form-label">Last name</span>
+                    <input type="text" name="LastName" value="@Model.LastName" class="form-control" required maxlength="100" />
+                </label>
+
+                <label class="form-field"><span class="form-label">Nationality</span>
+                    <input type="text" name="Nationality" value="@Model.Nationality" class="form-control" maxlength="100" />
+                </label>
+
+                <div>
+                    @await Html.PartialAsync("_DateTimePicker", null, new ViewDataDictionary(ViewData)
+                    {
+                        ["FieldName"] = "DateOfBirth",
+                        ["Label"] = "Date of birth",
+                        ["Value"] = Model.DateOfBirth
+                    })
+                </div>
+
+                <div>
+                    @await Html.PartialAsync("_DateTimePicker", null, new ViewDataDictionary(ViewData)
+                    {
+                        ["FieldName"] = "ContractUntil",
+                        ["Label"] = "Contract until",
+                        ["Value"] = Model.ContractUntil
+                    })
+                </div>
+
+                <label class="form-field"><span class="form-label">Role</span>
+                    <input type="text" name="Role" value="@Model.Role" class="form-control" required maxlength="100" />
+                </label>
+
+                <label class="form-field"><span class="form-label">Club</span>
+                    <select name="ClubId" class="form-control" required>
+                        @foreach (var c in (IEnumerable<FootballClub.Models.Club>)ViewBag.Clubs)
+                        {
+                            if (Model.ClubId == c.Id)
+                            {
+                                <option value="@c.Id" selected="selected">@c.Name</option>
+                            }
+                            else
+                            {
+                                <option value="@c.Id">@c.Name</option>
+                            }
+                        }
+                    </select>
+                </label>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Save</button>
+                <a class="btn btn-outline-light" href="/staff-members">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

@@ -1,19 +1,20 @@
+using FootballClub.Data;
 using FootballClub.Models;
-using FootballClub.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FootballClub.Web.Controllers;
 
 public class TacticsController : Controller
 {
-    private readonly PlayerMockRepository _playerRepo;
+    private readonly ApplicationDbContext _context;
 
-    public TacticsController(PlayerMockRepository playerRepo)
+    public TacticsController(ApplicationDbContext context)
     {
-        _playerRepo = playerRepo;
+        _context = context;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
         ViewData["ActivePage"] = "Tactics";
         ViewData["Breadcrumbs"] = new List<(string, string?)>
@@ -22,7 +23,12 @@ public class TacticsController : Controller
             ("Tactics Board", null)
         };
 
-        var players = _playerRepo.GetAll().Where(p => p.Club?.Id == 1).ToList();
+        // Get Dinamo Zagreb (ID = 1) players
+        var players = await _context.Players
+            .Where(p => p.ClubId == 1)
+            .OrderBy(p => p.Position)
+            .ToListAsync();
+        
         return View(players);
     }
 }

@@ -25,7 +25,7 @@
             <span class="badge badge-blue">@(selectedClub?.Name ?? "Club")</span>
             @if (selectedClub != null)
             {
-                <a href="/Player/Schedule?clubId=@selectedClub.Id" class="view-link">Weekly Schedules â†’</a>
+                <a href="/Player/Schedule?clubId=@selectedClub.Id" class="view-link">Weekly Schedules →</a>
             }
         </div>
     </div>
@@ -49,6 +49,23 @@
             <button type="submit" class="btn-back" style="padding: 8px 14px;">Apply</button>
         </form>
 
+        <div style="margin-bottom: 18px;">
+            @await Html.PartialAsync("_AutocompleteDropdown", null, new ViewDataDictionary(ViewData)
+            {
+                ["Label"] = "Find a player",
+                ["Placeholder"] = "Search by player name...",
+                ["Endpoint"] = "/api/players/search",
+                ["MinChars"] = 2,
+                ["FieldName"] = "playerSearch"
+            })
+        </div>
+
+        <div style="margin-bottom:12px; display:flex; gap:8px; align-items:center;">
+            <input id="playerQuickSearch" type="search" placeholder="Quick search players..." class="form-control" style="max-width:420px;" />
+            <button id="clearPlayerSearch" class="btn btn-outline-light" type="button">Clear</button>
+            <a class="btn btn-primary" href="/Player/Create">Add player</a>
+        </div>
+
         <table class="fc-table">
             <thead>
                 <tr>
@@ -61,43 +78,40 @@
                     <th></th>
                 </tr>
             </thead>
-            <tbody>
-                @foreach (var player in Model.OrderBy(p => p.Club?.Name).ThenBy(p => p.Position))
-                {
-                    <tr>
-                        <td><strong>@player.FirstName @player.LastName</strong></td>
-                        <td>
-                            @{
-                                var posClass = player.Position switch
-                                {
-                                    PlayerPosition.Goalkeeper => "badge-gray",
-                                    PlayerPosition.Defender => "badge-blue",
-                                    PlayerPosition.Midfielder => "badge-amber",
-                                    PlayerPosition.Forward => "badge-red",
-                                    _ => "badge-gray"
-                                };
-                            }
-                            <span class="badge @posClass">@player.Position</span>
-                        </td>
-                        <td>@player.Club?.Name</td>
-                        <td>#@player.JerseyNumber</td>
-                        <td>â‚¬@player.MarketValue.ToString("F1")M</td>
-                        <td>
-                            @if (player.IsInjured)
-                            {
-                                <span class="badge badge-red">Injured</span>
-                            }
-                            else
-                            {
-                                <span class="badge badge-green">Active</span>
-                            }
-                        </td>
-                        <td><a href="/player-profile/@player.Id" class="view-link">Details →</a></td>
-                    </tr>
-                }
+            <tbody id="playersTableBody">
+                @await Html.PartialAsync("_PlayerRows", Model)
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+    (function(){
+        var input = document.getElementById('playerQuickSearch');
+        var clearBtn = document.getElementById('clearPlayerSearch');
+        var timeout = null;
+        var tbody = document.getElementById('playersTableBody');
+
+        function fetchAndRender(q) {
+            fetch('/Player/Filter?term=' + encodeURIComponent(q), { headers: { 'Accept': 'text/html' } })
+                .then(function(r){ return r.text(); })
+                .then(function(html){ 
+                    tbody.innerHTML = html; 
+                    // Reinitialize row hover animations after AJAX update
+                    if (window.reinitializeAnimations) {
+                        window.reinitializeAnimations();
+                    }
+                })
+                .catch(function(){});
+        }
+
+        input.addEventListener('input', function(){
+            clearTimeout(timeout);
+            timeout = setTimeout(function(){ fetchAndRender(input.value.trim()); }, 250);
+        });
+
+        clearBtn.addEventListener('click', function(){ input.value = ''; fetchAndRender(''); input.focus(); });
+    })();
+</script>
 
 

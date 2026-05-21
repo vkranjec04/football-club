@@ -10,10 +10,10 @@
             public int MatchId { get; set; }
 
         // N strana od Player 1-N Stats
-        public Player Player { get; set; }
+        public Player Player { get; set; } = null!;
 
         // N strana od Match 1-N PlayerStats
-        public Match Match { get; set; }
+        public Match Match { get; set; } = null!;
 
         public int Goals { get; set; }
         public int Assists { get; set; }

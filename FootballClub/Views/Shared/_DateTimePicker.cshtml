@@ -1,0 +1,482 @@
+@using System.Globalization
+@{
+    var fieldName = ViewData["FieldName"]?.ToString();
+    if (string.IsNullOrWhiteSpace(fieldName))
+    {
+        throw new InvalidOperationException("_DateTimePicker requires ViewData[\"FieldName\"].");
+    }
+
+    var label = ViewData["Label"]?.ToString() ?? fieldName;
+    var helpText = ViewData["HelpText"]?.ToString();
+    var elementKey = fieldName.Replace(".", "_").Replace("[", "_").Replace("]", "_");
+    var displayId = $"{elementKey}_display";
+    var culture = CultureInfo.CurrentCulture;
+    var shortDatePattern = culture.DateTimeFormat.ShortDatePattern;
+    var shortTimePattern = culture.DateTimeFormat.ShortTimePattern;
+    var dateTimePattern = $"{shortDatePattern} {shortTimePattern}";
+
+    DateTime? initialValue = null;
+    if (ViewData["Value"] is DateTime dateTimeValue)
+    {
+        initialValue = dateTimeValue;
+    }
+    else if (ViewData["Value"] is string stringValue && DateTime.TryParse(stringValue, culture, DateTimeStyles.AllowWhiteSpaces, out var parsedValue))
+    {
+        initialValue = parsedValue;
+    }
+
+    var hiddenValue = initialValue?.ToString("yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture) ?? string.Empty;
+    var displayValue = initialValue.HasValue ? initialValue.Value.ToString(dateTimePattern, culture) : string.Empty;
+}
+
+<div class="football-dtp" data-football-dtp data-culture="@culture.Name" data-field-name="@fieldName" data-date-pattern="@shortDatePattern" data-time-pattern="@shortTimePattern">
+    <label class="form-label" for="@displayId">@label</label>
+
+    <div class="football-dtp__shell" style="position: relative; display: grid; grid-template-columns: 1fr auto; gap: 0.5rem; align-items: start;">
+        <input type="text"
+               id="@displayId"
+               class="form-control football-dtp__display"
+               value="@displayValue"
+               autocomplete="off"
+               inputmode="text"
+               placeholder="@dateTimePattern"
+               data-football-dtp-display />
+
+        <input type="hidden"
+               id="@elementKey"
+               name="@fieldName"
+               value="@hiddenValue"
+               data-football-dtp-value />
+
+        <button type="button"
+                class="btn btn-outline-light football-dtp__toggle"
+                data-football-dtp-toggle
+                aria-label="Open date and time picker"
+                style="min-width: 44px; height: 100%;">
+            📅
+        </button>
+    </div>
+
+    <div class="football-dtp__panel"
+         data-football-dtp-panel
+         hidden
+         style="position: absolute; z-index: 20; margin-top: 0.5rem; width: min(22rem, 100%); padding: 0.85rem; border-radius: 1rem; background: #0f172a; color: #e2e8f0; box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35); border: 1px solid rgba(148, 163, 184, 0.25);">
+        <div class="football-dtp__panel-header" style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.75rem;">
+            <button type="button" class="btn btn-sm btn-outline-light" data-football-dtp-prev aria-label="Previous month">‹</button>
+            <strong data-football-dtp-title style="letter-spacing: 0.02em;"></strong>
+            <button type="button" class="btn btn-sm btn-outline-light" data-football-dtp-next aria-label="Next month">›</button>
+        </div>
+
+        <div class="football-dtp__weekdays"
+             data-football-dtp-weekdays
+             style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; font-size: 0.72rem; text-transform: uppercase; opacity: 0.78; margin-bottom: 0.35rem; text-align: center;"></div>
+
+        <div class="football-dtp__days"
+             data-football-dtp-days
+             style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 0.25rem; margin-bottom: 0.8rem;"></div>
+
+        <div class="football-dtp__time" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.85rem;">
+            <label style="display: grid; gap: 0.3rem; font-size: 0.85rem;">
+                <span>Hour</span>
+                <input type="number" min="0" max="23" step="1" value="0" class="form-control football-dtp__hour" data-football-dtp-hour />
+            </label>
+            <label style="display: grid; gap: 0.3rem; font-size: 0.85rem;">
+                <span>Minute</span>
+                <input type="number" min="0" max="59" step="1" value="0" class="form-control football-dtp__minute" data-football-dtp-minute />
+            </label>
+        </div>
+
+        <div class="football-dtp__panel-actions" style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: space-between;">
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-sm btn-outline-light" data-football-dtp-today>Today</button>
+                <button type="button" class="btn btn-sm btn-outline-light" data-football-dtp-clear>Clear</button>
+            </div>
+            <button type="button" class="btn btn-sm btn-primary" data-football-dtp-apply>Apply</button>
+        </div>
+    </div>
+
+    <span class="text-danger" data-valmsg-for="@fieldName" data-valmsg-replace="true"></span>
+    @if (!string.IsNullOrWhiteSpace(helpText))
+    {
+        <div class="form-text">@helpText</div>
+    }
+</div>
+
+<script>
+(function () {
+    if (window.FootballClubDateTimePicker) {
+        window.FootballClubDateTimePicker.init();
+        return;
+    }
+
+    var monthFormatterCache = {};
+    var weekdayFormatterCache = {};
+
+    function toLocalIso(date) {
+        var year = date.getFullYear();
+        var month = String(date.getMonth() + 1).padStart(2, "0");
+        var day = String(date.getDate()).padStart(2, "0");
+        var hour = String(date.getHours()).padStart(2, "0");
+        var minute = String(date.getMinutes()).padStart(2, "0");
+        var second = String(date.getSeconds()).padStart(2, "0");
+        return year + "-" + month + "-" + day + "T" + hour + ":" + minute + ":" + second;
+    }
+
+    function getCultureMode(cultureName) {
+        return cultureName && cultureName.toLowerCase().indexOf("hr") === 0
+            ? { dateFirst: true, hour12: false }
+            : { dateFirst: false, hour12: true };
+    }
+
+    function parseDisplayValue(value, cultureName) {
+        if (!value) {
+            return null;
+        }
+
+        var text = value.trim();
+        var parts = text.split(/\s+/);
+        var datePart = parts[0] || "";
+        var timePart = parts[1] || "00:00";
+        var ampmPart = (parts[2] || "").toUpperCase();
+        var mode = getCultureMode(cultureName);
+        var dateMatch = datePart.match(mode.dateFirst
+            ? /^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/
+            : /^(\d{1,2})[./-](\d{1,2})[./-](\d{4})$/);
+
+        if (!dateMatch) {
+            return null;
+        }
+
+        var first = parseInt(dateMatch[1], 10);
+        var second = parseInt(dateMatch[2], 10);
+        var year = parseInt(dateMatch[3], 10);
+        var month = mode.dateFirst ? second : first;
+        var day = mode.dateFirst ? first : second;
+
+        if (ampmPart === "AM" || ampmPart === "PM") {
+            var ampmMatch = timePart.match(/^(\d{1,2})(?::(\d{1,2}))?$/);
+            if (!ampmMatch) {
+                return null;
+            }
+
+            var hour12 = parseInt(ampmMatch[1], 10);
+            var minute12 = parseInt(ampmMatch[2] || "0", 10);
+            if (hour12 < 1 || hour12 > 12 || minute12 < 0 || minute12 > 59) {
+                return null;
+            }
+
+            var convertedHour = hour12 % 12;
+            if (ampmPart === "PM") {
+                convertedHour += 12;
+            }
+
+            return new Date(year, month - 1, day, convertedHour, minute12, 0, 0);
+        }
+
+        var timeMatch = timePart.match(/^(\d{1,2})(?::(\d{1,2}))?$/);
+        if (!timeMatch) {
+            return null;
+        }
+
+        var hour = parseInt(timeMatch[1], 10);
+        var minute = parseInt(timeMatch[2] || "0", 10);
+
+        if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+            return null;
+        }
+
+        return new Date(year, month - 1, day, hour, minute, 0, 0);
+    }
+
+    function formatDisplayValue(date, cultureName) {
+        if (!date) {
+            return "";
+        }
+
+        var mode = getCultureMode(cultureName);
+        var options = mode.dateFirst
+            ? { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hour12: false }
+            : { month: "2-digit", day: "2-digit", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true };
+
+        return new Intl.DateTimeFormat(cultureName || undefined, options).format(date);
+    }
+
+    function getMonthFormatter(cultureName) {
+        if (!monthFormatterCache[cultureName]) {
+            monthFormatterCache[cultureName] = new Intl.DateTimeFormat(cultureName || undefined, { month: "long", year: "numeric" });
+        }
+
+        return monthFormatterCache[cultureName];
+    }
+
+    function getWeekdayFormatter(cultureName) {
+        if (!weekdayFormatterCache[cultureName]) {
+            weekdayFormatterCache[cultureName] = new Intl.DateTimeFormat(cultureName || undefined, { weekday: "short" });
+        }
+
+        return weekdayFormatterCache[cultureName];
+    }
+
+    function createPicker(root) {
+        var cultureName = root.dataset.culture || "en-US";
+        var hiddenInput = root.querySelector("[data-football-dtp-value]");
+        var displayInput = root.querySelector("[data-football-dtp-display]");
+        var panel = root.querySelector("[data-football-dtp-panel]");
+        var title = root.querySelector("[data-football-dtp-title]");
+        var weekdayContainer = root.querySelector("[data-football-dtp-weekdays]");
+        var dayContainer = root.querySelector("[data-football-dtp-days]");
+        var hourInput = root.querySelector("[data-football-dtp-hour]");
+        var minuteInput = root.querySelector("[data-football-dtp-minute]");
+        var toggleButton = root.querySelector("[data-football-dtp-toggle]");
+        var prevButton = root.querySelector("[data-football-dtp-prev]");
+        var nextButton = root.querySelector("[data-football-dtp-next]");
+        var todayButton = root.querySelector("[data-football-dtp-today]");
+        var clearButton = root.querySelector("[data-football-dtp-clear]");
+        var applyButton = root.querySelector("[data-football-dtp-apply]");
+
+        if (root.dataset.dtpInitialized === "true") {
+            return;
+        }
+
+        root.dataset.dtpInitialized = "true";
+
+        var current = parseDisplayValue(displayInput.value || formatDisplayValue(hiddenInput.value ? new Date(hiddenInput.value) : null, cultureName), cultureName) || (hiddenInput.value ? new Date(hiddenInput.value) : new Date());
+        var selected = hiddenInput.value ? new Date(hiddenInput.value) : current;
+
+        function clampTime(date) {
+            date.setHours(Math.max(0, Math.min(23, parseInt(hourInput.value || "0", 10) || 0)));
+            date.setMinutes(Math.max(0, Math.min(59, parseInt(minuteInput.value || "0", 10) || 0)));
+            date.setSeconds(0, 0);
+            return date;
+        }
+
+        function syncTimeFromDate(date) {
+            hourInput.value = String(date.getHours()).padStart(2, "0");
+            minuteInput.value = String(date.getMinutes()).padStart(2, "0");
+        }
+
+        function syncInputs(date) {
+            if (!date) {
+                hiddenInput.value = "";
+                displayInput.value = "";
+                return;
+            }
+
+            var normalized = clampTime(new Date(date.getTime()));
+            hiddenInput.value = toLocalIso(normalized);
+            displayInput.value = formatDisplayValue(normalized, cultureName);
+            selected = normalized;
+            current = new Date(normalized.getFullYear(), normalized.getMonth(), 1, normalized.getHours(), normalized.getMinutes(), 0, 0);
+            syncTimeFromDate(normalized);
+            renderCalendar();
+        }
+
+        function closePanel() {
+            panel.hidden = true;
+        }
+
+        function openPanel() {
+            panel.hidden = false;
+            renderCalendar();
+        }
+
+        function renderWeekdays() {
+            var formatter = getWeekdayFormatter(cultureName);
+            var mode = getCultureMode(cultureName);
+            var base = mode.dateFirst ? 1 : 0;
+            var now = new Date(2024, 0, 7 + base);
+
+            weekdayContainer.innerHTML = "";
+            for (var i = 0; i < 7; i++) {
+                var weekdayDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + i);
+                var weekday = document.createElement("div");
+                weekday.textContent = formatter.format(weekdayDate);
+                weekdayContainer.appendChild(weekday);
+            }
+        }
+
+        function renderCalendar() {
+            renderWeekdays();
+
+            var year = current.getFullYear();
+            var month = current.getMonth();
+            var firstDay = new Date(year, month, 1);
+            var lastDay = new Date(year, month + 1, 0);
+            var startOffset = firstDay.getDay();
+            var cells = [];
+
+            title.textContent = getMonthFormatter(cultureName).format(firstDay);
+            dayContainer.innerHTML = "";
+
+            if (getCultureMode(cultureName).dateFirst) {
+                startOffset = (startOffset + 6) % 7;
+            }
+
+            for (var empty = 0; empty < startOffset; empty++) {
+                cells.push(null);
+            }
+
+            for (var day = 1; day <= lastDay.getDate(); day++) {
+                cells.push(new Date(year, month, day, selected.getHours(), selected.getMinutes(), 0, 0));
+            }
+
+            cells.forEach(function (date) {
+                var button = document.createElement("button");
+                button.type = "button";
+                button.className = "btn btn-sm " + (date ? (selected && date.getDate() === selected.getDate() && date.getMonth() === selected.getMonth() && date.getFullYear() === selected.getFullYear() ? "btn-primary" : "btn-outline-light") : "btn-outline-secondary");
+                button.style.minHeight = "2.2rem";
+                button.style.width = "100%";
+
+                if (!date) {
+                    button.disabled = true;
+                    button.innerHTML = "&nbsp;";
+                } else {
+                    button.textContent = String(date.getDate());
+                    button.addEventListener("click", function () {
+                        selected = new Date(date.getTime());
+                        syncTimeFromDate(selected);
+                        syncInputs(selected);
+                    });
+                }
+
+                dayContainer.appendChild(button);
+            });
+        }
+
+        function moveMonth(delta) {
+            current = new Date(current.getFullYear(), current.getMonth() + delta, 1, current.getHours(), current.getMinutes(), 0, 0);
+            renderCalendar();
+        }
+
+        toggleButton.addEventListener("click", function (event) {
+            event.preventDefault();
+            panel.hidden = !panel.hidden;
+            if (!panel.hidden) {
+                renderCalendar();
+            }
+        });
+
+        prevButton.addEventListener("click", function (event) {
+            event.preventDefault();
+            moveMonth(-1);
+        });
+
+        nextButton.addEventListener("click", function (event) {
+            event.preventDefault();
+            moveMonth(1);
+        });
+
+        todayButton.addEventListener("click", function (event) {
+            event.preventDefault();
+            var today = new Date();
+            today.setSeconds(0, 0);
+            selected = today;
+            current = new Date(today.getFullYear(), today.getMonth(), 1, today.getHours(), today.getMinutes(), 0, 0);
+            syncTimeFromDate(today);
+            syncInputs(today);
+        });
+
+        clearButton.addEventListener("click", function (event) {
+            event.preventDefault();
+            hiddenInput.value = "";
+            displayInput.value = "";
+            panel.hidden = true;
+        });
+
+        applyButton.addEventListener("click", function (event) {
+            event.preventDefault();
+            var parsed = parseDisplayValue(displayInput.value, cultureName);
+
+            if (parsed) {
+                selected = parsed;
+            }
+
+            selected = clampTime(selected || new Date());
+            syncInputs(selected);
+            closePanel();
+        });
+
+        displayInput.addEventListener("blur", function () {
+            var parsed = parseDisplayValue(displayInput.value, cultureName);
+
+            if (!parsed) {
+                if (!displayInput.value.trim()) {
+                    hiddenInput.value = "";
+                    return;
+                }
+
+                displayInput.setCustomValidity("Use the expected date and time format for your browser culture.");
+                displayInput.reportValidity();
+                return;
+            }
+
+            displayInput.setCustomValidity("");
+            selected = parsed;
+            syncInputs(selected);
+        });
+
+        displayInput.addEventListener("input", function () {
+            displayInput.setCustomValidity("");
+        });
+
+        hourInput.addEventListener("change", function () {
+            var parsed = parseDisplayValue(displayInput.value, cultureName) || selected || new Date();
+            parsed.setHours(Math.max(0, Math.min(23, parseInt(hourInput.value || "0", 10) || 0)));
+            parsed.setMinutes(Math.max(0, Math.min(59, parseInt(minuteInput.value || "0", 10) || 0)));
+            parsed.setSeconds(0, 0);
+            selected = parsed;
+            syncInputs(selected);
+        });
+
+        minuteInput.addEventListener("change", function () {
+            var parsed = parseDisplayValue(displayInput.value, cultureName) || selected || new Date();
+            parsed.setHours(Math.max(0, Math.min(23, parseInt(hourInput.value || "0", 10) || 0)));
+            parsed.setMinutes(Math.max(0, Math.min(59, parseInt(minuteInput.value || "0", 10) || 0)));
+            parsed.setSeconds(0, 0);
+            selected = parsed;
+            syncInputs(selected);
+        });
+
+        document.addEventListener("click", function (event) {
+            if (!root.contains(event.target)) {
+                closePanel();
+            }
+        });
+
+        if (hiddenInput.value) {
+            var initialDate = new Date(hiddenInput.value);
+            if (!isNaN(initialDate.getTime())) {
+                selected = initialDate;
+                current = new Date(initialDate.getFullYear(), initialDate.getMonth(), 1, initialDate.getHours(), initialDate.getMinutes(), 0, 0);
+                syncTimeFromDate(initialDate);
+                displayInput.value = formatDisplayValue(initialDate, cultureName);
+            }
+        } else if (displayInput.value) {
+            var parsedInitial = parseDisplayValue(displayInput.value, cultureName);
+            if (parsedInitial) {
+                selected = parsedInitial;
+                current = new Date(parsedInitial.getFullYear(), parsedInitial.getMonth(), 1, parsedInitial.getHours(), parsedInitial.getMinutes(), 0, 0);
+                syncTimeFromDate(parsedInitial);
+            }
+        } else {
+            syncTimeFromDate(selected);
+        }
+
+        renderCalendar();
+    }
+
+    window.FootballClubDateTimePicker = {
+        init: function () {
+            document.querySelectorAll("[data-football-dtp]").forEach(createPicker);
+        }
+    };
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", function () {
+            window.FootballClubDateTimePicker.init();
+        });
+    } else {
+        window.FootballClubDateTimePicker.init();
+    }
+})();
+</script>

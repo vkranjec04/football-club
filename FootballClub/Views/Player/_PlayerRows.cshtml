@@ -1,0 +1,64 @@
+@using FootballClub.Models.Enums
+@model List<Player>
+
+@{
+    bool isAdmin = (bool?)ViewBag.IsAdmin ?? false;
+}
+
+@foreach (var player in Model.OrderBy(p => p.IsDeleted ? 1 : 0).ThenBy(p => p.Club?.Name).ThenBy(p => p.Position))
+{
+    @if (player.IsDeleted && !isAdmin)
+    {
+        // Skip deleted players for non-admin users
+        continue;
+    }
+    <tr @(player.IsDeleted ? "style='opacity:0.5;'" : "")>
+        <td><strong>@player.FirstName @player.LastName</strong></td>
+        <td>
+            @{var posClass = player.Position switch
+                {
+                    PlayerPosition.Goalkeeper => "badge-gray",
+                    PlayerPosition.Defender => "badge-blue",
+                    PlayerPosition.Midfielder => "badge-amber",
+                    PlayerPosition.Forward => "badge-red",
+                    _ => "badge-gray"
+                };
+            }
+            <span class="badge @posClass">@player.Position</span>
+        </td>
+        <td>@player.Club?.Name</td>
+        <td>#@player.JerseyNumber</td>
+        <td>€@player.MarketValue.ToString("F1") M</td>
+        <td>
+            @if (player.IsDeleted)
+            {
+                <span class="badge" style="background:#fee2e2;color:#b91c1c;">Deleted</span>
+            }
+            else if (player.IsInjured)
+            {
+                <span class="badge badge-red">Injured</span>
+            }
+            else
+            {
+                <span class="badge badge-green">Active</span>
+            }
+        </td>
+        <td>
+            @if (player.IsDeleted)
+            {
+                @if (isAdmin)
+                {
+                    <form method="post" action="/Player/Restore/@player.Id" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="view-link" style="border:none;background:none;cursor:pointer;text-decoration:underline;">Restore →</button>
+                    </form>
+                }
+            }
+            else
+            {
+                <a href="/player-profile/@player.Id" class="view-link">Details →</a>
+            }
+        </td>
+    </tr>
+}
+
