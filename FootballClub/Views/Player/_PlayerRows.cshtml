@@ -50,13 +50,13 @@
                 {
                     <form method="post" action="/Player/Restore/@player.Id" style="display:inline;">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="view-link" style="border:none;background:none;cursor:pointer;text-decoration:underline;">Restore →</button>
+                        <button type="submit" class="btn btn-sm btn-success">Restore</button>
                     </form>
                 }
             }
             else
             {
-                <a href="/player-profile/@player.Id" class="view-link">Details →</a>
+                <a href="/player-profile/@player.Id" class="btn btn-sm btn-ghost btn-arrow">Details</a>
             }
         </td>
     </tr>

@@ -25,7 +25,7 @@
             <span class="badge badge-blue">@(selectedClub?.Name ?? "Club")</span>
             @if (selectedClub != null)
             {
-                <a href="/Player/Schedule?clubId=@selectedClub.Id" class="view-link">Weekly Schedules →</a>
+                <a href="/Player/Schedule?clubId=@selectedClub.Id" class="btn btn-sm btn-ghost btn-arrow">Weekly Schedules</a>
             }
         </div>
     </div>

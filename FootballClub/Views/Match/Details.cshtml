@@ -1,4 +1,4 @@
-﻿@using FootballClub.Models.Enums
+@using FootballClub.Models.Enums
 @model Match
 
 @{
@@ -12,7 +12,7 @@
     };
 }
 
-<a href="/Match" class="btn-back">â† Back to Matches</a>
+<a href="/Match" class="btn-back btn-arrow-left">Back to Matches</a>
 
 <div class="page-header">
     <h2>@Model.HomeClub.Name vs @Model.AwayClub.Name</h2>
@@ -106,7 +106,7 @@
             </div>
             <div class="info-row">
                 <span class="lbl">Budget</span>
-                <span class="val">â‚¬@Model.HomeClub.Budget.ToString("F1")M</span>
+                <span class="val">€@Model.HomeClub.Budget.ToString("F1")M</span>
             </div>
             @if (Model.Status == MatchStatus.Finished)
             {
@@ -134,7 +134,7 @@
             </div>
             <div class="info-row">
                 <span class="lbl">Budget</span>
-                <span class="val">â‚¬@Model.AwayClub.Budget.ToString("F1")M</span>
+                <span class="val">€@Model.AwayClub.Budget.ToString("F1")M</span>
             </div>
             @if (Model.Status == MatchStatus.Finished)
             {
@@ -176,7 +176,7 @@
                                 <td>@stat.Assists</td>
                                 <td>@stat.MinutesPlayed'</td>
                                 <td style="font-weight: 700;">@stat.Rating.ToString("F1")</td>
-                                <td><a href="/player-profile/@stat.Player.Id" class="view-link">Player â†’</a></td>
+                                <td><a href="/player-profile/@stat.Player.Id" class="btn btn-sm btn-ghost btn-arrow">Player</a></td>
                             </tr>
                         }
                     </tbody>
@@ -185,4 +185,3 @@
         </div>
     }
 </div>
-

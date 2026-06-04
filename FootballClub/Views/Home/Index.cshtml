@@ -1,4 +1,4 @@
-﻿@using FootballClub.Models
+@using FootballClub.Models
 @{
     ViewData["Title"] = "Dashboard";
     ViewData["ActivePage"] = "Home";
@@ -60,12 +60,12 @@
             </div>
         </div>
         <div class="match-meta">
-            <span>ðŸ“ @nextTraining.Location</span>
-            <span>ðŸ‘¥ @nextTraining.Participants.Count participants</span>
-            <span>ðŸ§  @nextTraining.Intensity intensity</span>
+            <span>📍 @nextTraining.Location</span>
+            <span>👥 @nextTraining.Participants.Count participants</span>
+            <span>🧠 @nextTraining.Intensity intensity</span>
         </div>
         <div style="margin-top: 12px;">
-            <a href="/Training/Details/@nextTraining.Id" style="color: var(--blue-light); text-decoration: none; font-weight: 700;">Open session plan â†’</a>
+            <a href="/Training/Details/@nextTraining.Id" class="btn btn-sm btn-ghost btn-arrow">Open session plan</a>
         </div>
     </div>
 }
@@ -103,7 +103,7 @@
                             <td>@session.StartTime.ToString("dd.MM.yyyy HH:mm")</td>
                             <td>@((session.EndTime - session.StartTime).TotalMinutes) min</td>
                             <td><span class="badge badge-gray">@session.Intensity</span></td>
-                            <td><a href="/Training/Details/@session.Id" class="view-link">Details â†’</a></td>
+                            <td><a href="/Training/Details/@session.Id" class="btn btn-sm btn-ghost btn-arrow">Details</a></td>
                         </tr>
                     }
                 </tbody>
@@ -139,7 +139,7 @@
                             <td><strong>@match.HomeClub.Name</strong> vs <strong>@match.AwayClub.Name</strong></td>
                             <td>@match.HomeScore - @match.AwayScore</td>
                             <td>@match.Date.ToString("dd.MM.yyyy")</td>
-                            <td><a href="/Match/Details/@match.Id" class="view-link">Match â†’</a></td>
+                            <td><a href="/Match/Details/@match.Id" class="btn btn-sm btn-ghost btn-arrow">Match</a></td>
                         </tr>
                     }
                 </tbody>
@@ -176,7 +176,7 @@
                             <td><strong>@player.FullName</strong></td>
                             <td>@player.Position</td>
                             <td><span class="badge badge-red">Injured</span></td>
-                            <td><a href="/player-profile/@player.Id" class="view-link">Profile â†’</a></td>
+                            <td><a href="/player-profile/@player.Id" class="btn btn-sm btn-ghost btn-arrow">Profile</a></td>
                         </tr>
                     }
                 </tbody>
@@ -184,4 +184,3 @@
         }
     </div>
 </div>
-

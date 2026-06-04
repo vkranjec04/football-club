@@ -2,6 +2,7 @@ using FootballClub.Models;
 using FootballClub.Models.Mapping;
 using FootballClub.Repositories;
 using FootballClub.Web.Dto;
+using FootballClub.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,12 +13,12 @@ namespace FootballClub.Web.Controllers.Api;
 public class AttachmentsApiController : ApiControllerBase
 {
     private readonly AttachmentMockRepository _attachments;
-    private readonly IWebHostEnvironment _environment;
+    private readonly IFileStorage _storage;
 
-    public AttachmentsApiController(AttachmentMockRepository attachments, IWebHostEnvironment environment)
+    public AttachmentsApiController(AttachmentMockRepository attachments, IFileStorage storage)
     {
         _attachments = attachments;
-        _environment = environment;
+        _storage = storage;
     }
 
     [AllowAnonymous]
@@ -54,15 +55,10 @@ public class AttachmentsApiController : ApiControllerBase
             return BadRequest("File name is invalid.");
         }
 
-        var relativeDirectory = Path.Combine("uploads", safeEntityType, dto.EntityId.ToString());
-        var absoluteDirectory = Path.Combine(_environment.WebRootPath, relativeDirectory);
-        Directory.CreateDirectory(absoluteDirectory);
-
-        var uniqueFileName = $"{Guid.NewGuid():N}_{safeFileName}";
-        var absoluteFilePath = Path.Combine(absoluteDirectory, uniqueFileName);
-        await using (var stream = System.IO.File.Create(absoluteFilePath))
+        string storedFilePath;
+        await using (var stream = dto.File.OpenReadStream())
         {
-            await dto.File.CopyToAsync(stream);
+            storedFilePath = await _storage.SaveAsync(stream, safeEntityType, dto.EntityId, safeFileName, dto.File.ContentType);
         }
 
         var attachment = new Attachment
@@ -70,7 +66,7 @@ public class AttachmentsApiController : ApiControllerBase
             EntityType = dto.EntityType.Trim(),
             EntityId = dto.EntityId,
             FileName = safeFileName,
-            FilePath = Path.Combine(relativeDirectory, uniqueFileName).Replace('\\', '/'),
+            FilePath = storedFilePath,
             ContentType = dto.File.ContentType,
             FileSize = dto.File.Length,
             CreatedAt = DateTime.UtcNow
@@ -82,7 +78,7 @@ public class AttachmentsApiController : ApiControllerBase
 
     [Authorize(Roles = "Admin")]
     [HttpDelete("{id:int}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
         var attachment = _attachments.GetById(id);
         if (attachment == null)
@@ -90,11 +86,7 @@ public class AttachmentsApiController : ApiControllerBase
             return NotFound();
         }
 
-        var absoluteFilePath = Path.Combine(_environment.WebRootPath, attachment.FilePath.Replace('/', Path.DirectorySeparatorChar));
-        if (System.IO.File.Exists(absoluteFilePath))
-        {
-            System.IO.File.Delete(absoluteFilePath);
-        }
+        await _storage.DeleteAsync(attachment.FilePath);
 
         _attachments.Delete(attachment);
         return NoContent();

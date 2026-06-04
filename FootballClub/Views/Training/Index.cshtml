@@ -1,4 +1,4 @@
-﻿@using FootballClub.Models
+@using FootballClub.Models
 @using FootballClub.Models.Enums
 @model List<TrainingSession>
 
@@ -40,7 +40,7 @@
                     }
                 }
             </select>
-            <a href="/Player/Schedule" class="view-link">Open Player Schedules ?</a>
+            <a href="/Player/Schedule" class="btn btn-sm btn-ghost btn-arrow">Open Player Schedules</a>
         </form>
     </div>
 </div>
@@ -80,7 +80,7 @@
                             <td>@((session.EndTime - session.StartTime).TotalMinutes) min</td>
                             <td><span class="badge badge-gray">@session.Intensity</span></td>
                             <td>@session.Participants.Count</td>
-                            <td><a href="/Training/Details/@session.Id" class="view-link">Session Plan â†’</a></td>
+                            <td><a href="/Training/Details/@session.Id" class="btn btn-sm btn-ghost btn-arrow">Session Plan</a></td>
                         </tr>
                     }
                 </tbody>
@@ -125,7 +125,7 @@
                             <td>@trainingCount</td>
                             <td>@recoveryCount</td>
                             <td>@mediaCount</td>
-                            <td><a href="/player-profile/@player.Id" class="view-link">Player Plan →</a></td>
+                            <td><a href="/player-profile/@player.Id" class="btn btn-sm btn-ghost btn-arrow">Player Plan</a></td>
                         </tr>
                     }
                 </tbody>
@@ -148,8 +148,8 @@
         function fetchAndRender(q) {
             fetch('/Training/Filter?term=' + encodeURIComponent(q), { headers: { 'Accept': 'text/html' } })
                 .then(function(r){ return r.text(); })
-                .then(function(html){ 
-                    tbody.innerHTML = html; 
+                .then(function(html){
+                    tbody.innerHTML = html;
                     // Reinitialize row hover animations after AJAX update
                     if (window.reinitializeAnimations) {
                         window.reinitializeAnimations();
@@ -166,4 +166,3 @@
         clearBtn.addEventListener('click', function(){ input.value = ''; fetchAndRender(''); input.focus(); });
     })();
 </script>
-

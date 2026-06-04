@@ -22,7 +22,10 @@
     --text-dark: #f1f5f9;      /* Swapped for dark mode */
     --white: #ffffff;
     --red: #ef4444;
+    --green: #10b981;
     --amber: #f59e0b;
+    --link: #60a5fa;        /* readable link blue on dark bg */
+    --link-hover: #93c5fd;
     --sidebar-w: 240px;
 }
 
@@ -33,6 +36,17 @@ body {
     display: flex;
     min-height: 100vh;
 }
+
+/* Readable default link color (overrides the browser's dark-blue default
+   that was unreadable on the dark background). Components that need their
+   own colour set it via a class, which wins on specificity. */
+a {
+    color: var(--link);
+}
+
+    a:hover {
+        color: var(--link-hover);
+    }
 
 /* ---- SIDEBAR ---- */
 .sidebar {
@@ -164,7 +178,7 @@ body {
         }
 
     .breadcrumbs .sep {
-        color: var(--dark-border);
+        color: var(--text-muted);
     }
 
     .breadcrumbs .current {
@@ -324,13 +338,13 @@ body {
         background: #1e293b;
     }
 
-    .fc-table a {
-        color: var(--blue-light);
+    .fc-table a:not(.btn):not(.view-link) {
+        color: var(--link);
         text-decoration: none;
         font-weight: 600;
     }
 
-        .fc-table a:hover {
+        .fc-table a:not(.btn):not(.view-link):hover {
             text-decoration: underline;
         }
 
@@ -442,7 +456,7 @@ body {
     display: flex;
     justify-content: space-between;
     padding: 0.625rem 0;
-    border-bottom: 1px solid #f1f5f9;
+    border-bottom: 1px solid var(--dark-border);
     font-size: 14px;
 }
 
@@ -656,18 +670,27 @@ body {
         color: var(--blue-light);
     }
 
+/* .view-link is kept as an alias of a small ghost button so any legacy
+   markup still renders as a button instead of a bare text link. */
 .view-link {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    font-size: 13px;
-    color: var(--blue-light);
+    gap: 5px;
+    padding: 5px 11px;
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--dark-border);
+    color: var(--text-main);
     text-decoration: none;
-    font-weight: 700;
+    font-size: 12.5px;
+    font-weight: 600;
 }
 
     .view-link:hover {
-        text-decoration: underline;
+        background: rgba(59, 130, 246, 0.12);
+        border-color: var(--blue-light);
+        color: #bfdbfe;
+        text-decoration: none;
     }
 
 /* ---- RESPONSIVE ---- */
@@ -746,4 +769,213 @@ body {
 /* Enhanced focus and hover states */
 .form-control:hover {
     border-color: rgba(59, 130, 246, 0.5);
+}
+
+/* =============================================
+   BUTTON SYSTEM
+   Cohesive buttons that read well on the dark theme.
+   Used by redirect links, form actions and table actions.
+   ============================================= */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s, transform 0.06s;
+}
+
+    .btn:hover {
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+
+    .btn:active {
+        transform: translateY(0);
+    }
+
+    .btn:focus-visible {
+        outline: 2px solid var(--blue-light);
+        outline-offset: 2px;
+    }
+
+/* Small variant for table-row actions and the topbar */
+.btn-sm {
+    gap: 5px;
+    padding: 5px 11px;
+    border-radius: 7px;
+    font-size: 12.5px;
+}
+
+/* Primary — solid blue, white text */
+.btn-primary {
+    background: var(--blue-light);
+    border-color: var(--blue-light);
+    color: #fff;
+}
+
+    .btn-primary:hover {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #fff;
+        box-shadow: 0 6px 16px rgba(59, 130, 246, 0.25);
+    }
+
+/* Ghost — subtle dark surface with border; the default "go to" button */
+.btn-ghost {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: var(--dark-border);
+    color: var(--text-main);
+}
+
+    .btn-ghost:hover {
+        background: rgba(59, 130, 246, 0.12);
+        border-color: var(--blue-light);
+        color: #bfdbfe;
+    }
+
+/* Outline-light (form Cancel, Google login, etc.) */
+.btn-outline-light,
+.btn-outline-secondary {
+    background: transparent;
+    border-color: var(--dark-border);
+    color: var(--text-main);
+}
+
+    .btn-outline-light:hover,
+    .btn-outline-secondary:hover {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: var(--text-muted);
+        color: #fff;
+    }
+
+/* Informational outline (e.g. Stadium "Details") */
+.btn-outline-info {
+    background: transparent;
+    border-color: rgba(59, 130, 246, 0.5);
+    color: #93c5fd;
+}
+
+    .btn-outline-info:hover {
+        background: rgba(59, 130, 246, 0.15);
+        border-color: var(--blue-light);
+        color: #dbeafe;
+    }
+
+/* Danger — delete actions */
+.btn-danger,
+.btn-outline-danger {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: #fca5a5;
+}
+
+    .btn-danger:hover,
+    .btn-outline-danger:hover {
+        background: var(--red);
+        border-color: var(--red);
+        color: #fff;
+        box-shadow: 0 6px 16px rgba(239, 68, 68, 0.25);
+    }
+
+/* Success — restore actions */
+.btn-success {
+    background: rgba(16, 185, 129, 0.14);
+    border-color: rgba(16, 185, 129, 0.5);
+    color: #6ee7b7;
+}
+
+    .btn-success:hover {
+        background: var(--green);
+        border-color: var(--green);
+        color: #06281d;
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.25);
+    }
+
+/* Arrow affixes — drawn with an SVG mask so they recolour with the button
+   text and never depend on a text glyph/encoding (the old arrow mojibake). */
+.btn-arrow::after,
+.btn-arrow-left::before {
+    content: "";
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23000'%20stroke-width='3'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M5%2012h14M13%206l6%206-6%206'/%3E%3C/svg%3E") no-repeat center / contain;
+    mask: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23000'%20stroke-width='3'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M5%2012h14M13%206l6%206-6%206'/%3E%3C/svg%3E") no-repeat center / contain;
+    transition: transform 0.15s ease;
+}
+
+.btn-arrow-left::before {
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23000'%20stroke-width='3'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M19%2012H5M11%206l-6%206%206%206'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%20fill='none'%20stroke='%23000'%20stroke-width='3'%20stroke-linecap='round'%20stroke-linejoin='round'%3E%3Cpath%20d='M19%2012H5M11%206l-6%206%206%206'/%3E%3C/svg%3E");
+}
+
+.btn-arrow:hover::after {
+    transform: translateX(3px);
+}
+
+.btn-arrow-left:hover::before {
+    transform: translateX(-3px);
+}
+
+/* Layout helpers used by League/Details that were never defined */
+.text-muted {
+    color: var(--text-muted);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+    margin-bottom: 1.5rem;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 0.75rem;
+}
+
+    .profile-header h4 {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--text-main);
+    }
+
+.info-label {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 13px;
+}
+
+.info-value {
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+@media (max-width: 900px) {
+    .two-column {
+        grid-template-columns: 1fr;
+    }
 }

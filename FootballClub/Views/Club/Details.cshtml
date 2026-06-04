@@ -1,4 +1,4 @@
-﻿@using FootballClub.Models.Enums
+@using FootballClub.Models.Enums
 @using System.Linq
 @model Club
 
@@ -19,7 +19,7 @@
         : null;
 }
 
-<a href="/Club" class="btn-back">â† Back to Clubs</a>
+<a href="/Club" class="btn-back btn-arrow-left">Back to Clubs</a>
 
 <div class="page-header">
     <h2>@Model.Name</h2>
@@ -32,7 +32,7 @@
         <div class="profile-avatar">@Model.Name.Substring(0, 1)</div>
         <div class="profile-name">@Model.Name</div>
         <div class="profile-sub">@Model.City</div>
-        
+
         <div class="profile-stats">
             <div class="profile-stat-item">
                 <div class="val">@Model.FoundedYear</div>
@@ -43,7 +43,7 @@
                 <div class="lbl">Players</div>
             </div>
             <div class="profile-stat-item">
-                <div class="val">â‚¬@Model.Budget.ToString("F1")</div>
+                <div class="val">€@Model.Budget.ToString("F1")</div>
                 <div class="lbl">Budget</div>
             </div>
             <div class="profile-stat-item">
@@ -79,7 +79,7 @@
                 </div>
                 <div class="info-row">
                     <span class="lbl">Budget</span>
-                    <span class="val">â‚¬@Model.Budget.ToString("F2") Million</span>
+                    <span class="val">€@Model.Budget.ToString("F2") Million</span>
                 </div>
             </div>
         </div>
@@ -94,7 +94,7 @@
                 <div class="card-body">
                     <div class="info-row">
                         <span class="lbl">Name</span>
-                        <span class="val"><a href="/staff-members/@headStaff.Id" class="view-link">@headStaff.FirstName @headStaff.LastName</a></span>
+                        <span class="val"><a href="/staff-members/@headStaff.Id" class="btn btn-sm btn-ghost">@headStaff.FirstName @headStaff.LastName</a></span>
                     </div>
                     <div class="info-row">
                         <span class="lbl">Nationality</span>
@@ -159,7 +159,7 @@
                                             <span class="badge badge-green">Active</span>
                                         }
                                     </td>
-                                    <td><a href="/player-profile/@player.Id" class="view-link">Details â†’</a></td>
+                                    <td><a href="/player-profile/@player.Id" class="btn btn-sm btn-ghost btn-arrow">Details</a></td>
                                 </tr>
                             }
                         </tbody>
@@ -182,4 +182,3 @@
     }
     @await Html.PartialAsync("_AttachmentUpload")
 </div>
-

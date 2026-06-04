@@ -30,12 +30,12 @@
                 {
                     <form method="post" action="/Staff/Restore/@staff.Id" style="display: inline; margin: 0;">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="view-link" style="background: none; border: none; cursor: pointer; padding: 0;">Restore →</button>
+                        <button type="submit" class="btn btn-sm btn-success">Restore</button>
                     </form>
                 }
                 else
                 {
-                    <a href="/staff-members/@staff.Id" class="view-link">Details →</a>
+                    <a href="/staff-members/@staff.Id" class="btn btn-sm btn-ghost btn-arrow">Details</a>
                 }
             </td>
         </tr>

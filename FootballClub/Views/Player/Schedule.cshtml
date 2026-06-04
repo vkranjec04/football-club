@@ -1,4 +1,4 @@
-﻿@using FootballClub.Models
+@using FootballClub.Models
 @using FootballClub.Models.Enums
 @model Dictionary<Player, List<PlayerScheduleItem>>
 
@@ -32,7 +32,7 @@
                     }
                 }
             </select>
-            <a href="/Training" class="view-link">Training Calendar ?</a>
+            <a href="/Training" class="btn btn-sm btn-ghost btn-arrow">Training Calendar</a>
         </form>
     </div>
 </div>
@@ -56,7 +56,7 @@ else
                 <div style="display: flex; gap: 8px; align-items: center;">
                     <span class="badge badge-gray">@player.Position</span>
                     <span class="badge badge-blue">@items.Count duties</span>
-                    <a href="/player-profile/@player.Id" class="view-link">Profile â†’</a>
+                    <a href="/player-profile/@player.Id" class="btn btn-sm btn-ghost btn-arrow">Profile</a>
                 </div>
             </div>
             <div class="card-body">
@@ -103,5 +103,3 @@ else
         </div>
     }
 }
-
-

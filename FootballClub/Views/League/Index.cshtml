@@ -49,7 +49,7 @@
                         <td>
                             @if (row.Club.Name.Contains("Dinamo"))
                             {
-                                <strong style="color: var(--blue);">★ @row.Club.Name</strong>
+                                <strong style="color: var(--text-main);"><span style="color: var(--amber);">&#9733;</span> @row.Club.Name</strong>
                             }
                             else
                             {
@@ -65,7 +65,7 @@
                         <td>@row.Club.FoundedYear</td>
                         <td>€@row.Club.Budget.ToString("F1")</td>
                         <td><span class="badge badge-blue">@row.Club.Players.Count</span></td>
-                        <td><a href="/League/Details/@row.Club.Id" class="view-link">View →</a></td>
+                        <td><a href="/League/Details/@row.Club.Id" class="btn btn-sm btn-ghost btn-arrow">View</a></td>
                     </tr>
                     position++;
                 }

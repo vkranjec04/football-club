@@ -11,7 +11,7 @@
     };
 }
 
-<a href="/staff-members" class="btn-back">&larr; Back to Staff</a>
+<a href="/staff-members" class="btn-back btn-arrow-left">Back to Staff</a>
 
 <div class="page-header">
     <h2>@Model.FirstName @Model.LastName</h2>
@@ -25,7 +25,7 @@
             <span class="badge" style="background-color: #dc2626;">Deleted</span>
             <form method="post" action="/Staff/Restore/@Model.Id" style="display: inline; margin: 0;">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-outline-light">Restore</button>
+                <button type="submit" class="btn btn-success">Restore</button>
             </form>
         }
         else
@@ -33,7 +33,7 @@
             <a href="/Staff/Edit/@Model.Id" class="btn btn-primary">Edit Staff Member</a>
             <form method="post" action="/Staff/Delete/@Model.Id" style="display: inline; margin: 0;" onsubmit="return confirm('Soft delete this staff member?');">
                 @Html.AntiForgeryToken()
-                <button type="submit" class="btn btn-outline-light" style="border-color: #dc2626; color: #fecaca;">Delete</button>
+                <button type="submit" class="btn btn-danger">Delete</button>
             </form>
         }
     </div>

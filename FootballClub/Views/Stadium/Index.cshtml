@@ -2,24 +2,32 @@
 
 @{
     ViewData["Title"] = "Stadiums List";
+    ViewData["Breadcrumbs"] = new List<(string, string?)>
+    {
+        ("Dashboard", "/"),
+        ("Stadiums", null)
+    };
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>@ViewData["Title"]</h2>
-    <a href="#" class="btn btn-primary">Create New Stadium</a>
+<div class="page-header" style="display:flex; align-items:center; justify-content:space-between; gap:16px;">
+    <div>
+        <h2>Stadiums</h2>
+        <p>Venues registered in the league database</p>
+    </div>
+    <a href="#" class="btn btn-primary">+ Create New Stadium</a>
 </div>
 
-<div class="card shadow-sm">
-    <div class="card-body p-0">
-        <table class="table table-striped table-hover mb-0">
-            <thead class="table-dark">
+<div class="card">
+    <div class="card-body" style="padding:0;">
+        <table class="fc-table">
+            <thead>
                 <tr>
                     <th>Id</th>
                     <th>Name</th>
                     <th>City</th>
                     <th>Capacity</th>
                     <th>Year Built</th>
-                    <th class="text-center">Actions</th>
+                    <th style="text-align:right;">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,14 +37,16 @@
                     {
                         <tr>
                             <td>@item.Id</td>
-                            <td class="fw-bold">@item.Name</td>
+                            <td><strong>@item.Name</strong></td>
                             <td>@item.City</td>
                             <td>@item.Capacity.ToString("N0")</td>
                             <td>@item.YearBuilt</td>
-                            <td class="text-center">
-                                <a href="#" class="btn btn-sm btn-outline-secondary">Edit</a>
-                                <a href="#" class="btn btn-sm btn-outline-info mx-1">Details</a>
-                                <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
+                            <td>
+                                <div style="display:flex; gap:8px; justify-content:flex-end;">
+                                    <a href="#" class="btn btn-sm btn-outline-secondary">Edit</a>
+                                    <a href="#" class="btn btn-sm btn-outline-info">Details</a>
+                                    <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
+                                </div>
                             </td>
                         </tr>
                     }
@@ -44,7 +54,7 @@
                 else
                 {
                     <tr>
-                        <td colspan="6" class="text-center py-4 text-muted">No stadiums available in the database.</td>
+                        <td colspan="6" style="text-align:center; padding:2rem; color: var(--text-muted);">No stadiums available in the database.</td>
                     </tr>
                 }
             </tbody>

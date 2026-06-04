@@ -93,11 +93,11 @@
                     }
                 }
             </div>
-            <div class="topbar-right">
-                <span id="authStatus" style="display:none; margin-right: 12px; font-weight: 600;"></span>
-                <a id="authLoginLink" href="/Account/Login" style="margin-right: 12px;">Prijava</a>
-                <a id="authRegisterLink" href="/Account/Register">Registracija</a>
-                <a id="authLogoutLink" href="#" style="display:none;">Odjava</a>
+            <div class="topbar-right" style="display:flex; align-items:center; gap:8px;">
+                <span id="authStatus" style="display:none; font-weight: 600; color: var(--text-main);"></span>
+                <a id="authLoginLink" href="/Account/Login" class="btn btn-sm btn-ghost">Prijava</a>
+                <a id="authRegisterLink" href="/Account/Register" class="btn btn-sm btn-primary">Registracija</a>
+                <a id="authLogoutLink" href="#" class="btn btn-sm btn-ghost" style="display:none;">Odjava</a>
             </div>
         </header>
 
@@ -107,7 +107,7 @@
         </div>
 
         <!-- FOOTER -->
-        <footer style="padding: 1rem 2rem; border-top: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: var(--text-muted);">
+        <footer style="padding: 1rem 2rem; border-top: 1px solid var(--dark-border); text-align: center; font-size: 12px; color: var(--text-muted);">
             &copy; 2026 - Dinamo Zagreb Football Club | Lab 2 Assignment
         </footer>
     </div>

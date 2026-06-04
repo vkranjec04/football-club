@@ -34,16 +34,16 @@
                 {
                     <form method="post" action="/Training/Restore/@session.Id" style="display: inline; margin: 0;">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="view-link" style="background: none; border: none; cursor: pointer; padding: 0;">Restore →</button>
+                        <button type="submit" class="btn btn-sm btn-success">Restore</button>
                     </form>
                 }
                 else
                 {
-                    <a href="/Training/Details/@session.Id" class="view-link">Details →</a>
-                    <a href="/Training/Edit/@session.Id" class="view-link">Edit →</a>
+                    <a href="/Training/Details/@session.Id" class="btn btn-sm btn-ghost btn-arrow">Details</a>
+                    <a href="/Training/Edit/@session.Id" class="btn btn-sm btn-ghost btn-arrow">Edit</a>
                     <form method="post" action="/Training/Delete/@session.Id" style="display: inline; margin: 0;" onsubmit="return confirm('Soft delete this training session?');">
                         @Html.AntiForgeryToken()
-                        <button type="submit" class="view-link" style="background: none; border: none; cursor: pointer; padding: 0; color: #fca5a5;">Delete →</button>
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
                     </form>
                 }
             </td>

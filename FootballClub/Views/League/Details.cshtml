@@ -1,4 +1,4 @@
-﻿@using FootballClub.Models.Enums
+@using FootballClub.Models.Enums
 @using System.Linq
 @model Club
 
@@ -21,7 +21,7 @@
 
 <div class="page-header">
     <h2>@Model.Name</h2>
-    <p>@Model.City â€¢ Founded @Model.FoundedYear</p>
+    <p>@Model.City &bull; Founded @Model.FoundedYear</p>
 </div>
 
 <div class="stats-grid">
@@ -30,8 +30,8 @@
         <div class="stat-label">Players</div>
     </div>
     <div class="stat-card">
-        <div class="stat-value">â‚¬@Model.Budget.ToString("F1")</div>
-        <div class="stat-label">Budget (â‚¬M)</div>
+        <div class="stat-value">€@Model.Budget.ToString("F1")</div>
+        <div class="stat-label">Budget (€M)</div>
     </div>
     <div class="stat-card">
         <div class="stat-value">@(Model.HomeMatches.Count + Model.AwayMatches.Count)</div>
@@ -70,7 +70,7 @@
                                 <td>@player.FirstName @player.LastName</td>
                                 <td><span class="badge badge-gray">@player.Position</span></td>
                                 <td>@player.Nationality</td>
-                                <td><a href="/player-profile/@player.Id" class="view-link">View â†’</a></td>
+                                <td><a href="/player-profile/@player.Id" class="btn btn-sm btn-ghost btn-arrow">View</a></td>
                             </tr>
                         }
                     </tbody>
@@ -108,7 +108,7 @@
                             <div class="info-value">@headStaff.ContractUntil.ToString("dd/MM/yyyy")</div>
                         </div>
                         <div class="info-row">
-                            <a href="/staff-members/@headStaff.Id" class="view-link">View Staff Profile â†’</a>
+                            <a href="/staff-members/@headStaff.Id" class="btn btn-sm btn-ghost btn-arrow">View Staff Profile</a>
                         </div>
                     </div>
                 }
@@ -172,4 +172,3 @@
         }
     </div>
 </div>
-
