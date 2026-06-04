@@ -105,6 +105,13 @@
                 <a class="btn btn-outline-light" href="/Player">Cancel</a>
             </div>
         </form>
+
+        <!-- File Upload Component -->
+        @{
+            ViewBag.EntityType = "Player";
+            ViewBag.EntityId = Model.Id;
+        }
+        @await Html.PartialAsync("_AttachmentUpload")
     </div>
 </div>
 

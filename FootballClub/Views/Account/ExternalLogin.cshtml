@@ -1,0 +1,21 @@
+@model FootballClub.Web.ViewModels.ExternalLoginViewModel
+@{
+    ViewData["Title"] = "Prijava";
+}
+
+<div class="card" style="max-width: 520px;">
+    <div class="card-header"><h3>Prijava</h3></div>
+    <div class="card-body">
+        <p>Prijava u tijeku…</p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            var session = @Html.Raw(Json.Serialize(new { token = Model.Token, username = Model.Username, role = Model.Role }));
+            Auth.storeSession(session);
+            window.location.href = @Html.Raw(Json.Serialize(Model.ReturnUrl));
+        })();
+    </script>
+}

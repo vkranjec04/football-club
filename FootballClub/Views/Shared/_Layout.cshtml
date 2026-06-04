@@ -94,7 +94,10 @@
                 }
             </div>
             <div class="topbar-right">
-                Lab 2 - Club Management
+                <span id="authStatus" style="display:none; margin-right: 12px; font-weight: 600;"></span>
+                <a id="authLoginLink" href="/Account/Login" style="margin-right: 12px;">Prijava</a>
+                <a id="authRegisterLink" href="/Account/Register">Registracija</a>
+                <a id="authLogoutLink" href="#" style="display:none;">Odjava</a>
             </div>
         </header>
 
@@ -110,6 +113,34 @@
     </div>
 
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/auth.js" asp-append-version="true"></script>
+    <script>
+        (function () {
+            var statusLabel = document.getElementById('authStatus');
+            var loginLink = document.getElementById('authLoginLink');
+            var registerLink = document.getElementById('authRegisterLink');
+            var logoutLink = document.getElementById('authLogoutLink');
+
+            if (Auth.getToken()) {
+                var role = Auth.getRole();
+                if (statusLabel) {
+                    statusLabel.textContent = (Auth.getUsername() || '') + (role ? ' (' + role + ')' : '');
+                    statusLabel.style.display = '';
+                }
+                if (loginLink) loginLink.style.display = 'none';
+                if (registerLink) registerLink.style.display = 'none';
+                if (logoutLink) logoutLink.style.display = '';
+            }
+
+            if (logoutLink) {
+                logoutLink.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    Auth.clearSession();
+                    window.location.href = '/';
+                });
+            }
+        })();
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -1,0 +1,66 @@
+@{
+    ViewData["Title"] = "Prijava";
+    ViewData["Breadcrumbs"] = new List<(string, string?)>
+    {
+        ("Prijava", null)
+    };
+}
+
+<div class="card" style="max-width: 520px;">
+    <div class="card-header"><h3>Prijava</h3></div>
+    <div class="card-body">
+        <div id="formAlert" class="alert" style="display:none; margin-bottom: 1rem;"></div>
+
+        <form id="loginForm">
+            <div class="form-grid">
+                <label class="form-field"><span class="form-label">Korisničko ime ili email</span>
+                    <input type="text" id="usernameOrEmail" name="usernameOrEmail" class="form-control" required />
+                </label>
+                <label class="form-field"><span class="form-label">Lozinka</span>
+                    <input type="password" id="password" name="password" class="form-control" required />
+                </label>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Prijavi se</button>
+                <a class="btn btn-outline-light" href="/api/auth/google-login">Prijava putem Google računa</a>
+            </div>
+
+            <p style="margin-top: 1rem; color: var(--text-muted);">
+                Nemaš račun? <a href="/Account/Register">Registriraj se</a>
+            </p>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            var usernameOrEmail = document.getElementById('usernameOrEmail').value.trim();
+            var password = document.getElementById('password').value;
+
+            try {
+                var response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usernameOrEmail: usernameOrEmail, password: password })
+                });
+
+                if (response.ok) {
+                    var data = await response.json();
+                    Auth.storeSession(data);
+                    window.location.href = '/';
+                } else if (response.status === 401) {
+                    Auth.showAlert('formAlert', 'Neispravni podaci ili neaktivan račun.', 'danger');
+                } else {
+                    var message = await Auth.parseErrors(response);
+                    Auth.showAlert('formAlert', message, 'danger');
+                }
+            } catch (error) {
+                Auth.showAlert('formAlert', 'Greška pri povezivanju s poslužiteljem.', 'danger');
+            }
+        });
+    </script>
+}
