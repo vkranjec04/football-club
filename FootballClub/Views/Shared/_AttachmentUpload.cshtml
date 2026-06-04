@@ -1,0 +1,72 @@
+@* Reusable File Upload Component *@
+@{
+    var entityType = ViewBag.EntityType ?? "Unknown";
+    var entityId = ViewBag.EntityId ?? 0;
+    var allowMultiple = ViewBag.AllowMultiple ?? true;
+}
+
+<div class="attachment-container">
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="icon-upload"></i> Upload Documents & Images
+            </h5>
+        </div>
+        
+        <div class="card-body">
+            <!-- Dropzone -->
+            <div class="dropzone-wrapper" id="dropzone"
+                 data-entity-type="@entityType"
+                 data-entity-id="@entityId">
+                <div class="dropzone-content">
+                    <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <p class="dropzone-text">Drag files here or click to browse</p>
+                    <p class="dropzone-hint">Supports: PDF, PNG, JPG, GIF, WebP, TXT (Max 10 MB)</p>
+                </div>
+                <input type="file" id="fileInput" multiple="@allowMultiple.ToString().ToLower()" style="display: none;" accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.txt" />
+            </div>
+
+            <!-- Progress Bar (hidden by default) -->
+            <div id="uploadProgress" class="upload-progress mt-3" style="display: none;">
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         id="progressBar" 
+                         role="progressbar" 
+                         style="width: 0%">
+                    </div>
+                </div>
+                <p class="progress-text">Uploading <span id="uploadCount">0</span> file(s)...</p>
+            </div>
+
+            <!-- Alerts -->
+            <div id="uploadAlert" class="alert mt-3" style="display: none;"></div>
+
+            <!-- File List -->
+            <div id="fileList" class="file-list mt-4">
+                <h6>Uploaded Files</h6>
+                <div id="fileItems" class="list-group">
+                    <!-- Files will be dynamically added here -->
+                </div>
+                <p id="noFiles" class="text-muted mt-2">No files uploaded yet</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include styles and scripts -->
+<link rel="stylesheet" href="~/css/attachment-upload.css" />
+<script src="~/js/attachment-upload.js"></script>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            AttachmentUpload.init('dropzone', {
+                entityType: '@entityType',
+                entityId: @entityId,
+                maxFileSize: 10 * 1024 * 1024 // 10 MB
+            });
+        });
+    </script>
+}

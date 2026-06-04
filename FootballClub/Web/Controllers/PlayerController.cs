@@ -47,9 +47,16 @@ public class PlayerController : Controller
     {
         ViewBag.IsAdmin = true;
         var q = (term ?? string.Empty).Trim();
-        var players = string.IsNullOrWhiteSpace(q)
-            ? _context.Players.ToList()
-            : _context.Players.Where(p => (p.FirstName + " " + p.LastName).Contains(q, StringComparison.OrdinalIgnoreCase)).ToList();
+        var players = _context.Players
+            .Include(p => p.Club)
+            .ToList();
+
+        if (!string.IsNullOrWhiteSpace(q))
+        {
+            players = players
+                .Where(p => (p.FirstName + " " + p.LastName).Contains(q, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
 
         return PartialView("_PlayerRows", players);
     }
@@ -102,8 +109,8 @@ public class PlayerController : Controller
 
         // Include deleted players for admin view
         var players = selectedClub != null
-            ? _context.Players.Where(p => p.ClubId == selectedClub.Id).ToList()
-            : _context.Players.ToList();
+            ? _context.Players.Include(p => p.Club).Where(p => p.ClubId == selectedClub.Id).ToList()
+            : _context.Players.Include(p => p.Club).ToList();
         
         if (position.HasValue)
         {

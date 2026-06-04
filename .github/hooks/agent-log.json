@@ -3,13 +3,13 @@
     "UserPromptSubmit": [
       {
         "type": "command",
-        "command": "powershell.exe -ExecutionPolicy Bypass -NoProfile -Command \"[Console]::In.ReadToEnd() | Add-Content -Path 'V:\\Programi\\C#\\football-club\\lab-4\\agent-log.txt'\""
+        "command": "powershell.exe -ExecutionPolicy Bypass -NoProfile -Command \"[Console]::In.ReadToEnd() | Add-Content -Path 'V:\\Programi\\C#\\football-club\\labs\\lab-5\\agent-log.txt'\""
       }
     ],
     "PreToolUse": [
       {
         "type": "command",
-        "command": "powershell.exe -ExecutionPolicy Bypass -NoProfile -Command \"[Console]::In.ReadToEnd() | Add-Content -Path 'V:\\Programi\\C#\\football-club\\lab-4\\agent-log.txt'\""
+        "command": "powershell.exe -ExecutionPolicy Bypass -NoProfile -Command \"[Console]::In.ReadToEnd() | Add-Content -Path 'V:\\Programi\\C#\\football-club\\labs\\lab-5\\agent-log.txt'\""
       }
     ]
   }

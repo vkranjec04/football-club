@@ -4,6 +4,14 @@
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - SQL Server (LocalDB, Express, or Docker instance) depending on your `appsettings.json` configuration.
 - EF Core CLI tools (if running migrations manually: `dotnet tool install --global dotnet-ef`)
+- A JWT secret in `appsettings.json` under `Jwt`.
+- Google OAuth client settings in [`appsettings.Development.json` under `Authentication:Google`](https://console.cloud.google.com).
+
+## Authentication Setup
+- The app seeds two local accounts on startup if no users exist: `admin` / `Admin123!` and `user` / `User123!`.
+- Use the local login endpoint at `POST /api/auth/login` for username/password authentication.
+- Use `GET /api/auth/google-login` to start the Google sign-in flow.
+- The app now requires HTTPS redirection for external OAuth, so use the `https://localhost:5001` URL when testing Google login.
 
 ## Steps to Run
 
@@ -58,7 +66,8 @@ dotnet run
 ```
 
 ### Step 6: Open in Browser
-Check the terminal output for the local URL (typically `http://localhost:5000` or `https://localhost:5001`) and open it in your web browser.
+Check the terminal output for the local URL (typically `https://localhost:5001`) and open it in your web browser.
+If you only need the public pages, `http://localhost:5000` may still be shown, but Google OAuth callbacks should be tested over HTTPS.
 
 ---
 

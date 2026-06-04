@@ -194,3 +194,12 @@
     </div>
 </div>
 
+<!-- File Upload Component -->
+<div style="margin-top: 2rem;">
+    @{
+        ViewBag.EntityType = "Player";
+        ViewBag.EntityId = Model.Id;
+    }
+    @await Html.PartialAsync("_AttachmentUpload")
+</div>
+

@@ -2,7 +2,7 @@ using FootballClub.Data;
 using FootballClub.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FootballClub.Controllers
+namespace FootballClub.Web.Controllers
 {
     [Route("stadiums")]
     public class StadiumController : Controller
