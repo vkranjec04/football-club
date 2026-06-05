@@ -6,6 +6,12 @@
     ViewData["Title"] = "Create Player";
 }
 
+@await Html.PartialAsync("_AiEntryPanel", null, new ViewDataDictionary(ViewData)
+{
+    ["AiEndpoint"] = "/ai/extract/player",
+    ["AiPlaceholder"] = "e.g. 23-year-old Croatian forward Luka Modric, jersey 10, market value 50M, contract until 2027, plays for Dinamo"
+})
+
 <div class="card">
     <div class="card-header"><h3>Create Player</h3></div>
     <div class="card-body">

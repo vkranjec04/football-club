@@ -43,6 +43,19 @@ else
 {
     builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
 }
+
+// AI client: use Google Gemini when an API key is configured, otherwise a no-op
+// fallback so the app and tests run without a key (mirrors the IFileStorage pattern).
+builder.Services.Configure<AiOptions>(builder.Configuration.GetSection("Ai"));
+if (!string.IsNullOrWhiteSpace(builder.Configuration["Ai:ApiKey"]))
+{
+    builder.Services.AddHttpClient<IAiClient, GeminiAiClient>();
+}
+else
+{
+    builder.Services.AddScoped<IAiClient, NullAiClient>();
+}
+
 builder.Services
     .AddIdentityCore<AppUser>(options =>
     {

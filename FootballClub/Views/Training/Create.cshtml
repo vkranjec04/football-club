@@ -7,6 +7,12 @@
     var staffMembers = ViewBag.Staff as IEnumerable<FootballClub.Models.Staff> ?? System.Linq.Enumerable.Empty<FootballClub.Models.Staff>();
 }
 
+@await Html.PartialAsync("_AiEntryPanel", null, new ViewDataDictionary(ViewData)
+{
+    ["AiEndpoint"] = "/ai/extract/training",
+    ["AiPlaceholder"] = "e.g. Tomorrow 14:00-15:30 high-intensity fitness session at Maksimir, led by Bjelica"
+})
+
 <div class="card">
     <div class="card-header"><h3>Create Training Session</h3></div>
     <div class="card-body">

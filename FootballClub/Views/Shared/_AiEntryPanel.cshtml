@@ -1,0 +1,135 @@
+@*
+    Reusable AI quick-entry panel. Place ABOVE a Create form (not inside it).
+    Driven by ViewData:
+      ["AiEndpoint"]    - POST endpoint that returns { success, warnings, data, dateFields }
+      ["AiPlaceholder"] - textarea placeholder/example
+      ["AiTitle"]       - optional card title
+    The returned `data` is keyed by the form field `name`; `dateFields` lists keys
+    whose value is an ISO date-time (sets the date picker's hidden + display inputs).
+*@
+@{
+    var aiEndpoint = ViewData["AiEndpoint"]?.ToString() ?? "/ai/extract/player";
+    var aiPlaceholder = ViewData["AiPlaceholder"]?.ToString() ?? "Describe the record in plain language...";
+    var aiTitle = ViewData["AiTitle"]?.ToString() ?? "AI quick entry";
+}
+<div class="card" id="ai-entry-panel" data-endpoint="@aiEndpoint" style="margin-bottom: 1rem;">
+    <div class="card-header"><h3>@aiTitle</h3></div>
+    <div class="card-body">
+        @Html.AntiForgeryToken()
+        <p class="form-text">Describe it in plain language (Croatian or English), then click Generate. The AI fills the form below - review and correct before saving.</p>
+
+        <label class="form-field">
+            <span class="form-label">Description</span>
+            <textarea id="ai-entry-text" class="form-control" rows="3" placeholder="@aiPlaceholder"></textarea>
+        </label>
+
+        <div class="form-actions" style="margin-top: 0.75rem;">
+            <button type="button" id="ai-entry-generate" class="btn btn-primary">Generate from description</button>
+            <span id="ai-entry-status" class="form-text" style="margin-left: 0.75rem;"></span>
+        </div>
+
+        <div id="ai-entry-warnings" class="text-danger" style="margin-top: 0.5rem;"></div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var panel = document.getElementById("ai-entry-panel");
+    if (!panel) {
+        return;
+    }
+
+    var endpoint = panel.getAttribute("data-endpoint");
+    var btn = document.getElementById("ai-entry-generate");
+    var statusEl = document.getElementById("ai-entry-status");
+    var warnEl = document.getElementById("ai-entry-warnings");
+    var textEl = document.getElementById("ai-entry-text");
+    var tokenEl = panel.querySelector("input[name='__RequestVerificationToken']");
+
+    function formatDisplay(iso) {
+        var parts = String(iso).split("T");
+        var date = parts[0].split("-");
+        if (date.length !== 3) {
+            return iso;
+        }
+        var time = (parts[1] || "00:00:00").split(":");
+        return date[2] + "." + date[1] + "." + date[0] + " " + (time[0] || "00") + ":" + (time[1] || "00");
+    }
+
+    function applyField(name, value, isDate) {
+        if (value === null || value === undefined || value === "") {
+            return;
+        }
+        var el = document.querySelector("[name='" + name + "']");
+        if (!el) {
+            return;
+        }
+        if (el.type === "checkbox") {
+            el.checked = !!value;
+            return;
+        }
+        if (isDate) {
+            el.value = value;
+            var display = document.getElementById(name + "_display");
+            if (display) {
+                display.value = formatDisplay(value);
+            }
+            return;
+        }
+        el.value = value;
+    }
+
+    btn.addEventListener("click", function () {
+        var text = (textEl.value || "").trim();
+        warnEl.innerHTML = "";
+        if (!text) {
+            statusEl.textContent = "Enter a description.";
+            return;
+        }
+
+        btn.disabled = true;
+        statusEl.textContent = "Generating...";
+
+        var body = new URLSearchParams();
+        body.append("text", text);
+        if (tokenEl) {
+            body.append("__RequestVerificationToken", tokenEl.value);
+        }
+
+        fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: body.toString()
+        })
+        .then(function (response) { return response.json(); })
+        .then(function (res) {
+            btn.disabled = false;
+            if (!res.success) {
+                statusEl.textContent = "";
+                warnEl.textContent = res.error || "AI extraction failed.";
+                return;
+            }
+
+            var data = res.data || {};
+            var dateFields = res.dateFields || [];
+            Object.keys(data).forEach(function (key) {
+                applyField(key, data[key], dateFields.indexOf(key) >= 0);
+            });
+
+            statusEl.textContent = "Filled in - review and save.";
+            if (res.warnings && res.warnings.length) {
+                warnEl.innerHTML = res.warnings.map(function (w) {
+                    var div = document.createElement("div");
+                    div.textContent = "! " + w;
+                    return div.outerHTML;
+                }).join("");
+            }
+        })
+        .catch(function () {
+            btn.disabled = false;
+            statusEl.textContent = "";
+            warnEl.textContent = "Error communicating with the AI service.";
+        });
+    });
+})();
+</script>

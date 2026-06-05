@@ -1,0 +1,137 @@
+@*
+    Dashboard AI assistant (chatbot). Login-gated:
+    - the /api/assistant/chat endpoint requires a JWT (sent via Auth.authHeaders);
+    - the UI shows the chat only when a token exists, otherwise a login prompt.
+    Auth lives in localStorage (wwwroot/js/auth.js, loaded globally by _Layout).
+*@
+<div class="card" id="assistant-widget" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+        <h3>AI Assistant</h3>
+        <span class="badge badge-blue">Beta</span>
+    </div>
+    <div class="card-body">
+        <div id="assistant-locked" style="display:none;">
+            <p style="color: var(--text-muted);">Sign in to ask the club assistant about your squad, tactics and training.</p>
+            <a href="/Account/Login" class="btn btn-sm btn-primary">Prijava</a>
+        </div>
+
+        <div id="assistant-chat" style="display:none;">
+            <div id="assistant-messages" style="max-height: 340px; overflow-y: auto; display:flex; flex-direction:column; gap:10px; margin-bottom: 12px;"></div>
+
+            <div id="assistant-suggestions" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
+                <button type="button" class="btn btn-sm btn-ghost assistant-suggest">Tko je najskuplji, a tko najjeftiniji igrač u momčadi?</button>
+                <button type="button" class="btn btn-sm btn-ghost assistant-suggest">Koju početnu postavu da koristimo protiv Hajduka?</button>
+                <button type="button" class="btn btn-sm btn-ghost assistant-suggest">Koje vježbe za bolju kondiciju?</button>
+            </div>
+
+            <div style="display:flex; gap:8px; align-items:flex-end;">
+                <textarea id="assistant-input" class="form-control" rows="2" placeholder="Ask about your squad, tactics, training..." style="flex:1;"></textarea>
+                <button type="button" id="assistant-send" class="btn btn-primary">Send</button>
+            </div>
+            <div id="assistant-error" class="text-danger" style="margin-top:8px;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var widget = document.getElementById("assistant-widget");
+    if (!widget) {
+        return;
+    }
+
+    var lockedEl = document.getElementById("assistant-locked");
+    var chatEl = document.getElementById("assistant-chat");
+    var messagesEl = document.getElementById("assistant-messages");
+    var inputEl = document.getElementById("assistant-input");
+    var sendBtn = document.getElementById("assistant-send");
+    var errorEl = document.getElementById("assistant-error");
+    var history = [];
+
+    function showLocked() { lockedEl.style.display = ""; chatEl.style.display = "none"; }
+    function showChat() { lockedEl.style.display = "none"; chatEl.style.display = ""; }
+
+    function addBubble(role, text) {
+        var isUser = role === "user";
+        var bubble = document.createElement("div");
+        bubble.style.alignSelf = isUser ? "flex-end" : "flex-start";
+        bubble.style.maxWidth = "85%";
+        bubble.style.padding = "8px 12px";
+        bubble.style.borderRadius = "12px";
+        bubble.style.whiteSpace = "pre-wrap";
+        bubble.style.lineHeight = "1.4";
+        bubble.style.background = isUser ? "var(--accent-blue, #2563eb)" : "rgba(148,163,184,0.16)";
+        bubble.style.color = isUser ? "#ffffff" : "var(--text-main, #e2e8f0)";
+        bubble.textContent = text;
+        messagesEl.appendChild(bubble);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+        return bubble;
+    }
+
+    function send(text) {
+        text = (text || "").trim();
+        if (!text) {
+            return;
+        }
+        errorEl.textContent = "";
+        addBubble("user", text);
+        history.push({ role: "user", text: text });
+        inputEl.value = "";
+        sendBtn.disabled = true;
+
+        var pending = addBubble("model", "...");
+
+        fetch("/api/assistant/chat", {
+            method: "POST",
+            headers: Auth.authHeaders({ "Content-Type": "application/json" }),
+            body: JSON.stringify({ messages: history })
+        })
+        .then(function (response) {
+            if (response.status === 401) {
+                pending.remove();
+                showLocked();
+                throw new Error("unauthorized");
+            }
+            return response.json().then(function (data) { return { ok: response.ok, body: data }; });
+        })
+        .then(function (res) {
+            sendBtn.disabled = false;
+            if (!res.ok) {
+                pending.textContent = "";
+                errorEl.textContent = (res.body && res.body.error) || "The assistant is unavailable.";
+                return;
+            }
+            var reply = (res.body && res.body.reply) || "";
+            pending.textContent = reply;
+            history.push({ role: "model", text: reply });
+        })
+        .catch(function (err) {
+            sendBtn.disabled = false;
+            if (err && err.message === "unauthorized") {
+                return;
+            }
+            pending.textContent = "";
+            errorEl.textContent = "Error contacting the assistant.";
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof Auth === "undefined" || !Auth.getToken()) {
+            showLocked();
+            return;
+        }
+
+        showChat();
+        sendBtn.addEventListener("click", function () { send(inputEl.value); });
+        inputEl.addEventListener("keydown", function (event) {
+            if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                send(inputEl.value);
+            }
+        });
+        Array.prototype.forEach.call(document.querySelectorAll(".assistant-suggest"), function (btn) {
+            btn.addEventListener("click", function () { send(btn.textContent); });
+        });
+    });
+})();
+</script>
