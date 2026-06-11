@@ -97,7 +97,10 @@ public class TrainingController : Controller
             return Json(Array.Empty<object>());
         }
 
+        // Filter !IsDeleted in SQL, then materialize: the case-insensitive
+        // string.Contains overload and Url.Action below cannot be translated by EF.
         var matches = _context.TrainingSessions.Where(ts => !ts.IsDeleted)
+            .AsEnumerable()
             .Where(session =>
                 session.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 session.FocusArea.Contains(query, StringComparison.OrdinalIgnoreCase))

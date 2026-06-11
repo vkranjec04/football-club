@@ -1,4 +1,5 @@
 using FootballClub.Web.Dto;
+using FootballClub.Web.Filters;
 using FootballClub.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
@@ -8,15 +9,20 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FootballClub.Web.Controllers.Api;
 
+// Auth events are audited explicitly below (with the attempted username and outcome), so the
+// generic request filter is told to skip this controller to avoid blander duplicate entries.
+[SkipActivityLog]
 [ApiController]
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
     private readonly IUserService _userService;
+    private readonly IActivityLogger _activityLogger;
 
-    public AuthController(IUserService userService)
+    public AuthController(IUserService userService, IActivityLogger activityLogger)
     {
         _userService = userService;
+        _activityLogger = activityLogger;
     }
 
     [AllowAnonymous]
@@ -26,9 +32,11 @@ public class AuthController : ControllerBase
         var result = await _userService.RegisterAsync(request.Username, request.Email, request.Password, cancellationToken);
         if (!result.Succeeded)
         {
+            await _activityLogger.LogAsync("Register", "Auth", request.Username, "Registration failed.", success: false, cancellationToken);
             return BadRequest(new { errors = result.Errors });
         }
 
+        await _activityLogger.LogAsync("Register", "Auth", request.Username, "New account registered.", success: true, cancellationToken);
         return Ok(result.Auth);
     }
 
@@ -39,9 +47,11 @@ public class AuthController : ControllerBase
         var result = await _userService.AuthenticateAsync(request.UsernameOrEmail, request.Password, cancellationToken);
         if (result == null)
         {
+            await _activityLogger.LogAsync("LoginFailed", "Auth", request.UsernameOrEmail, "Invalid credentials or inactive account.", success: false, cancellationToken);
             return Unauthorized("Invalid credentials or inactive account.");
         }
 
+        await _activityLogger.LogAsync("Login", "Auth", result.Username, "Login successful.", success: true, cancellationToken);
         return Ok(result);
     }
 
@@ -69,8 +79,11 @@ public class AuthController : ControllerBase
 
         if (result == null)
         {
+            await _activityLogger.LogAsync("LoginFailed", "Auth", null, "Google login could not resolve a local user.", success: false, cancellationToken);
             return Unauthorized("Unable to create or resolve a local user for this Google account.");
         }
+
+        await _activityLogger.LogAsync("Login", "Auth", result.Username, "Login successful (Google).", success: true, cancellationToken);
 
         // The site authenticates via a JWT held in localStorage (see wwwroot/js/auth.js).
         // Since the Google flow is a full-page redirect rather than a fetch, hand the token

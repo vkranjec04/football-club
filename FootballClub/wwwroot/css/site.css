@@ -35,6 +35,9 @@ body {
     color: var(--text-dark);
     display: flex;
     min-height: 100vh;
+    /* clip (not hidden) so position:sticky keeps working; guarantees the page
+       itself never scrolls sideways even if a child misbehaves */
+    overflow-x: clip;
 }
 
 /* Readable default link color (overrides the browser's dark-blue default
@@ -58,6 +61,7 @@ a {
     left: 0;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
     z-index: 100;
 }
 
@@ -145,6 +149,9 @@ a {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    /* flex items default to min-width:auto, which lets a wide table force the
+       whole page wider than the viewport — the cause of sideways scrolling */
+    min-width: 0;
 }
 
 .topbar {
@@ -187,8 +194,217 @@ a {
     }
 
 .topbar-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+    min-width: 0;
     font-size: 13px;
     color: var(--text-muted);
+}
+
+#authStatus {
+    font-weight: 600;
+    color: var(--text-main);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+/* ===== GLOBAL SEARCH (topbar) ===== */
+.global-search {
+    flex: 1 1 auto;
+    max-width: 480px;
+    min-width: 140px;
+    margin: 0 auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.global-search__icon {
+    position: absolute;
+    left: 12px;
+    font-size: 14px;
+    line-height: 1;
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.global-search__input {
+    width: 100%;
+    background: var(--dark);
+    color: var(--text-main);
+    border: 1px solid var(--dark-border);
+    border-radius: 10px;
+    padding: 0.5rem 3.25rem 0.5rem 2.2rem;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+    .global-search__input::placeholder {
+        color: var(--text-muted);
+    }
+
+    .global-search__input:focus {
+        border-color: var(--blue-light);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+.global-search__kbd {
+    position: absolute;
+    right: 10px;
+    font-size: 10px;
+    font-family: inherit;
+    color: var(--text-muted);
+    border: 1px solid var(--dark-border);
+    border-radius: 5px;
+    padding: 1px 5px;
+    background: rgba(255, 255, 255, 0.03);
+    pointer-events: none;
+}
+
+.global-search__input:focus ~ .global-search__kbd {
+    display: none;
+}
+
+.global-search__panel {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    left: 0;
+    right: 0;
+    z-index: 60;
+    background: #0f172a;
+    border: 1px solid var(--dark-border);
+    border-radius: 12px;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.45);
+    max-height: 60vh;
+    overflow-y: auto;
+    padding: 6px;
+}
+
+.global-search__group-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+    color: var(--text-muted);
+    padding: 8px 10px 4px;
+}
+
+.global-search__item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+    .global-search__item.is-active,
+    .global-search__item:hover {
+        background: rgba(59, 130, 246, 0.16);
+    }
+
+.global-search__item-icon {
+    flex-shrink: 0;
+    width: 22px;
+    font-size: 16px;
+    line-height: 1;
+    text-align: center;
+}
+
+.global-search__item-body {
+    min-width: 0;
+}
+
+.global-search__item-title {
+    color: var(--text-main);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.global-search__item-sub {
+    color: var(--text-muted);
+    font-size: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.global-search__note {
+    padding: 12px 10px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+@media (max-width: 900px) {
+    .global-search {
+        max-width: 320px;
+    }
+}
+
+@media (max-width: 640px) {
+    .global-search {
+        max-width: none;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .global-search__panel {
+        position: fixed;
+        top: 60px;
+        left: 10px;
+        right: 10px;
+        max-height: 70vh;
+    }
+}
+
+/* Hamburger menu button — hidden on desktop, revealed at the mobile breakpoint */
+.nav-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--dark-border);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-main);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+    .nav-toggle:hover {
+        border-color: var(--blue-light);
+        color: var(--blue-light);
+        background: rgba(59, 130, 246, 0.12);
+    }
+
+/* Dim backdrop shown behind the off-canvas drawer on small screens */
+.sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 90;
+    opacity: 0;
+    transition: opacity 0.25s ease;
 }
 
 .page-body {
@@ -347,6 +563,21 @@ a {
         .fc-table a:not(.btn):not(.view-link):hover {
             text-decoration: underline;
         }
+
+    /* Action cells holding several buttons (Details / Edit / Delete) */
+    .fc-table td.td-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+/* Horizontal scroll wrapper so wide data tables never break the layout on
+   small screens. site.js wraps every data table in one of these automatically. */
+.table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
 
 /* ---- BADGES ---- */
 .badge {
@@ -530,6 +761,7 @@ a {
         justify-content: space-between;
         gap: 1rem;
         margin: 1rem 0;
+        flex-wrap: wrap;
     }
 
     .upcoming-card .team {
@@ -654,6 +886,14 @@ a {
     display: flex;
     gap: 8px;
     align-items: center;
+    flex-wrap: wrap;
+}
+
+/* AI assistant suggestion chips hold whole sentences — they must be allowed
+   to wrap or they force sideways scrolling on phones */
+#assistant-suggestions .btn {
+    white-space: normal;
+    text-align: left;
 }
 
 /* smaller inputs */
@@ -694,25 +934,212 @@ a {
     }
 
 /* ---- RESPONSIVE ---- */
+/* Tablet & below: the sidebar becomes an off-canvas drawer sliding over the
+   content (toggled by the topbar hamburger), the content spans full width and
+   multi-column layouts collapse to one column. */
 @media (max-width: 900px) {
-    .sidebar {
-        width: 60px;
+    .nav-toggle {
+        display: inline-flex;
     }
 
-    .sidebar-brand h1, .sidebar-brand p, .nav-link span, .nav-section-label, .sidebar-footer {
-        display: none;
+    .sidebar {
+        transform: translateX(-100%);
+        box-shadow: 2px 0 24px rgba(0, 0, 0, 0.45);
+        transition: transform 0.25s ease;
+    }
+
+    body.sidebar-open .sidebar {
+        transform: translateX(0);
+    }
+
+    body.sidebar-open .sidebar-overlay {
+        display: block;
+        opacity: 1;
+    }
+
+    body.sidebar-open {
+        overflow: hidden;
     }
 
     .main-content {
-        margin-left: 60px;
+        margin-left: 0;
     }
 
-    .detail-grid {
+    .detail-grid,
+    .two-column {
         grid-template-columns: 1fr;
+    }
+
+    /* Always a clean 2×2 on mobile — auto-fit would produce a lopsided
+       3-on-top / 1-below split at in-between widths */
+    .stat-grid,
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .score-result {
         font-size: 32px;
+    }
+
+    /* Comfortable touch targets in the drawer */
+    .nav-link {
+        padding: 0.8rem 1.25rem;
+        font-size: 15px;
+    }
+}
+
+/* Phones & small tablets: data tables flip from rows+columns to stacked cards.
+   The column header is rendered per-cell via the data-label attribute that
+   site.js copies from the table's <th> elements. No sideways scrolling. */
+@media (max-width: 768px) {
+    /* 16px inputs stop iOS Safari from auto-zooming into focused fields */
+    .form-control,
+    select {
+        font-size: 16px;
+    }
+
+    .card-body select,
+    .card-body input[type="search"],
+    .card-body input[type="text"] {
+        min-width: 0 !important;
+        max-width: 100%;
+    }
+
+    .fc-table,
+    .fc-table tbody,
+    .sofa-matches-table,
+    .sofa-matches-table tbody {
+        display: block;
+        width: 100%;
+    }
+
+    .fc-table thead,
+    .sofa-matches-table thead {
+        display: none;
+    }
+
+    .fc-table tr,
+    .sofa-matches-table tr {
+        display: block;
+        border: 1px solid var(--dark-border);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.02);
+        padding: 0.25rem 0.875rem;
+        margin-bottom: 0.75rem;
+    }
+
+        .fc-table tr:last-child,
+        .sofa-matches-table tr:last-child {
+            margin-bottom: 0;
+        }
+
+    /* !important also defeats stray inline display styles on cells */
+    .fc-table td,
+    .sofa-matches-table td {
+        display: block !important;
+        text-align: right;
+        padding: 0.55rem 0;
+        border-bottom: 1px solid rgba(51, 65, 85, 0.45);
+        font-size: 14px;
+    }
+
+        .fc-table td:last-child,
+        .sofa-matches-table td:last-child {
+            border-bottom: none;
+        }
+
+        .fc-table td:empty,
+        .sofa-matches-table td:empty {
+            display: none !important;
+        }
+
+    .fc-table td::before,
+    .sofa-matches-table td::before {
+        content: attr(data-label);
+        float: left;
+        margin-right: 12px;
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        line-height: 2;
+    }
+
+    /* Full-row cells (empty states, "Loading...") stay centered */
+    .fc-table td[colspan],
+    .sofa-matches-table td[colspan] {
+        text-align: center;
+    }
+
+    /* Multi-button action cells: keep buttons in a wrapping row */
+    .fc-table td.td-actions {
+        display: flex !important;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    /* Desktop row-hover repaint makes no sense on stacked cards */
+    .fc-table tr:hover td {
+        background: transparent;
+    }
+}
+
+/* Narrow phones: tighten the chrome so content gets the space */
+@media (max-width: 640px) {
+    .topbar {
+        padding: 0.75rem 1rem;
+    }
+
+    .breadcrumbs {
+        display: none;
+    }
+
+    .page-body {
+        padding: 1rem;
+    }
+
+    .page-header h2 {
+        font-size: 19px;
+    }
+
+    .card-header {
+        padding: 0.875rem 1rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+
+    .stat-grid,
+    .stats-grid {
+        gap: 0.75rem;
+    }
+
+    .stat-card {
+        padding: 1rem;
+    }
+
+    .stat-value {
+        font-size: 24px;
+    }
+
+    .score-display {
+        flex-direction: column;
+        gap: 0.5rem;
+        padding: 1.25rem;
+    }
+
+    .score-result {
+        border-left: none;
+        border-right: none;
+        padding: 0.25rem 0;
+    }
+
+    #authStatus {
+        max-width: 110px;
     }
 }
 
@@ -972,10 +1399,4 @@ a {
     color: var(--text-dark);
     font-weight: 600;
     font-size: 14px;
-}
-
-@media (max-width: 900px) {
-    .two-column {
-        grid-template-columns: 1fr;
-    }
 }

@@ -23,6 +23,7 @@ namespace FootballClub.Data
         public DbSet<Attachment> Attachments { get; set; }
         public DbSet<PlayerScheduleItem> PlayerScheduleItems { get; set; }
         public DbSet<LeagueStanding> LeagueStandings { get; set; }
+        public DbSet<ActivityLog> ActivityLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -98,6 +99,12 @@ namespace FootballClub.Data
                     .HasOne(c => c.HomeStadium)
                     .WithMany()
                     .HasForeignKey(c => c.HomeStadiumId);
+
+            // The audit log is queried newest-first and filtered by user, so index both.
+            modelBuilder.Entity<ActivityLog>()
+                .HasIndex(log => log.TimestampUtc);
+            modelBuilder.Entity<ActivityLog>()
+                .HasIndex(log => log.UserName);
         }
     }
 }

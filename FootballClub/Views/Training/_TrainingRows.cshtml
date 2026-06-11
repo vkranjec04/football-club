@@ -29,7 +29,7 @@
                     <span class="badge badge-blue">@(session.IsUpcoming ? "Upcoming" : "Past")</span>
                 }
             </td>
-            <td style="display: flex; gap: 8px;">
+            <td class="td-actions">
                 @if (session.IsDeleted && isAdmin)
                 {
                     <form method="post" action="/Training/Restore/@session.Id" style="display: inline; margin: 0;">

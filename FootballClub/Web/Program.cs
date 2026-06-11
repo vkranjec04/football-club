@@ -1,6 +1,7 @@
 using FootballClub.Data;
 using FootballClub.Models;
 using FootballClub.Repositories;
+using FootballClub.Web.Filters;
 using FootballClub.Web.Options;
 using FootballClub.Web.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,8 +29,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Configure for Razor Pages + MVC Controllers (if you use both)
 builder.Services.AddRazorPages();
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    // Auto-audit every state-changing request (MVC form posts and API calls alike).
+    options.Filters.Add<ActivityLogActionFilter>();
+});
 builder.Services.AddScoped<IUserService, UserService>();
+
+// Audit logging: record who-did-what to the database. The logger resolves the acting user
+// from the current request, so it needs the HttpContext accessor. Mirrors IFileStorage by
+// being registered once behind an interface so the sink is swappable.
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSingleton<IActivityLogger, DbActivityLogger>();
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 
 // File storage: use Azure Blob Storage when a connection string is configured

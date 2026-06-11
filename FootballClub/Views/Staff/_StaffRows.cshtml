@@ -25,7 +25,7 @@
                     <span class="badge badge-blue">@(staff.ContractUntil > DateTime.Now ? "Active" : "Past")</span>
                 }
             </td>
-            <td style="display: flex; gap: 8px;">
+            <td class="td-actions">
                 @if (staff.IsDeleted && isAdmin)
                 {
                     <form method="post" action="/Staff/Restore/@staff.Id" style="display: inline; margin: 0;">

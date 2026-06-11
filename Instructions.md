@@ -2,10 +2,21 @@
 
 ## Prerequisites
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- SQL Server (LocalDB, Express, or Docker instance) depending on your `appsettings.json` configuration.
+- SQL Server (LocalDB, Express, or Docker instance) — connection string lives in `appsettings.Development.json`.
 - EF Core CLI tools (if running migrations manually: `dotnet tool install --global dotnet-ef`)
-- A JWT secret in `appsettings.json` under `Jwt`.
-- Google OAuth client settings in [`appsettings.Development.json` under `Authentication:Google`](https://console.cloud.google.com).
+
+## Configuration (important)
+The base `appsettings.json` ships with **empty placeholders** — real secrets are injected from Azure App Settings in production and are **not** committed. For **local development**, all secrets live in `appsettings.Development.json` (which is loaded only when `ASPNETCORE_ENVIRONMENT=Development`, the default for `dotnet run`):
+
+| Setting | Local location |
+|---|---|
+| `ConnectionStrings:DefaultConnection` | `appsettings.Development.json` |
+| `Jwt:Key` | `appsettings.Development.json` |
+| `Authentication:Google:ClientId` / `ClientSecret` | `appsettings.Development.json` (get from [Google Cloud Console](https://console.cloud.google.com)) |
+| `Storage:ConnectionString` | leave **empty** locally → attachments are saved to `wwwroot/uploads` (no Azure needed) |
+| `Seed:DemoData` | `true` seeds sample clubs/players/etc. on first run |
+
+> Note: if `Authentication:Google:*` is left as the placeholder value the app still starts and all non-Google features work; only the Google sign-in button will fail until you set real credentials.
 
 ## Authentication Setup
 - The app seeds two local accounts on startup if no users exist: `admin` / `Admin123!` and `user` / `User123!`.
@@ -36,7 +47,7 @@ If you have SQL Server Express installed locally:
 - Ensure TCP/IP is enabled in SQL Server Configuration Manager
 
 **Option C: Using LocalDB**  
-Modify `appsettings.json` to use LocalDB:
+Modify `appsettings.Development.json` to use LocalDB:
 ```json
 "DefaultConnection": "Server=(localdb)\\mssqllocaldb;Database=ClubDB;Integrated Security=true;"
 ```
@@ -53,8 +64,8 @@ Download all required NuGet packages:
 dotnet restore
 ```
 
-### Step 4: Update the Database
-Apply the existing Entity Framework migrations to generate your SQL schema:
+### Step 4: Update the Database (optional)
+The app **applies pending migrations automatically on startup**, so this step is optional. To apply them manually:
 ```bash
 dotnet ef database update
 ```
@@ -68,6 +79,32 @@ dotnet run
 ### Step 6: Open in Browser
 Check the terminal output for the local URL (typically `https://localhost:5001`) and open it in your web browser.
 If you only need the public pages, `http://localhost:5000` may still be shown, but Google OAuth callbacks should be tested over HTTPS.
+
+---
+
+## Running on Azure (Deployed)
+
+The app is deployed to Azure free tier and is publicly available — no local setup needed to use it:
+
+**Live URL:** https://footballclub-web-e9f2fuf8f2fzcvbe.francecentral-01.azurewebsites.net
+
+Architecture:
+- **App Service** (F1 Free, Linux, .NET 8) hosts the app.
+- **Azure SQL Database** (Free offer, serverless) holds the data; schema is created/migrated automatically on first startup.
+- **Azure Blob Storage** (container `attachments`) holds uploaded files (because the App Service disk is ephemeral). Selected automatically when `Storage:ConnectionString` is set.
+- Production secrets (connection string, JWT key, Google OAuth, storage) live in **App Service → Settings → Environment variables**, never in the repo.
+
+### Deploying changes (CI/CD)
+Deployment is automatic via **GitHub Actions** (`.github/workflows/master_footballclub-web.yml`):
+```bash
+git push origin master   # builds FootballClub.csproj, publishes, and deploys to App Service
+```
+Watch progress in the repo's **Actions** tab.
+
+### Notes
+- **First request after ~20 min idle is slow (~30-60s):** F1 has no Always On and the serverless database auto-pauses; it wakes on the first hit, then responds normally.
+- **Google login** requires the Authorized redirect URI in Google Cloud Console to be `https://footballclub-web-e9f2fuf8f2fzcvbe.francecentral-01.azurewebsites.net/signin-google`.
+- Seeded accounts work the same as locally: `admin` / `Admin123!` and `user` / `User123!`.
 
 ---
 

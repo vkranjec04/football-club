@@ -9,7 +9,7 @@
 </head>
 <body>
     <!-- SIDEBAR -->
-    <aside class="sidebar">
+    <aside class="sidebar" id="appSidebar">
         <div class="sidebar-brand">
             <a href="/" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
                 <div class="brand-logo">
@@ -58,6 +58,12 @@
                 <span class="nav-icon">📋</span>
                 <span>Tactics Board</span>
             </a>
+
+            <div class="nav-section-label admin-only" style="display:none;">Administration</div>
+            <a href="/ActivityLog" class="nav-link admin-only @(ViewData["ActivePage"]?.ToString() == "ActivityLog" ? "active" : "")" style="display:none;">
+                <span class="nav-icon">📜</span>
+                <span>Activity Log</span>
+            </a>
         </nav>
 
         <div class="sidebar-footer">
@@ -65,11 +71,18 @@
         </div>
     </aside>
 
+    <!-- MOBILE NAV BACKDROP -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
     <!-- MAIN CONTENT -->
     <div class="main-content">
         <!-- TOPBAR -->
         <header class="topbar">
-            <div class="breadcrumbs">
+            <div class="topbar-left">
+                <button type="button" class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-controls="appSidebar" aria-expanded="false">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+                </button>
+                <div class="breadcrumbs">
                 @{
                     var breadcrumbs = ViewData["Breadcrumbs"] as List<(string label, string? url)>;
                     if (breadcrumbs != null && breadcrumbs.Count > 0)
@@ -92,9 +105,13 @@
                         <span class="current">Dashboard</span>
                     }
                 }
+                </div>
             </div>
-            <div class="topbar-right" style="display:flex; align-items:center; gap:8px;">
-                <span id="authStatus" style="display:none; font-weight: 600; color: var(--text-main);"></span>
+
+            @await Html.PartialAsync("_GlobalSearch")
+
+            <div class="topbar-right">
+                <span id="authStatus" style="display:none;"></span>
                 <a id="authLoginLink" href="/Account/Login" class="btn btn-sm btn-ghost">Prijava</a>
                 <a id="authRegisterLink" href="/Account/Register" class="btn btn-sm btn-primary">Registracija</a>
                 <a id="authLogoutLink" href="#" class="btn btn-sm btn-ghost" style="display:none;">Odjava</a>
@@ -114,6 +131,7 @@
 
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/auth.js" asp-append-version="true"></script>
+    <script src="~/js/global-search.js" asp-append-version="true"></script>
     <script>
         (function () {
             var statusLabel = document.getElementById('authStatus');
@@ -130,6 +148,10 @@
                 if (loginLink) loginLink.style.display = 'none';
                 if (registerLink) registerLink.style.display = 'none';
                 if (logoutLink) logoutLink.style.display = '';
+
+                if (role === 'Admin') {
+                    document.querySelectorAll('.admin-only').forEach(function (el) { el.style.display = ''; });
+                }
             }
 
             if (logoutLink) {

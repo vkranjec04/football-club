@@ -62,7 +62,10 @@ public class StaffController : Controller
             return Json(Array.Empty<object>());
         }
 
+        // Filter !IsDeleted in SQL, then materialize: the case-insensitive
+        // string.Contains overload and Url.Action below cannot be translated by EF.
         var matches = _context.StaffMembers.Where(s => !s.IsDeleted)
+            .AsEnumerable()
             .Where(staff =>
                 staff.FirstName.Contains(query, StringComparison.OrdinalIgnoreCase) ||
                 staff.LastName.Contains(query, StringComparison.OrdinalIgnoreCase) ||

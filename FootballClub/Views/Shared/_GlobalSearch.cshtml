@@ -1,0 +1,22 @@
+@*
+    Global search bar — rendered in the topbar by _Layout on every page.
+    Behaviour + the static page index live in wwwroot/js/global-search.js
+    (loaded after auth.js so role-gated entries can be filtered out).
+    Searches a static page/menu index (instant) plus the existing record
+    endpoints: /api/{players,staff,training}/search.
+*@
+<div class="global-search" id="globalSearch">
+    <span class="global-search__icon" aria-hidden="true">🔍</span>
+    <input id="globalSearchInput"
+           type="text"
+           class="global-search__input"
+           placeholder="Pretraži stranice, igrače, osoblje…"
+           autocomplete="off"
+           role="combobox"
+           aria-expanded="false"
+           aria-autocomplete="list"
+           aria-controls="globalSearchPanel"
+           aria-label="Globalna pretraga (Ctrl + K)" />
+    <kbd class="global-search__kbd" aria-hidden="true">Ctrl K</kbd>
+    <div id="globalSearchPanel" class="global-search__panel" role="listbox" aria-label="Rezultati pretrage" hidden></div>
+</div>

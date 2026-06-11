@@ -105,6 +105,35 @@
         border-radius: 4px;
         font-weight: bold;
     }
+
+    @@media (max-width: 900px) {
+        .sofa-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 640px) {
+        .sofa-container {
+            padding: 12px;
+            min-height: 0;
+        }
+
+        .sofa-header {
+            flex-wrap: wrap;
+            padding: 16px;
+        }
+
+            /* action buttons drop to their own full-width row when wrapped */
+            .sofa-header > div:last-child {
+                margin-left: 0 !important;
+                width: 100%;
+            }
+
+        .sofa-stats-row {
+            flex-wrap: wrap;
+            row-gap: 6px;
+        }
+    }
 </style>
 
 <div class="sofa-container">

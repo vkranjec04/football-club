@@ -1,0 +1,166 @@
+@{
+    ViewData["Title"] = "Dinamo Zagreb - Activity Log";
+}
+
+<div class="page-header">
+    <h2>Activity Log</h2>
+    <p>Audit trail of logins and data changes across the application.</p>
+</div>
+
+<div id="activityDenied" class="card" style="display:none;">
+    <div class="card-body">
+        <p style="margin:0;">You must be signed in as an <strong>Admin</strong> to view the activity log.</p>
+        <a href="/Account/Login" class="btn btn-primary btn-sm" style="margin-top:12px;">Prijava</a>
+    </div>
+</div>
+
+<div id="activityPanel" style="display:none;">
+    <div class="card">
+        <div class="card-body" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <input type="text" id="filterUser" class="form-control" placeholder="Filter by user..." style="flex:1; min-width:160px;" />
+            <input type="text" id="filterAction" class="form-control" placeholder="Filter by action..." style="flex:1; min-width:160px;" />
+            <button id="applyFilter" type="button" class="btn btn-primary">Filter</button>
+            <button id="clearFilter" type="button" class="btn btn-outline-light">Clear</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h3>Recent activity</h3>
+            <span id="activityCount" class="badge badge-blue">0 entries</span>
+        </div>
+        <div class="card-body">
+            <table class="fc-table">
+                <thead>
+                    <tr>
+                        <th>Time (UTC)</th>
+                        <th>User</th>
+                        <th>Action</th>
+                        <th>Entity</th>
+                        <th>Status</th>
+                        <th>Detail</th>
+                        <th>IP</th>
+                    </tr>
+                </thead>
+                <tbody id="activityTableBody">
+                    <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Loading...</td></tr>
+                </tbody>
+            </table>
+
+            <div style="display:flex; gap:12px; align-items:center; justify-content:flex-end; margin-top:16px;">
+                <button id="prevPage" type="button" class="btn btn-sm btn-outline-light">Prev</button>
+                <span id="pageInfo" style="color:var(--text-muted); font-size:13px;"></span>
+                <button id="nextPage" type="button" class="btn btn-sm btn-outline-light">Next</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    (function () {
+        // The audit data is served by the admin-only API; the page itself is just a shell.
+        if (!Auth.getToken() || Auth.getRole() !== 'Admin') {
+            document.getElementById('activityDenied').style.display = '';
+            return;
+        }
+
+        document.getElementById('activityPanel').style.display = '';
+
+        var state = { page: 1, pageSize: 50, totalPages: 1 };
+        var tbody = document.getElementById('activityTableBody');
+        var countBadge = document.getElementById('activityCount');
+        var pageInfo = document.getElementById('pageInfo');
+
+        function escapeHtml(value) {
+            if (value === null || value === undefined) return '';
+            return String(value)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function formatTime(iso) {
+            if (!iso) return '';
+            var d = new Date(iso);
+            if (isNaN(d.getTime())) return escapeHtml(iso);
+            return d.toISOString().replace('T', ' ').slice(0, 19);
+        }
+
+        function statusBadge(success) {
+            var color = success ? '#166534' : '#991b1b';
+            var bg = success ? '#dcfce7' : '#fee2e2';
+            var label = success ? 'OK' : 'Failed';
+            return '<span class="badge" style="background:' + bg + '; color:' + color + ';">' + label + '</span>';
+        }
+
+        function entityText(row) {
+            if (!row.entityType) return '';
+            return escapeHtml(row.entityType) + (row.entityId ? ' #' + escapeHtml(row.entityId) : '');
+        }
+
+        function render(items) {
+            if (!items || items.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No activity recorded yet.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = items.map(function (row) {
+                return '<tr>' +
+                    '<td>' + formatTime(row.timestampUtc) + '</td>' +
+                    '<td>' + escapeHtml(row.userName) + '</td>' +
+                    '<td>' + escapeHtml(row.action) + '</td>' +
+                    '<td>' + entityText(row) + '</td>' +
+                    '<td>' + statusBadge(row.success) + '</td>' +
+                    '<td style="color:var(--text-muted); font-size:13px;">' + escapeHtml(row.description) + '</td>' +
+                    '<td style="color:var(--text-muted); font-size:13px;">' + escapeHtml(row.ipAddress) + '</td>' +
+                    '</tr>';
+            }).join('');
+        }
+
+        function load() {
+            var user = document.getElementById('filterUser').value.trim();
+            var action = document.getElementById('filterAction').value.trim();
+            var url = '/api/activity-logs?page=' + state.page + '&pageSize=' + state.pageSize +
+                (user ? '&user=' + encodeURIComponent(user) : '') +
+                (action ? '&action=' + encodeURIComponent(action) : '');
+
+            fetch(url, { headers: Auth.authHeaders({ 'Accept': 'application/json' }) })
+                .then(function (response) {
+                    if (response.status === 401 || response.status === 403) {
+                        document.getElementById('activityPanel').style.display = 'none';
+                        document.getElementById('activityDenied').style.display = '';
+                        throw new Error('forbidden');
+                    }
+                    return response.json();
+                })
+                .then(function (result) {
+                    render(result.items);
+                    if (window.applyResponsiveTables) {
+                        window.applyResponsiveTables();
+                    }
+                    state.totalPages = result.totalPages || 1;
+                    countBadge.textContent = result.totalCount + ' entries';
+                    pageInfo.textContent = 'Page ' + result.page + ' of ' + (result.totalPages || 1);
+                    document.getElementById('prevPage').disabled = result.page <= 1;
+                    document.getElementById('nextPage').disabled = result.page >= (result.totalPages || 1);
+                })
+                .catch(function () { /* denial handled above; ignore transient errors */ });
+        }
+
+        document.getElementById('applyFilter').addEventListener('click', function () { state.page = 1; load(); });
+        document.getElementById('clearFilter').addEventListener('click', function () {
+            document.getElementById('filterUser').value = '';
+            document.getElementById('filterAction').value = '';
+            state.page = 1;
+            load();
+        });
+        document.getElementById('prevPage').addEventListener('click', function () {
+            if (state.page > 1) { state.page--; load(); }
+        });
+        document.getElementById('nextPage').addEventListener('click', function () {
+            if (state.page < state.totalPages) { state.page++; load(); }
+        });
+
+        load();
+    })();
+</script>
+}
