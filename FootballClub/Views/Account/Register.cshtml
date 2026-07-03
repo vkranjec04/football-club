@@ -61,7 +61,7 @@
                 if (response.ok) {
                     var data = await response.json();
                     Auth.storeSession(data);
-                    window.location.href = '/';
+                    window.location.href = Auth.getReturnUrl();
                 } else {
                     var message = await Auth.parseErrors(response);
                     Auth.showAlert('formAlert', message, 'danger');

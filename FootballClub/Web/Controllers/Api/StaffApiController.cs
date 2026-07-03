@@ -24,7 +24,6 @@ public class StaffApiController : ApiControllerBase
         _context = context;
     }
 
-    [AllowAnonymous]
     [HttpGet]
     public IActionResult GetAll([FromQuery] string? search = null, [FromQuery, Range(1, int.MaxValue)] int page = 1, [FromQuery, Range(1, 100)] int pageSize = 10)
     {

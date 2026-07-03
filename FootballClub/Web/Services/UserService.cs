@@ -207,6 +207,76 @@ public class UserService : IUserService
         };
     }
 
+    public async Task<IReadOnlyList<UserDto>> GetUsersAsync(CancellationToken cancellationToken = default)
+    {
+        var users = await _userManager.Users
+            .OrderBy(user => user.UserName)
+            .ToListAsync(cancellationToken);
+
+        var result = new List<UserDto>(users.Count);
+        foreach (var user in users)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            result.Add(new UserDto
+            {
+                Id = user.Id,
+                Username = user.UserName ?? string.Empty,
+                Email = user.Email ?? string.Empty,
+                Role = roles.FirstOrDefault() ?? string.Empty,
+                IsActive = user.IsActive,
+                CreatedAt = user.CreatedAt,
+                LastLoginAt = user.LastLoginAt
+            });
+        }
+
+        return result;
+    }
+
+    public async Task<bool> PromoteToAdminAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+        {
+            return false;
+        }
+
+        var adminRole = Models.Enums.Role.Admin.ToString();
+        if (!await _roleManager.RoleExistsAsync(adminRole))
+        {
+            await _roleManager.CreateAsync(new IdentityRole<int>(adminRole));
+        }
+
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        if (currentRoles.Contains(adminRole))
+        {
+            return true;
+        }
+
+        if (currentRoles.Count > 0)
+        {
+            var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            if (!removeResult.Succeeded)
+            {
+                return false;
+            }
+        }
+
+        var addResult = await _userManager.AddToRoleAsync(user, adminRole);
+        return addResult.Succeeded;
+    }
+
+    public async Task<bool> DeleteUserAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+        {
+            return false;
+        }
+
+        var deleteResult = await _userManager.DeleteAsync(user);
+        return deleteResult.Succeeded;
+    }
+
     private List<Claim> CreateClaims(AppUser user, IEnumerable<string> roles, bool includeExternalProviderClaim = false)
     {
         var claims = new List<Claim>

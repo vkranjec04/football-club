@@ -1,0 +1,179 @@
+@{
+    ViewData["Title"] = "Dinamo Zagreb - Accounts";
+}
+
+<div class="page-header">
+    <h2>Accounts</h2>
+    <p>Manage user accounts: promote users to administrators or remove accounts.</p>
+</div>
+
+<div id="accountsDenied" class="card" style="display:none;">
+    <div class="card-body">
+        <p style="margin:0;">You must be signed in as an <strong>Admin</strong> to manage accounts.</p>
+        <a href="/Account/Login" class="btn btn-primary btn-sm" style="margin-top:12px;">Prijava</a>
+    </div>
+</div>
+
+<div id="accountsPanel" style="display:none;">
+    <div class="card">
+        <div class="card-header">
+            <h3>Users</h3>
+            <span id="accountsCount" class="badge badge-blue">0 users</span>
+        </div>
+        <div class="card-body">
+            <div id="accountsError" class="text-danger" style="margin-bottom:12px; display:none;"></div>
+            <table class="fc-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Created (UTC)</th>
+                        <th>Last login (UTC)</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="accountsTableBody">
+                    <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Loading...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    (function () {
+        // The user data is served by the admin-only API; the page itself is just a shell.
+        if (!Auth.getToken() || Auth.getRole() !== 'Admin') {
+            document.getElementById('accountsDenied').style.display = '';
+            return;
+        }
+
+        document.getElementById('accountsPanel').style.display = '';
+
+        var tbody = document.getElementById('accountsTableBody');
+        var countBadge = document.getElementById('accountsCount');
+        var errorEl = document.getElementById('accountsError');
+        var currentUser = Auth.getUsername();
+
+        function escapeHtml(value) {
+            if (value === null || value === undefined) return '';
+            return String(value)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        function formatTime(iso) {
+            if (!iso) return '<span style="color:var(--text-muted);">—</span>';
+            var d = new Date(iso);
+            if (isNaN(d.getTime())) return escapeHtml(iso);
+            return d.toISOString().replace('T', ' ').slice(0, 19);
+        }
+
+        function roleBadge(role) {
+            var isAdmin = role === 'Admin';
+            var color = isAdmin ? '#7c2d12' : '#1e3a8a';
+            var bg = isAdmin ? '#fed7aa' : '#dbeafe';
+            return '<span class="badge" style="background:' + bg + '; color:' + color + ';">' + escapeHtml(role || 'User') + '</span>';
+        }
+
+        function statusBadge(active) {
+            var color = active ? '#166534' : '#991b1b';
+            var bg = active ? '#dcfce7' : '#fee2e2';
+            return '<span class="badge" style="background:' + bg + '; color:' + color + ';">' + (active ? 'Active' : 'Inactive') + '</span>';
+        }
+
+        function showError(message) {
+            errorEl.textContent = message;
+            errorEl.style.display = '';
+        }
+
+        function actionsCell(user) {
+            var isSelf = user.username === currentUser;
+            var buttons = '';
+            if (user.role !== 'Admin') {
+                buttons += '<button type="button" class="btn btn-sm btn-primary" data-promote="' + user.id + '">Promote to Admin</button> ';
+            }
+            if (!isSelf) {
+                buttons += '<button type="button" class="btn btn-sm btn-outline-light" data-delete="' + user.id + '" data-name="' + escapeHtml(user.username) + '">Delete</button>';
+            } else {
+                buttons += '<span style="color:var(--text-muted); font-size:12px;">(you)</span>';
+            }
+            return buttons;
+        }
+
+        function render(users) {
+            countBadge.textContent = users.length + (users.length === 1 ? ' user' : ' users');
+            if (!users || users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted);">No users found.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = users.map(function (user) {
+                return '<tr>' +
+                    '<td><strong>' + escapeHtml(user.username) + '</strong></td>' +
+                    '<td style="color:var(--text-muted); font-size:13px;">' + escapeHtml(user.email) + '</td>' +
+                    '<td>' + roleBadge(user.role) + '</td>' +
+                    '<td>' + statusBadge(user.isActive) + '</td>' +
+                    '<td style="color:var(--text-muted); font-size:13px;">' + formatTime(user.createdAt) + '</td>' +
+                    '<td style="color:var(--text-muted); font-size:13px;">' + formatTime(user.lastLoginAt) + '</td>' +
+                    '<td>' + actionsCell(user) + '</td>' +
+                    '</tr>';
+            }).join('');
+            if (window.applyResponsiveTables) {
+                window.applyResponsiveTables();
+            }
+        }
+
+        function load() {
+            errorEl.style.display = 'none';
+            fetch('/api/users', { headers: Auth.authHeaders({ 'Accept': 'application/json' }) })
+                .then(function (response) {
+                    if (response.status === 401 || response.status === 403) {
+                        document.getElementById('accountsPanel').style.display = 'none';
+                        document.getElementById('accountsDenied').style.display = '';
+                        throw new Error('forbidden');
+                    }
+                    return response.json();
+                })
+                .then(render)
+                .catch(function () { /* denial handled above; ignore transient errors */ });
+        }
+
+        function promote(id) {
+            fetch('/api/users/' + id + '/promote', { method: 'POST', headers: Auth.authHeaders({}) })
+                .then(function (response) {
+                    if (!response.ok) { throw new Error('promote failed'); }
+                    load();
+                })
+                .catch(function () { showError('Could not promote that user.'); });
+        }
+
+        function remove(id, name) {
+            if (!window.confirm('Delete account "' + name + '"? This cannot be undone.')) {
+                return;
+            }
+            fetch('/api/users/' + id, { method: 'DELETE', headers: Auth.authHeaders({}) })
+                .then(function (response) {
+                    if (response.status === 400) {
+                        showError('You cannot delete your own account.');
+                        return;
+                    }
+                    if (!response.ok) { throw new Error('delete failed'); }
+                    load();
+                })
+                .catch(function () { showError('Could not delete that user.'); });
+        }
+
+        tbody.addEventListener('click', function (event) {
+            var promoteBtn = event.target.closest('[data-promote]');
+            if (promoteBtn) { promote(promoteBtn.getAttribute('data-promote')); return; }
+            var deleteBtn = event.target.closest('[data-delete]');
+            if (deleteBtn) { remove(deleteBtn.getAttribute('data-delete'), deleteBtn.getAttribute('data-name')); }
+        });
+
+        load();
+    })();
+</script>
+}

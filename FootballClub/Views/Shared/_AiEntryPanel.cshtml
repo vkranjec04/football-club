@@ -98,7 +98,7 @@
 
         fetch(endpoint, {
             method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            headers: Auth.authHeaders({ "Content-Type": "application/x-www-form-urlencoded" }),
             body: body.toString()
         })
         .then(function (response) { return response.json(); })

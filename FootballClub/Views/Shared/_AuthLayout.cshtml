@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Dinamo Zagreb</title>
+    <link rel="icon" href="~/images/dinamo-zagreb-logo.png" type="image/png">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <style>
+        /* The auth pages get a clean, centered shell (no sidebar/topbar). */
+        body.auth-body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px;
+            background:
+                radial-gradient(1200px 600px at 50% -10%, rgba(59, 130, 246, 0.18), transparent 60%),
+                #0f172a;
+        }
+
+        .auth-shell {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            gap: 20px;
+        }
+
+        .auth-brand {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 10px;
+        }
+
+            .auth-brand img {
+                width: 72px;
+                height: 72px;
+                object-fit: contain;
+                filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.45));
+            }
+
+            .auth-brand h1 {
+                margin: 0;
+                font-size: 22px;
+                font-weight: 800;
+                letter-spacing: 0.2px;
+                color: var(--text-main);
+            }
+
+            .auth-brand p {
+                margin: 0;
+                font-size: 13px;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+            }
+
+        /* The form card stretches to the shell width and loses its inline cap. */
+        .auth-shell .card {
+            max-width: none !important;
+            width: 100%;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+        }
+
+        .auth-footer {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body class="auth-body">
+    <main class="auth-shell">
+        <div class="auth-brand">
+            <img src="~/images/dinamo-zagreb-logo.png" alt="Dinamo Zagreb" />
+            <h1>Dinamo Zagreb</h1>
+            <p>Club Management System</p>
+        </div>
+
+        @RenderBody()
+
+        <div class="auth-footer">&copy; 2026 Dinamo Zagreb Football Club</div>
+    </main>
+
+    <script src="~/js/auth.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

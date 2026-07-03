@@ -52,17 +52,24 @@
         background: #dc2626;
     }
 
+    .board-layout {
+        display: flex;
+        gap: 24px;
+        align-items: flex-start;
+    }
+
     .pitch-section {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 20px;
+        gap: 16px;
+        flex: 0 0 380px;
+        max-width: 380px;
     }
 
     .pitch-wrapper {
         position: relative;
         width: 100%;
-        max-width: 900px;
         aspect-ratio: 1 / 1.5;
     }
 
@@ -167,7 +174,8 @@
     }
 
     .squad-section {
-        margin-top: 40px;
+        flex: 1;
+        min-width: 220px;
     }
 
     .squad-header {
@@ -183,10 +191,32 @@
         border-radius: 8px;
         padding: 15px;
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
         gap: 10px;
-        max-height: 400px;
+        max-height: 65vh;
         overflow-y: auto;
+    }
+
+    @@media (max-width: 768px) {
+        .board-layout {
+            flex-direction: column;
+        }
+
+        .pitch-section,
+        .squad-section {
+            width: 100%;
+        }
+
+        .pitch-wrapper {
+            height: auto;
+            width: 100%;
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .squad-container {
+            max-height: 320px;
+        }
     }
 
     .squad-player {
@@ -292,6 +322,7 @@
         </div>
     </div>
 
+    <div class="board-layout">
     <div class="pitch-section">
         <div class="pitch-wrapper">
             <div class="pitch-container">
@@ -311,7 +342,7 @@
             </div>
         </div>
 
-        <p class="info-text">💡 Drag players from the squad below onto the pitch. Click + drag on the pitch to draw. Select a formation to auto-position players.</p>
+        <p class="info-text">💡 Drag players from the squad onto the pitch. Click + drag on the pitch to draw. Select a formation to auto-position players.</p>
     </div>
 
     <div class="squad-section">
@@ -319,6 +350,7 @@
         <div class="squad-container" id="squadContainer">
             <!-- Players populated by JavaScript -->
         </div>
+    </div>
     </div>
 </div>
 
@@ -438,6 +470,9 @@
     }
 
     function placePlayersOnPitch(formationKey) {
+        // Remove any existing player nodes (they live in the pitch container, not playersContainer)
+        document.querySelectorAll('.player-node').forEach(node => node.remove());
+        document.querySelectorAll('.squad-player.on-pitch').forEach(el => el.classList.remove('on-pitch'));
         playersContainer.innerHTML = '';
         playerPositions = {};
         const formation = formations[formationKey];
@@ -550,7 +585,10 @@
         draggedPlayer = null; draggedFrom = null;
     });
 
+    let currentFormation = '4231';
+
     function changeFormation(formationKey) {
+        currentFormation = formationKey;
         placePlayersOnPitch(formationKey);
     }
 
@@ -606,6 +644,6 @@
     // Redraw on window resize
     window.addEventListener('resize', () => {
         initCanvas();
-        placePlayersOnPitch('4231');
+        placePlayersOnPitch(currentFormation);
     });
 </script>

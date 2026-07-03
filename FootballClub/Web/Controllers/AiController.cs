@@ -3,6 +3,7 @@ using System.Text.Json;
 using FootballClub.Data;
 using FootballClub.Models.Enums;
 using FootballClub.Web.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FootballClub.Web.Controllers;
@@ -13,6 +14,7 @@ namespace FootballClub.Web.Controllers;
 /// Create action, so the AI never writes to the database directly.
 /// </summary>
 [Route("ai")]
+[Authorize]
 public class AiController : Controller
 {
     private readonly IAiClient _ai;

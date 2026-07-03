@@ -51,7 +51,7 @@
                 if (response.ok) {
                     var data = await response.json();
                     Auth.storeSession(data);
-                    window.location.href = '/';
+                    window.location.href = Auth.getReturnUrl();
                 } else if (response.status === 401) {
                     Auth.showAlert('formAlert', 'Neispravni podaci ili neaktivan račun.', 'danger');
                 } else {

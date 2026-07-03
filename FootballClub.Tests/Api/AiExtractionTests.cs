@@ -27,7 +27,7 @@ public class AiExtractionTests
             clubName = club.Name
         });
 
-        using var client = factory.CreateClient();
+        using var client = TestClientFactory.CreateClient(factory, "User");
         var response = await client.PostAsync("/ai/extract/player", Form("23-year-old forward Luka Modric"));
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -53,7 +53,7 @@ public class AiExtractionTests
         await using var factory = CreateFactory();
         factory.AiClient.NextExtraction = FakeAiClient.Extraction(new { firstName = "Test", clubName = "Nonexistent Club XYZ" });
 
-        using var client = factory.CreateClient();
+        using var client = TestClientFactory.CreateClient(factory, "User");
         var response = await client.PostAsync("/ai/extract/player", Form("some text"));
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -67,7 +67,7 @@ public class AiExtractionTests
     public async Task ExtractPlayer_ReturnsFailure_WhenTextEmpty()
     {
         await using var factory = CreateFactory();
-        using var client = factory.CreateClient();
+        using var client = TestClientFactory.CreateClient(factory, "User");
 
         var response = await client.PostAsync("/ai/extract/player", Form(string.Empty));
 
@@ -92,7 +92,7 @@ public class AiExtractionTests
             clubName = club.Name
         });
 
-        using var client = factory.CreateClient();
+        using var client = TestClientFactory.CreateClient(factory, "User");
         var response = await client.PostAsync("/ai/extract/staff", Form("assistant coach Bjelica"));
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -124,7 +124,7 @@ public class AiExtractionTests
             notes = "stamina"
         });
 
-        using var client = factory.CreateClient();
+        using var client = TestClientFactory.CreateClient(factory, "User");
         var response = await client.PostAsync("/ai/extract/training", Form("tomorrow fitness session"));
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);

@@ -21,7 +21,6 @@ public class AttachmentsApiController : ApiControllerBase
         _storage = storage;
     }
 
-    [AllowAnonymous]
     [HttpGet]
     public IActionResult GetAll([FromQuery] string? entityType = null, [FromQuery] int? entityId = null)
     {

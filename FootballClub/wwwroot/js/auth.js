@@ -34,6 +34,19 @@ const Auth = (() => {
         return localStorage.getItem(ROLE_KEY);
     }
 
+    /**
+     * Reads a `returnUrl` query param and returns it only if it is a same-site
+     * relative path (guards against open redirects); otherwise falls back to "/".
+     */
+    function getReturnUrl() {
+        var params = new URLSearchParams(window.location.search);
+        var url = params.get('returnUrl') || '/';
+        if (url.charAt(0) !== '/' || url.charAt(1) === '/') {
+            return '/';
+        }
+        return url;
+    }
+
     /** Returns headers with an Authorization: Bearer entry when a token is present. */
     function authHeaders(headers) {
         const result = headers || {};
@@ -95,6 +108,7 @@ const Auth = (() => {
         getToken: getToken,
         getUsername: getUsername,
         getRole: getRole,
+        getReturnUrl: getReturnUrl,
         authHeaders: authHeaders,
         parseErrors: parseErrors,
         showAlert: showAlert

@@ -13,7 +13,7 @@ public class AttachmentsApiTests
     public async Task GetAll_ReturnsOk()
     {
         await using var factory = CreateFactory();
-        using var client = TestClientFactory.CreateClient(factory);
+        using var client = TestClientFactory.CreateClient(factory, "User");
 
         var response = await client.GetAsync("/api/Attachments");
 
