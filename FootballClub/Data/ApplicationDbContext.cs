@@ -20,7 +20,6 @@ namespace FootballClub.Data
         public DbSet<PlayerStat> PlayerStats { get; set; }
         public DbSet<Transfer> Transfers { get; set; }
         public DbSet<TrainingSession> TrainingSessions { get; set; }
-        public DbSet<Attachment> Attachments { get; set; }
         public DbSet<PlayerScheduleItem> PlayerScheduleItems { get; set; }
         public DbSet<LeagueStanding> LeagueStandings { get; set; }
         public DbSet<ActivityLog> ActivityLogs { get; set; }

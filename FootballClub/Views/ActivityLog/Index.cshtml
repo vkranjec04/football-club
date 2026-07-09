@@ -18,7 +18,9 @@
     <div class="card">
         <div class="card-body" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
             <input type="text" id="filterUser" class="form-control" placeholder="Filter by user..." style="flex:1; min-width:160px;" />
-            <input type="text" id="filterAction" class="form-control" placeholder="Filter by action..." style="flex:1; min-width:160px;" />
+            <select id="filterAction" class="form-control" style="flex:1; min-width:160px;">
+                <option value="">All actions</option>
+            </select>
             <button id="applyFilter" type="button" class="btn btn-primary">Filter</button>
             <button id="clearFilter" type="button" class="btn btn-outline-light">Clear</button>
         </div>
@@ -116,6 +118,21 @@
             }).join('');
         }
 
+        function loadActions() {
+            var select = document.getElementById('filterAction');
+            fetch('/api/activity-logs/actions', { headers: Auth.authHeaders({ 'Accept': 'application/json' }) })
+                .then(function (response) { return response.ok ? response.json() : []; })
+                .then(function (actions) {
+                    (actions || []).forEach(function (action) {
+                        var option = document.createElement('option');
+                        option.value = action;
+                        option.textContent = action;
+                        select.appendChild(option);
+                    });
+                })
+                .catch(function () { /* leave just the "All actions" option */ });
+        }
+
         function load() {
             var user = document.getElementById('filterUser').value.trim();
             var action = document.getElementById('filterAction').value.trim();
@@ -160,6 +177,7 @@
             if (state.page < state.totalPages) { state.page++; load(); }
         });
 
+        loadActions();
         load();
     })();
 </script>

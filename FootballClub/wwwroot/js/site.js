@@ -114,22 +114,37 @@
 
     // ===== RESPONSIVE TABLES =====
     // Two jobs, so individual views never need responsive markup of their own:
-    // 1. Wrap each data table in a .table-scroll container (safety net against
-    //    layout blow-out at in-between widths).
+    // 1. Wrap each data table in a .table-scroll container and only turn on
+    //    horizontal scrolling when the table's content actually overflows it
+    //    (safety net against layout blow-out at in-between widths, without
+    //    showing a scrollbar — which some browsers render as a hover-triggered
+    //    overlay that flickers — on tables that already fit).
     // 2. Copy each column's <th> text onto its cells as data-label, which the
     //    phone layout (site.css <=768px) renders as the per-field label when
     //    rows are restyled as stacked cards.
     // Re-run after AJAX swaps a tbody (exposed as window.applyResponsiveTables).
+    const responsiveTableWraps = [];
+
+    function updateTableScrollState(wrap, table) {
+        const overflowing = table.scrollWidth > wrap.clientWidth + 1;
+        wrap.classList.toggle('table-scroll--overflowing', overflowing);
+    }
+
     function applyResponsiveTables() {
         const tables = document.querySelectorAll('.fc-table, .sofa-matches-table');
         tables.forEach(function (table) {
             const parent = table.parentNode;
-            if (parent && !(parent.classList && parent.classList.contains('table-scroll'))) {
-                const wrap = document.createElement('div');
+            let wrap = parent;
+            if (!(parent && parent.classList && parent.classList.contains('table-scroll'))) {
+                wrap = document.createElement('div');
                 wrap.className = 'table-scroll';
                 parent.insertBefore(wrap, table);
                 wrap.appendChild(table);
             }
+            if (responsiveTableWraps.indexOf(wrap) === -1) {
+                responsiveTableWraps.push(wrap);
+            }
+            updateTableScrollState(wrap, table);
 
             const headers = Array.prototype.map.call(
                 table.querySelectorAll('thead th'),
@@ -153,6 +168,15 @@
         });
     }
     window.applyResponsiveTables = applyResponsiveTables;
+
+    window.addEventListener('resize', function () {
+        responsiveTableWraps.forEach(function (wrap) {
+            const table = wrap.querySelector('.fc-table, .sofa-matches-table');
+            if (table) {
+                updateTableScrollState(wrap, table);
+            }
+        });
+    });
 
     // ===== RESPONSIVE: OFF-CANVAS SIDEBAR (MOBILE NAV) =====
     function initSidebarToggle() {

@@ -103,7 +103,7 @@ Watch progress in the repo's **Actions** tab.
 
 ### Notes
 - **First request after ~20 min idle is slow (~30-60s):** F1 has no Always On and the serverless database auto-pauses; it wakes on the first hit, then responds normally.
-- **Google login** requires the Authorized redirect URI in Google Cloud Console to be `https://footballclub-web-e9f2fuf8f2fzcvbe.francecentral-01.azurewebsites.net/signin-google`.
+- **Google login** requires the Authorized redirect URI in Google Cloud Console to be `https://footballclub-web-e9f2fuf8f2fzcvbe.francecentral-01.azurewebsites.net`.
 - Seeded accounts work the same as locally: `admin` / `Admin123!` and `user` / `User123!`.
 
 ---

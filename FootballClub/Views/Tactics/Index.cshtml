@@ -478,16 +478,23 @@
         const formation = formations[formationKey];
         const pitchRect = canvas.parentElement.getBoundingClientRect();
 
-        // Center formation horizontally for symmetry
-        const xs = formation.map(f => (f.x / 100) * pitchRect.width);
-        const avgX = xs.reduce((a, b) => a + b, 0) / xs.length;
-        const centerShift = (pitchRect.width / 2) - avgX;
+        // The pitch is drawn portrait (goal areas top/bottom, taller than wide —
+        // see .pitch-wrapper's aspect-ratio), so the formation's "x" (10-90,
+        // goalkeeper-to-striker attacking progression) must map onto the pitch's
+        // HEIGHT, and its "y" (20-80, left/right spread across the pitch) onto
+        // the pitch's WIDTH. Mapping them the other way around — as raw x→width,
+        // y→height — is what made formations look scattered instead of shaped.
+
+        // Center the formation's left/right spread across the pitch width for symmetry.
+        const ys = formation.map(f => (f.y / 100) * pitchRect.width);
+        const avgY = ys.reduce((a, b) => a + b, 0) / ys.length;
+        const centerShift = (pitchRect.width / 2) - avgY;
 
         playersData.slice(0, 11).forEach((player, index) => {
             if (index < formation.length) {
                 const formPos = formation[index];
-                const x = (formPos.x / 100) * pitchRect.width + centerShift;
-                const y = (formPos.y / 100) * pitchRect.height;
+                const x = (formPos.y / 100) * pitchRect.width + centerShift;
+                const y = (formPos.x / 100) * pitchRect.height;
 
                 placePlayer(player, x, y, formPos.pos);
             }

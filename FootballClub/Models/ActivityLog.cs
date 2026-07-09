@@ -5,7 +5,7 @@ namespace FootballClub.Models;
 /// <summary>
 /// An audit-trail entry recording a single significant action (a login, or a
 /// create/update/delete) together with who performed it and from where. Written by
-/// <c>DbActivityLogger</c> (see <c>FootballClub.Web.Services.IActivityLogger</c>) and
+/// <c>DbActivityLogger</c> (see <c>FootballClub.Web.Features.ActivityLog.IActivityLogger</c>) and
 /// surfaced through the admin-only activity-log viewer.
 /// </summary>
 public class ActivityLog

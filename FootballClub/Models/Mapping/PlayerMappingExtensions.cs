@@ -1,4 +1,3 @@
-using FootballClub.Web.Dto;
 
 namespace FootballClub.Models.Mapping;
 

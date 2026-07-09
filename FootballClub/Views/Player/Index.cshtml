@@ -30,7 +30,7 @@
         </div>
     </div>
     <div class="card-body">
-        <form id="clubFilterForm" method="get" action="/Player" style="display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;">
+        <form id="clubFilterForm" method="get" action="/team-roster" style="display: flex; gap: 10px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;">
             <label for="posFilter" style="font-weight: 700; color: var(--text-dark);">Select Position:</label>
             <select id="posFilter" name="position" onchange="document.getElementById('clubFilterForm').submit();" style="padding: 8px 12px; border-radius: 6px; border: 1px solid var(--dark-border); background: var(--dark-card); color: var(--text-main); min-width: 260px; font-size: 14px;">
                 <option value="">All Positions</option>
@@ -49,19 +49,8 @@
             <button type="submit" class="btn-back" style="padding: 8px 14px;">Apply</button>
         </form>
 
-        <div style="margin-bottom: 18px;">
-            @await Html.PartialAsync("_AutocompleteDropdown", null, new ViewDataDictionary(ViewData)
-            {
-                ["Label"] = "Find a player",
-                ["Placeholder"] = "Search by player name...",
-                ["Endpoint"] = "/api/players/search",
-                ["MinChars"] = 2,
-                ["FieldName"] = "playerSearch"
-            })
-        </div>
-
         <div style="margin-bottom:12px; display:flex; gap:8px; align-items:center;">
-            <input id="playerQuickSearch" type="search" placeholder="Quick search players..." class="form-control" style="max-width:420px;" />
+            <input id="playerQuickSearch" type="search" placeholder="Search for a player by name..." class="form-control" style="max-width:420px;" />
             <button id="clearPlayerSearch" class="btn btn-outline-light" type="button">Clear</button>
             <a class="btn btn-primary" href="/Player/Create">Add player</a>
         </div>

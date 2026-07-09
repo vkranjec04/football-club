@@ -15,7 +15,7 @@ public class PlayerMockRepository
 
     public List<Player> GetAll() => _context.Players.Where(p => !p.IsDeleted).ToList();
     public List<Player> GetAllIncludingDeleted() => _context.Players.ToList();
-    public Player? GetById(int id) => _context.Players.FirstOrDefault(p => p.Id == id && !p.IsDeleted);
+    public Player? GetById(int id) => _context.Players.Include(p => p.Club).FirstOrDefault(p => p.Id == id && !p.IsDeleted);
     public List<Player> GetByClub(int clubId) => _context.Players.Where(p => p.ClubId == clubId && !p.IsDeleted).ToList();
     public List<Player> GetByClubOrdered(int clubId) => _context.Players
         .Where(p => p.ClubId == clubId && !p.IsDeleted)

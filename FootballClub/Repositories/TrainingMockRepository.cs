@@ -1,64 +1,29 @@
+using FootballClub.Data;
 using FootballClub.Models;
-using FootballClub.Models.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace FootballClub.Repositories;
 
 public class TrainingMockRepository
 {
-    private readonly ClubMockRepository _clubs;
-    private readonly PlayerMockRepository _players;
-    private readonly StaffMockRepository _staff;
+    private readonly ApplicationDbContext _context;
 
-    public TrainingMockRepository(
-        ClubMockRepository clubs,
-        PlayerMockRepository players,
-        StaffMockRepository staff)
+    public TrainingMockRepository(ApplicationDbContext context)
     {
-        _clubs = clubs;
-        _players = players;
-        _staff = staff;
+        _context = context;
     }
 
-    public List<TrainingSession> GetByClub(int clubId)
-    {
-        var club = _clubs.GetById(clubId);
-        if (club == null)
-        {
-            return new List<TrainingSession>();
-        }
+    public List<TrainingSession> GetByClub(int clubId) => _context.TrainingSessions
+        .Include(ts => ts.Club)
+        .Include(ts => ts.LeadStaff)
+        .Include(ts => ts.Participants)
+        .Where(ts => ts.ClubId == clubId && !ts.IsDeleted)
+        .OrderBy(ts => ts.StartTime)
+        .ToList();
 
-        var leadStaff = _staff.GetCurrentStaffByClub(clubId);
-        var squad = _players.GetByClub(clubId).OrderBy(p => p.JerseyNumber).ToList();
-        var coreSquad = squad.Take(Math.Min(14, squad.Count)).ToList();
-
-        var today = DateTime.Today;
-        var sessions = new List<TrainingSession>
-        {
-            new()
-            {
-                Id = clubId * 100 + 1,
-                Club = club,
-                Title = "Morning Activation & Mobility",
-                FocusArea = "Recovery and injury prevention",
-                StartTime = today.AddDays(1).AddHours(9),
-                EndTime = today.AddDays(1).AddHours(10).AddMinutes(30),
-                Location = "Indoor Training Hall",
-                Intensity = TrainingIntensity.Light,
-                LeadStaff = leadStaff,
-                Participants = coreSquad,
-                Notes = "Dynamic stretching, prehab circuits and low-load technical drills."
-            },
-            // ... other sessions omitted for brevity
-        };
-
-        return sessions.OrderBy(s => s.StartTime).ToList();
-    }
-
-    public TrainingSession? GetById(int id)
-    {
-        var clubIds = _clubs.GetAll().Select(c => c.Id).ToList();
-        return clubIds
-            .SelectMany(GetByClub)
-            .FirstOrDefault(s => s.Id == id);
-    }
+    public TrainingSession? GetById(int id) => _context.TrainingSessions
+        .Include(ts => ts.Club)
+        .Include(ts => ts.LeadStaff)
+        .Include(ts => ts.Participants)
+        .FirstOrDefault(ts => ts.Id == id && !ts.IsDeleted);
 }

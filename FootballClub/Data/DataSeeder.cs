@@ -11,9 +11,9 @@ public static class DataSeeder
     {
         // If players exist we assume database already seeded; checking Players is safer
         // than checking Stadiums because partial seeding could leave stadiums present
-        // while other tables remain empty.
-        if (context.Players.Any()) return;
-
+        // while other tables remain empty. This full seed only ever runs once per database.
+        if (!context.Players.Any())
+        {
         try
         {
             // Clear any tracking to avoid ID assignment conflicts
@@ -269,6 +269,168 @@ public static class DataSeeder
             Console.WriteLine($"Seeding error: {ex.Message}");
             throw;
         }
+        }
+
+        // Runs every time (independent of the one-shot seed above) so an already-seeded
+        // database still picks up fresh training data as "today" moves forward.
+        SeedJulyTrainingSessions(context);
+    }
+
+    // The original seed's TrainingSessions were all dated May 2026; once "today" passes
+    // that, Training/Schedules pages look stale (no upcoming sessions, most players with
+    // no weekly obligations). This adds a July 2026 batch with broad squad coverage,
+    // idempotent so it only inserts once even though it runs on every startup.
+    private static void SeedJulyTrainingSessions(ApplicationDbContext context)
+    {
+        var club = context.Clubs.FirstOrDefault(c => c.Name.Contains("Dinamo"));
+        if (club == null) return;
+
+        if (context.TrainingSessions.Any(ts => ts.ClubId == club.Id && ts.StartTime.Year == 2026 && ts.StartTime.Month == 7))
+        {
+            return;
+        }
+
+        var squad = context.Players.Where(p => p.ClubId == club.Id && !p.IsDeleted).OrderBy(p => p.JerseyNumber).ToList();
+        if (squad.Count == 0) return;
+
+        var staff = context.StaffMembers.Where(s => s.ClubId == club.Id && !s.IsDeleted).ToList();
+        var headCoach = staff.FirstOrDefault(s => s.Role == "Head Coach") ?? staff.FirstOrDefault();
+        var assistantCoach = staff.FirstOrDefault(s => s.Role == "Assistant Coach") ?? headCoach;
+        var fitnessCoach = staff.FirstOrDefault(s => s.Role == "Fitness Coach") ?? headCoach;
+        var physio = staff.FirstOrDefault(s => s.Role == "Physio") ?? headCoach;
+
+        var goalkeepers = squad.Where(p => p.Position == PlayerPosition.Goalkeeper).ToList();
+        var defenders = squad.Where(p => p.Position == PlayerPosition.Defender).ToList();
+        var midfielders = squad.Where(p => p.Position == PlayerPosition.Midfielder).ToList();
+        var forwards = squad.Where(p => p.Position == PlayerPosition.Forward).ToList();
+
+        // TrainingSession.Participants maps through Player.TrainingSessionId — a single FK on
+        // Player, not a real many-to-many join table — so a given player can only ever be the
+        // "current" participant of ONE session. Split each position group into two disjoint
+        // halves so every player ends up with exactly one real July session (no player is
+        // silently reassigned/overwritten by a later session claiming the same person).
+        var defendersA = defenders.Take((defenders.Count + 1) / 2).ToList();
+        var defendersB = defenders.Skip(defendersA.Count).ToList();
+        var midfieldersA = midfielders.Take((midfielders.Count + 1) / 2).ToList();
+        var midfieldersB = midfielders.Skip(midfieldersA.Count).ToList();
+        var forwardsA = forwards.Take((forwards.Count + 1) / 2).ToList();
+        var forwardsB = forwards.Skip(forwardsA.Count).ToList();
+
+        var sessions = new List<TrainingSession>
+        {
+            // Club-wide calendar entries: no fixed roster, so they don't compete with the
+            // unit-specific sessions below for any player's single TrainingSessionId slot.
+            new()
+            {
+                Club = club, Title = "Pre-Season Fitness Testing", FocusArea = "Aerobic conditioning",
+                StartTime = new DateTime(2026, 7, 1, 9, 0, 0), EndTime = new DateTime(2026, 7, 1, 10, 30, 0),
+                Location = "Maksimir", Intensity = TrainingIntensity.High, LeadStaff = fitnessCoach,
+                Participants = new List<Player>(), Notes = "Full-squad fitness testing to open the month."
+            },
+            new()
+            {
+                Club = club, Title = "Recovery Session", FocusArea = "Active recovery",
+                StartTime = new DateTime(2026, 7, 4, 9, 0, 0), EndTime = new DateTime(2026, 7, 4, 10, 0, 0),
+                Location = "Klinika Dinamo", Intensity = TrainingIntensity.Recovery, LeadStaff = physio,
+                Participants = new List<Player>(), Notes = "Pool session and stretching after the fitness block."
+            },
+            new()
+            {
+                Club = club, Title = "Set-Piece Rehearsal", FocusArea = "Corners and free kicks",
+                StartTime = new DateTime(2026, 7, 6, 16, 0, 0), EndTime = new DateTime(2026, 7, 6, 17, 30, 0),
+                Location = "Maksimir", Intensity = TrainingIntensity.Moderate, LeadStaff = assistantCoach,
+                Participants = new List<Player>(), Notes = "Dead-ball routines for both boxes."
+            },
+            new()
+            {
+                Club = club, Title = "Tactical Shape - Matchday Prep", FocusArea = "Positional play",
+                StartTime = new DateTime(2026, 7, 8, 10, 0, 0), EndTime = new DateTime(2026, 7, 8, 12, 0, 0),
+                Location = "Maksimir", Intensity = TrainingIntensity.High, LeadStaff = headCoach,
+                Participants = new List<Player>(), Notes = "Full-squad walkthrough of the matchday XI shape."
+            },
+            new()
+            {
+                Club = club, Title = "Media & Sponsor Day", FocusArea = "Media training",
+                StartTime = new DateTime(2026, 7, 14, 11, 0, 0), EndTime = new DateTime(2026, 7, 14, 13, 0, 0),
+                Location = "Maksimir Media Centre", Intensity = TrainingIntensity.Light, LeadStaff = headCoach,
+                Participants = new List<Player>(), Notes = "Season-opener press day."
+            },
+            new()
+            {
+                Club = club, Title = "Recovery & Regeneration", FocusArea = "Active recovery",
+                StartTime = new DateTime(2026, 7, 18, 9, 0, 0), EndTime = new DateTime(2026, 7, 18, 10, 0, 0),
+                Location = "Klinika Dinamo", Intensity = TrainingIntensity.Recovery, LeadStaff = physio,
+                Participants = new List<Player>(), Notes = "Ice baths, massage rotation and light mobility."
+            },
+            new()
+            {
+                Club = club, Title = "Matchday Simulation", FocusArea = "11v11 friendly",
+                StartTime = new DateTime(2026, 7, 21, 17, 0, 0), EndTime = new DateTime(2026, 7, 21, 18, 45, 0),
+                Location = "Maksimir", Intensity = TrainingIntensity.High, LeadStaff = headCoach,
+                Participants = new List<Player>(), Notes = "Full 90-minute intra-squad friendly."
+            },
+            new()
+            {
+                Club = club, Title = "Final Prep - League Opener", FocusArea = "Tactical walkthrough",
+                StartTime = new DateTime(2026, 7, 29, 10, 0, 0), EndTime = new DateTime(2026, 7, 29, 11, 30, 0),
+                Location = "Maksimir", Intensity = TrainingIntensity.High, LeadStaff = headCoach,
+                Participants = new List<Player>(), Notes = "Final training session ahead of the league opener."
+            },
+
+            // Unit-specific sessions: every player appears in exactly one of these.
+            new()
+            {
+                Club = club, Title = "Goalkeeper Specific Training", FocusArea = "Shot-stopping and distribution",
+                StartTime = new DateTime(2026, 7, 9, 9, 0, 0), EndTime = new DateTime(2026, 7, 9, 10, 0, 0),
+                Location = "Maksimir", Intensity = TrainingIntensity.Moderate, LeadStaff = assistantCoach,
+                Participants = goalkeepers, Notes = "One-on-one goalkeeping unit work."
+            },
+            new()
+            {
+                Club = club, Title = "Defensive Shape Work", FocusArea = "Back-line organisation",
+                StartTime = new DateTime(2026, 7, 2, 10, 0, 0), EndTime = new DateTime(2026, 7, 2, 11, 30, 0),
+                Location = "Maksimir", Intensity = TrainingIntensity.Moderate, LeadStaff = assistantCoach,
+                Participants = defendersA, Notes = "Offside trap and pressing triggers."
+            },
+            new()
+            {
+                Club = club, Title = "Defensive Transition Work", FocusArea = "Counter-press triggers",
+                StartTime = new DateTime(2026, 7, 23, 10, 0, 0), EndTime = new DateTime(2026, 7, 23, 11, 30, 0),
+                Location = "Maksimir", Intensity = TrainingIntensity.Moderate, LeadStaff = assistantCoach,
+                Participants = defendersB, Notes = "Reaction to turnovers in midfield."
+            },
+            new()
+            {
+                Club = club, Title = "Midfield Possession Play", FocusArea = "Ball retention under pressure",
+                StartTime = new DateTime(2026, 7, 11, 10, 0, 0), EndTime = new DateTime(2026, 7, 11, 11, 0, 0),
+                Location = "Maksimir", Intensity = TrainingIntensity.High, LeadStaff = headCoach,
+                Participants = midfieldersA, Notes = "Rondo and possession games."
+            },
+            new()
+            {
+                Club = club, Title = "Speed & Agility", FocusArea = "Sprint mechanics",
+                StartTime = new DateTime(2026, 7, 16, 9, 0, 0), EndTime = new DateTime(2026, 7, 16, 10, 0, 0),
+                Location = "Maksimir", Intensity = TrainingIntensity.High, LeadStaff = fitnessCoach,
+                Participants = midfieldersB, Notes = "Sprint testing and agility ladder work."
+            },
+            new()
+            {
+                Club = club, Title = "Attacking Combination Play", FocusArea = "Final third movement",
+                StartTime = new DateTime(2026, 7, 3, 10, 0, 0), EndTime = new DateTime(2026, 7, 3, 11, 30, 0),
+                Location = "Maksimir", Intensity = TrainingIntensity.Moderate, LeadStaff = headCoach,
+                Participants = forwardsA, Notes = "Combination play and finishing drills."
+            },
+            new()
+            {
+                Club = club, Title = "Technical Finishing Clinic", FocusArea = "Shooting technique",
+                StartTime = new DateTime(2026, 7, 25, 10, 0, 0), EndTime = new DateTime(2026, 7, 25, 11, 0, 0),
+                Location = "Maksimir", Intensity = TrainingIntensity.Moderate, LeadStaff = headCoach,
+                Participants = forwardsB, Notes = "One-touch finishing and volley work."
+            },
+        };
+
+        context.TrainingSessions.AddRange(sessions);
+        context.SaveChanges();
     }
 
     public static async Task SeedIdentityDataAsync(ApplicationDbContext context, UserManager<AppUser> userManager, RoleManager<IdentityRole<int>> roleManager, CancellationToken cancellationToken = default)

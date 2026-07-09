@@ -1,9 +1,6 @@
 using FootballClub.Data;
 using FootballClub.Models;
 using FootballClub.Repositories;
-using FootballClub.Web.Filters;
-using FootballClub.Web.Options;
-using FootballClub.Web.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -37,26 +34,14 @@ builder.Services.AddControllersWithViews(options =>
 builder.Services.AddScoped<IUserService, UserService>();
 
 // Audit logging: record who-did-what to the database. The logger resolves the acting user
-// from the current request, so it needs the HttpContext accessor. Mirrors IFileStorage by
-// being registered once behind an interface so the sink is swappable.
+// from the current request, so it needs the HttpContext accessor. Registered once behind
+// an interface so the sink is swappable.
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<IActivityLogger, DbActivityLogger>();
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 
-// File storage: use Azure Blob Storage when a connection string is configured
-// (production), otherwise fall back to local disk (development/tests).
-builder.Services.Configure<StorageOptions>(builder.Configuration.GetSection("Storage"));
-if (!string.IsNullOrWhiteSpace(builder.Configuration["Storage:ConnectionString"]))
-{
-    builder.Services.AddSingleton<IFileStorage, BlobFileStorage>();
-}
-else
-{
-    builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
-}
-
 // AI client: use Google Gemini when an API key is configured, otherwise a no-op
-// fallback so the app and tests run without a key (mirrors the IFileStorage pattern).
+// fallback so the app and tests run without a key.
 builder.Services.Configure<AiOptions>(builder.Configuration.GetSection("Ai"));
 if (!string.IsNullOrWhiteSpace(builder.Configuration["Ai:ApiKey"]))
 {
@@ -136,6 +121,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.CorrelationCookie.SameSite = SameSiteMode.None;
     });
 
+// MCP server: exposes the club's domain (players, clubs, matches, ...) as tools an agentic
+// IDE (Claude Code, VS Code, Cursor) can call directly over the Model Context Protocol at
+// "/mcp". Deliberately unauthenticated - same trust level as the app's anonymous GET
+// endpoints - since it is a local development surface, not a public API.
+builder.Services.AddMcpServer()
+    .WithHttpTransport()
+    .WithToolsFromAssembly();
+
 builder.Services.AddAuthorization();
 
 // Register mock repositories (Scoped if they use DbContext, Singleton if static-only)
@@ -143,7 +136,6 @@ builder.Services.AddScoped<ClubMockRepository>();
 builder.Services.AddScoped<PlayerMockRepository>();
 builder.Services.AddScoped<MatchMockRepository>();
 builder.Services.AddScoped<StaffMockRepository>();
-builder.Services.AddScoped<AttachmentMockRepository>();
 builder.Services.AddScoped<TrainingMockRepository>();
 builder.Services.AddScoped<PlayerScheduleMockRepository>();
 
@@ -215,6 +207,7 @@ app.MapRazorPages();
 
 // Map MVC controllers (fallback)
 app.MapControllers();
+app.MapMcp("/mcp");
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

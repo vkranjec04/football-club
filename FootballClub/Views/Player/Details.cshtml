@@ -1,5 +1,10 @@
 ﻿@using FootballClub.Models.Enums
 @model Player
+@{
+    var weeklySchedule = (ViewBag.WeeklySchedule as List<PlayerScheduleItem> ?? new List<PlayerScheduleItem>())
+        .OrderBy(item => item.StartTime)
+        .ToList();
+}
 
 @{
     ViewData["Title"] = $"{Model.FirstName} {Model.LastName}";
@@ -7,7 +12,7 @@
     ViewData["Breadcrumbs"] = new List<(string, string?)>
     {
         ("Dashboard", "/"),
-        ("Players", "/Player"),
+        ("Players", "/team-roster"),
         ($"{Model.FirstName} {Model.LastName}", null)
     };
 }
@@ -157,7 +162,7 @@
                 @Html.AntiForgeryToken()
                 <button type="submit" class="btn btn-sm btn-danger">Delete Player</button>
             </form>
-            <a href="/Player" class="btn btn-sm btn-ghost btn-arrow-left">Back to Players</a>
+            <a href="/team-roster" class="btn btn-sm btn-ghost btn-arrow-left">Back to Players</a>
         </div>
     </div>
 
@@ -170,10 +175,57 @@
             
             <div class="sofa-panel">
                 <h4>Attribute Overview</h4>
-                <div style="text-align: center; padding: 20px; color: #afb2b8;">
-                    <!-- Placeholder for radar chart -->
-                    <svg width="150" height="150" viewBox="0 0 100 100">
-                        <polygon points="50,10 90,40 75,90 25,90 10,40" fill="#16a34a" fill-opacity="0.2" stroke="#16a34a" stroke-width="2"/>
+                @{
+                    var overview = ViewBag.AttributeOverview as PlayerAttributeOverview ?? new PlayerAttributeOverview();
+                    var axes = new (string Label, int Value)[]
+                    {
+                        ("ATT", overview.Attacking),
+                        ("TEC", overview.Technical),
+                        ("TAC", overview.Tackling),
+                        ("DEF", overview.Defending),
+                        ("CRE", overview.Creativity),
+                    };
+                    const double cx = 100, cy = 100, maxR = 72;
+
+                    (double X, double Y) PointAt(int index, double radius)
+                    {
+                        var angle = (-90 + index * 72) * Math.PI / 180.0;
+                        return (cx + radius * Math.Cos(angle), cy + radius * Math.Sin(angle));
+                    }
+
+                    // SVG attributes use commas/periods as syntax, so coordinates must always be
+                    // formatted with an invariant decimal point regardless of request culture
+                    // (this app's default locale is "hr", where :F1 would render "100,0" — which
+                    // the SVG parser reads as two separate numbers, wrecking the whole shape).
+                    string F(double value) => value.ToString("F1", System.Globalization.CultureInfo.InvariantCulture);
+
+                    var valuePoints = string.Join(" ", axes.Select((a, i) =>
+                    {
+                        var p = PointAt(i, maxR * (a.Value / 100.0));
+                        return $"{F(p.X)},{F(p.Y)}";
+                    }));
+                    var outlinePoints = string.Join(" ", axes.Select((a, i) =>
+                    {
+                        var p = PointAt(i, maxR);
+                        return $"{F(p.X)},{F(p.Y)}";
+                    }));
+                    var midPoints = string.Join(" ", Enumerable.Range(0, 5).Select(i =>
+                    {
+                        var p = PointAt(i, maxR * 0.5);
+                        return $"{F(p.X)},{F(p.Y)}";
+                    }));
+                }
+                <div style="text-align: center; padding: 8px;">
+                    <svg width="200" height="200" viewBox="0 0 200 200">
+                        <polygon points="@outlinePoints" fill="none" stroke="#334155" stroke-width="1" />
+                        <polygon points="@midPoints" fill="none" stroke="#2a2e39" stroke-width="1" />
+                        <polygon points="@valuePoints" fill="#16a34a" fill-opacity="0.35" stroke="#16a34a" stroke-width="2" />
+                        @for (int i = 0; i < axes.Length; i++)
+                        {
+                            var labelPos = PointAt(i, maxR + 20);
+                            @Html.Raw($"<text x=\"{F(labelPos.X)}\" y=\"{F(labelPos.Y)}\" font-size=\"11\" fill=\"#afb2b8\" text-anchor=\"middle\">{axes[i].Label}</text>")
+                            @Html.Raw($"<text x=\"{F(labelPos.X)}\" y=\"{F(labelPos.Y + 13)}\" font-size=\"12\" font-weight=\"bold\" fill=\"#eab308\" text-anchor=\"middle\">{axes[i].Value}</text>")
+                        }
                     </svg>
                 </div>
             </div>
@@ -221,14 +273,51 @@
             </div>
         </div>
     </div>
-</div>
 
-<!-- File Upload Component -->
-<div style="margin-top: 2rem;">
-    @{
-        ViewBag.EntityType = "Player";
-        ViewBag.EntityId = Model.Id;
-    }
-    @await Html.PartialAsync("_AttachmentUpload")
+    <div class="sofa-panel" style="margin-top: 16px;">
+        <h4>Weekly Training &amp; Obligations</h4>
+        @if (weeklySchedule.Count == 0)
+        {
+            <p style="color: #afb2b8; margin: 0;">No training sessions or obligations scheduled for @Model.FirstName this week.</p>
+        }
+        else
+        {
+            <table class="fc-table">
+                <thead>
+                    <tr>
+                        <th>Date &amp; Time</th>
+                        <th>Task</th>
+                        <th>Type</th>
+                        <th>Location</th>
+                        <th>Assigned By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var task in weeklySchedule)
+                    {
+                        var typeClass = task.ResponsibilityType switch
+                        {
+                            ScheduleResponsibilityType.RegularTraining => "badge-blue",
+                            ScheduleResponsibilityType.Gym => "badge-amber",
+                            ScheduleResponsibilityType.PhysicalTherapy => "badge-green",
+                            ScheduleResponsibilityType.Massage => "badge-green",
+                            ScheduleResponsibilityType.MediaTraining => "badge-red",
+                            _ => "badge-gray"
+                        };
+                        <tr>
+                            <td data-label="Date & Time">@task.StartTime.ToString("ddd, dd.MM HH:mm") - @task.EndTime.ToString("HH:mm")</td>
+                            <td data-label="Task">
+                                <strong>@task.Title</strong>
+                                <div style="color: #afb2b8; font-size: 12px;">@task.Notes</div>
+                            </td>
+                            <td data-label="Type"><span class="badge @typeClass">@task.ResponsibilityType</span></td>
+                            <td data-label="Location">@task.Location</td>
+                            <td data-label="Assigned By">@task.AssignedBy</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
 </div>
 

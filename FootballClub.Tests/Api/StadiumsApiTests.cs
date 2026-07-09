@@ -1,6 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using FootballClub.Web.Dto;
 using Xunit;
 
 namespace FootballClub.Tests.Api;

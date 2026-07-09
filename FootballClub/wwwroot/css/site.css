@@ -161,6 +161,7 @@ a {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
     position: sticky;
     top: 0;
     z-index: 50;
@@ -572,9 +573,16 @@ a {
     }
 
 /* Horizontal scroll wrapper so wide data tables never break the layout on
-   small screens. site.js wraps every data table in one of these automatically. */
+   small screens. site.js wraps every data table in one of these automatically,
+   but only enables scrolling (.table-scroll--overflowing) when the table's
+   content actually exceeds the container — tables that already fit stay
+   overflow:visible so no scrollbar ever renders for them. */
 .table-scroll {
     width: 100%;
+    overflow-x: visible;
+}
+
+.table-scroll--overflowing {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
 }
@@ -942,6 +950,15 @@ a {
         display: inline-flex;
     }
 
+    /* Once the hamburger button joins .topbar-left, it must not be allowed to
+       shrink below its own width — min-width:0 (needed elsewhere to stop wide
+       content forcing horizontal scroll) otherwise lets the outer topbar flex
+       layout squeeze this container smaller than the button, so the button
+       overflows its box and the growing search bar renders on top of it. */
+    .topbar-left {
+        flex-shrink: 0;
+    }
+
     .sidebar {
         transform: translateX(-100%);
         box-shadow: 2px 0 24px rgba(0, 0, 0, 0.45);
@@ -1095,6 +1112,14 @@ a {
 
     .breadcrumbs {
         display: none;
+    }
+
+    /* The username/role label makes .topbar-right much wider than
+       .topbar-left (just the hamburger), which visibly drags the search bar
+       off-center since it fills the leftover space between them. Dropping it
+       on narrow phones balances both sides so the search bar centers. */
+    #authStatus {
+        display: none !important;
     }
 
     .page-body {
