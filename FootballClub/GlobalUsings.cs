@@ -1,0 +1,15 @@
+global using FootballClub.Web.Common;
+global using FootballClub.Web.Features.ActivityLog;
+global using FootballClub.Web.Features.Ai;
+global using FootballClub.Web.Features.Auth;
+global using FootballClub.Web.Features.Clubs;
+global using FootballClub.Web.Features.Home;
+global using FootballClub.Web.Features.League;
+global using FootballClub.Web.Features.Matches;
+global using FootballClub.Web.Features.Medical;
+global using FootballClub.Web.Features.Players;
+global using FootballClub.Web.Features.Stadiums;
+global using FootballClub.Web.Features.Staff;
+global using FootballClub.Web.Features.Tactics;
+global using FootballClub.Web.Features.Training;
+global using FootballClub.Web.Features.Transfers;
