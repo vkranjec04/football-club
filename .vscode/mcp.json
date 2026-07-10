@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "footballclub-cloud": {
+      "type": "http",
+      "url": "https://footballclub-web-e9f2fuf8f2fzcvbe.francecentral-01.azurewebsites.net/mcp"
+    },
+    "footballclub-local": {
+      "type": "http",
+      "url": "http://localhost:5203/mcp"
+    }
+  }
+}
