@@ -134,3 +134,10 @@ Watch progress in the repo's **Actions** tab.
 - The container already exists
 - Start it with `docker start ClubDB` instead of `docker run`
 - If you want a fresh container, remove the old one first with `docker rm -f ClubDB`
+
+- git clone repozitorija (ili ga već imaš) i otvori folder u VS Codeu
+- VS Code prepozna .vscode/mcp.json — u Copilot Chatu prebaci na Agent mode, klikni ikonu alata (🔧) i vidjet ćeš footballclub-cloud server sa svih - 14 alata (možda će tražiti klik na "Start"/"Trust" prvi put)
+- Upiši: "Prikaži mi HNL ljestvicu" → Copilot pozove get_league_standings na Azureu → pravi podaci iz produkcijske baze
+- Za efekt: "Dodaj igrača Marko Marulić, veznjak, 22 godine, Hajduk" → create_player → pa pokaži novog igrača u web aplikaciji
+
+dotnet test FootballClub.Tests/FootballClub.Tests.csproj --filter "FullyQualifiedName~PlaywrightScenarioTests"

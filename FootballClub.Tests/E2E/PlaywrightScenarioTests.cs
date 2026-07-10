@@ -30,7 +30,7 @@ public class PlaywrightScenarioTests : IAsyncLifetime
 
         _factory = new E2EWebApplicationFactory(Guid.NewGuid().ToString("N"));
         _playwright = await Playwright.CreateAsync();
-        _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = true });
+        _browser = await _playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions { Headless = false, SlowMo = 400 });
     }
 
     public async Task DisposeAsync()
